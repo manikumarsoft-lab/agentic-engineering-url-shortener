@@ -1,0 +1,149 @@
+# Versioned policy set evaluated by the orchestration engine (CON VI, FR-GOV-005/006).
+# Every run records `policy_set_version`. Each applicable check yields exactly one of:
+# PASS | FAIL | EXCEPTION-REQUESTED | NOT-APPLICABLE.
+# Blocking: mandatory AND (FAIL OR (EXCEPTION-REQUESTED AND exception not APPROVED or expired)).
+version: 1.0.0
+owner: human-owner (policy owner)
+effective_from: "2026-10-15 (approved by Mani Kumar Vadugu)"
+domains: [security, privacy, architecture, audit_retention, dependencies, licensing, change_control, release]
+
+non_waivable:   # Governance §3 — exception requests are refused (422 check_non_waivable)
+  - AUD-002     # audit integrity (CON IX audit-record requirements)
+  - REL-001     # executed tests (CON XI condition 4)
+  - SEC-002     # no secrets exposed (CON V)
+  - CHG-004     # approvals bound to current versions (CON III)
+
+checks:
+  - id: SEC-001
+    domain: security
+    mandatory: true
+    evaluated_at: [ST-11b]
+    description: Destination scheme allow-list in the workspace config equals the approved default {http, https}.
+    inputs: [workspace config]
+    not_applicable_when: never
+  - id: SEC-002
+    domain: security
+    mandatory: true
+    evaluated_at: [ST-11b]
+    description: detect-secrets finds zero new secrets in the workspace relative to the committed baseline.
+    inputs: [workspace tree, .secrets.baseline]
+  - id: SEC-003
+    domain: security
+    mandatory: true
+    evaluated_at: [ST-11b]
+    description: pip-audit reports zero high or critical vulnerabilities in locked dependencies (PVT-012).
+    inputs: [uv.lock]
+    on_tool_unavailable: FAIL      # never PASS without evidence
+  - id: SEC-004
+    domain: security
+    mandatory: true
+    evaluated_at: [ST-11b]
+    description: If touched components include any registry component with security_sensitive=true, G-SECURITY is required (PASS records the requirement; G-SECURITY enforces approval).
+    inputs: [change-application-record, component registry]
+    not_applicable_when: no security-sensitive component touched
+  - id: SEC-005
+    domain: security
+    mandatory: true
+    evaluated_at: [SP-1]
+    description: Threat review contains ≥1 entry with control or proposed accepted risk for every impacted interface.
+    inputs: [threat-review, impact-analysis or design]
+  - id: PRIV-001
+    domain: privacy
+    mandatory: true
+    evaluated_at: [ST-03, ST-11b]
+    description: |
+      No capture of personal data (FR-SHR-012, A-005). ST-03: requirement text matched against the
+      personal-data lexicon (who/identity/IP/user agent/device id/email/location/fingerprint).
+      ST-11b: migrations and models in the workspace add no columns/fields matching the lexicon.
+    routing_at_ST-03: clarify_if_unclarified
+  - id: ARCH-001
+    domain: architecture
+    mandatory: true
+    evaluated_at: [ST-03]
+    description: Requirement does not request an excluded capability (EXC-001..EXC-006).
+    routing_at_ST-03: clarify_if_unclarified
+  - id: AUD-001
+    domain: audit_retention
+    mandatory: true
+    evaluated_at: [ST-12]
+    description: Configured audit retention ≥ 365 days and automated deletion disabled (PD-002b, DQ-005, A-007).
+    parameters: { min_retention_days: 365, automated_deletion: false }
+  - id: AUD-002
+    domain: audit_retention
+    mandatory: true
+    evaluated_at: [ST-12]
+    description: Audit hash chain for the run verifies from GENESIS to head.
+  - id: DEP-001
+    domain: dependencies
+    mandatory: true
+    evaluated_at: [ST-11b]
+    description: Every locked package is listed in policy/approved-dependencies.yaml.
+    inputs: [uv.lock, policy/approved-dependencies.yaml]
+  - id: LIC-001
+    domain: licensing
+    mandatory: true
+    evaluated_at: [ST-11b]
+    description: Every installed distribution's license is in the allow-list.
+    parameters: { allow: [MIT, BSD-2-Clause, BSD-3-Clause, Apache-2.0, PSF-2.0, ISC] }
+  - id: LIC-002
+    domain: licensing
+    mandatory: false
+    evaluated_at: [ST-11b]
+    description: Weak-copyleft licenses (MPL-2.0, LGPL-*) flagged for review.
+  - id: CHG-001
+    domain: change_control
+    mandatory: true
+    evaluated_at: [ST-08]
+    description: Change-set bundle SHA-256 == approved.lock entry == fingerprint bound at G-DESIGN (FR-ORC-033).
+  - id: CHG-002
+    domain: change_control
+    mandatory: true
+    evaluated_at: [ST-08]
+    description: Files actually touched by the patch map only to components in the approved impact analysis/design (SCN-B-AC5).
+  - id: CHG-003
+    domain: change_control
+    mandatory: true
+    evaluated_at: [ST-11b]
+    description: Migrations in the change set are additive-only (no drop_*, alter_column narrowing, rename).
+    exception_allowed: true
+  - id: CHG-004
+    domain: change_control
+    mandatory: true
+    evaluated_at: [ST-08, ST-12]
+    description: All gate approvals on the path are bound to the current artifact versions (FR-GOV-004).
+  - id: REL-001
+    domain: release
+    mandatory: true
+    evaluated_at: [ST-12]
+    description: Every test required by the design test plan executed; zero failures/errors.
+  - id: REL-002
+    domain: release
+    mandatory: true
+    evaluated_at: [ST-12]
+    description: Run traceability complete — every RQ-ID links to ≥1 task, ≥1 executed test, docs, and evidence.
+  - id: REL-003
+    domain: release
+    mandatory: true
+    evaluated_at: [ST-12]
+    description: No exception on the run is REQUESTED (undecided), REJECTED-but-relied-upon, or EXPIRED.
+  - id: REL-004
+    domain: release
+    mandatory: true
+    evaluated_at: [ST-12]
+    description: Final docs reference the tested change-set fingerprint and test-results version.
+  - id: REL-005
+    domain: release
+    mandatory: false
+    evaluated_at: [ST-12]
+    description: Advisory — a fallback was used (degraded artifact present); shown to the release owner.
+
+exceptions:
+  approver_role: approver
+  required_fields: [policy, reason, scope, approving_authority, compensating_control, approval_timestamp, expiry_or_review_condition]
+  max_expiry_days: 30
+  expiry_effect: "status EXPIRED; REL-003 FAIL at ST-12; release readiness FAIL"
+
+release_blocking:
+  - any mandatory check blocking at its evaluation node (run SAFE_STOPPED)
+  - readiness-assessment FAIL (any of REL-001..004, AUD-001/002, CHG-004 FAIL)
+  - unapproved or expired exception (REL-003)

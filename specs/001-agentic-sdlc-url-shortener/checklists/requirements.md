@@ -51,6 +51,19 @@
     FR-GOV-013, NFR-SEC-004, NFR-RUN-001, NFR-DET-001, CST-006, CST-007, SC-010, SC-011,
     scenario capability statements for SCN-A/B/C, Key Entities.
   - Zero `[NEEDS CLARIFICATION]` markers remain. All items pass.
-  - PVT-001 to PVT-012 remain **proposals pending human approval** at the specification
-    approval gate; they are not confirmed requirements.
+  - At that point PVT-001 to PVT-012 were proposals pending human approval (superseded by
+    iteration 3 below).
+- Validation iteration 3 (2026-10-15, agent self-check during `/speckit-plan`; not a human review),
+  bringing these notes up to date with the approved spec:
+  - `/speckit-clarify` session 2026-10-15 recorded five answers (Q1–Q5), adding FR-ORC-032 to
+    FR-ORC-043, FR-GOV-014 to FR-GOV-016, PVT-013, A-012 to A-016, and the deferred-question
+    register DQ-001 to DQ-010.
+  - Spec approved at Human Gate 3 (2026-10-15, Mani Kumar Vadugu). PVT-003 to PVT-013 approved;
+    PVT-001/PVT-002 approved as non-gating demonstration targets (DQ-009). DQ-001 to DQ-004 and
+    DQ-006 resolved by approving A-004, A-013, A-014, A-015 and A-016 as written.
+  - Open at that point and carried into `/speckit-plan`: DQ-005 (audit retention), DQ-007 (failure
+    classification), DQ-008 (technology stack), DQ-010 (final scope cut). In plan.md, DQ-008 is
+    resolved by human selection (R-01 to R-04); DQ-005, DQ-007 and DQ-010 (PD-002b, PD-003,
+    PD-010) were approved at plan gate (Mani Kumar Vadugu, 2026-10-15).
+  - All checklist items still pass for the approved spec. No `[NEEDS CLARIFICATION]` markers.
 - Items marked incomplete require spec updates before `/speckit-clarify` or `/speckit-plan`.

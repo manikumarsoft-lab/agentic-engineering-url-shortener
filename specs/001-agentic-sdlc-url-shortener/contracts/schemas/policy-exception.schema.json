@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.local/001/policy-exception.schema.json",
+  "title": "Policy exception record",
+  "version": "1.0.0",
+  "description": "FR-GOV-008: policy, reason, scope, approving authority, compensating control, approval timestamp, expiry or review condition. Approval only via G-EXCEPTION by an approver-role human.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["exception_id", "run_id", "check_id", "policy_set_version", "reason", "scope", "compensating_control", "requested_by", "status", "requested_at"],
+  "properties": {
+    "exception_id": { "type": "string", "pattern": "^exc_[0-9A-HJKMNP-TV-Z]{26}$" },
+    "run_id": { "type": "string" },
+    "check_id": { "type": "string" },
+    "policy_set_version": { "type": "string" },
+    "reason": { "type": "string", "minLength": 10 },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["level"],
+      "properties": {
+        "level": { "enum": ["run", "artifact", "check"] },
+        "artifact": { "$ref": "workflow-state.schema.json#/$defs/ArtifactRef" }
+      }
+    },
+    "compensating_control": { "type": "string", "minLength": 10 },
+    "requested_by": { "type": "object", "required": ["key_id", "role"], "properties": { "key_id": { "type": "string" }, "role": { "type": "string" } } },
+    "requested_at": { "type": "string", "format": "date-time" },
+    "status": { "enum": ["REQUESTED", "APPROVED", "REJECTED", "EXPIRED"] },
+    "approving_authority": {
+      "type": ["object", "null"],
+      "properties": { "key_id": { "type": "string" }, "role": { "const": "approver" } }
+    },
+    "decision_id": { "type": ["string", "null"] },
+    "approved_at": { "type": ["string", "null"], "format": "date-time" },
+    "expires_at": { "type": ["string", "null"], "format": "date-time" },
+    "review_condition": { "type": ["string", "null"] }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "APPROVED" } } },
+      "then": {
+        "required": ["approving_authority", "approved_at", "decision_id"],
+        "anyOf": [
+          { "properties": { "expires_at": { "type": "string" } }, "required": ["expires_at"] },
+          { "properties": { "review_condition": { "type": "string" } }, "required": ["review_condition"] }
+        ]
+      }
+    }
+  ]
+}

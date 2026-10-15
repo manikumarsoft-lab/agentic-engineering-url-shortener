@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.local/001/workflow-state.schema.json",
+  "title": "Workflow run state document",
+  "version": "1.0.0",
+  "description": "Inspection view of a run (FR-ORC-024). Returned by GET /api/v1/runs/{run_id} and included in evidence exports.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["run_id", "state", "agent_mode", "graph_template_version", "graph_instance_version", "policy_set_version", "labels", "nodes", "open_gates", "created_at"],
+  "properties": {
+    "run_id": { "$ref": "#/$defs/RunId" },
+    "scenario_type": { "enum": ["greenfield", "brownfield", "ambiguous", "unspecified"] },
+    "scenario_ref": { "type": ["string", "null"] },
+    "variant": { "type": ["string", "null"] },
+    "change_set_ref": { "type": ["string", "null"] },
+    "agent_mode": { "enum": ["deterministic", "ai_backed"] },
+    "state": { "$ref": "#/$defs/RunState" },
+    "terminal_outcome": { "enum": ["COMPLETED", "FAILED", "ABORTED", "SAFE_STOPPED", null] },
+    "terminal_reason": { "type": ["string", "null"] },
+    "graph_template_version": { "$ref": "#/$defs/SemVer" },
+    "graph_instance_version": { "type": "integer", "minimum": 1 },
+    "policy_set_version": { "$ref": "#/$defs/SemVer" },
+    "base_release_id": { "type": ["string", "null"] },
+    "labels": {
+      "type": "array",
+      "items": { "enum": ["demonstration", "fault-injection", "finding-injection", "test"] },
+      "contains": { "const": "demonstration" }
+    },
+    "nodes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/NodeView" }
+    },
+    "open_gates": { "type": "array", "items": { "$ref": "#/$defs/GateView" } },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "terminal_at": { "type": ["string", "null"], "format": "date-time" }
+  },
+  "$defs": {
+    "RunId": { "type": "string", "pattern": "^run_[0-9A-HJKMNP-TV-Z]{26}$" },
+    "SemVer": { "type": "string", "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$" },
+    "RunState": { "enum": ["CREATED", "RUNNING", "AWAITING_HUMAN", "REPLANNING", "RESUMING", "COMPLETED", "FAILED", "ABORTED", "SAFE_STOPPED"] },
+    "NodeState": { "enum": ["PENDING", "READY", "RUNNING", "SUCCEEDED", "FAILED_TRANSIENT", "RETRY_WAIT", "FAILED_PERMANENT", "BLOCKED", "SKIPPED", "SUSPENDED", "STALE", "INTERRUPTED", "ROLLED_BACK", "COMPENSATED", "AWAITING_DECISION"] },
+    "ArtifactRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifact_id", "version", "hash"],
+      "properties": {
+        "artifact_id": { "type": "string", "pattern": "^art_[0-9A-HJKMNP-TV-Z]{26}$" },
+        "type": { "type": "string" },
+        "version": { "type": "integer", "minimum": 1 },
+        "hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+      }
+    },
+    "NodeView": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node_id", "kind", "state", "attempts_used"],
+      "properties": {
+        "node_id": { "type": "string", "pattern": "^(ST-\\d{2}[ab]?|G-[A-Z]+(-\\d+)?|SP-\\d|REL-\\d{2})$" },
+        "kind": { "enum": ["agent", "gate", "sync", "system"] },
+        "state": { "$ref": "#/$defs/NodeState" },
+        "attempts_used": { "type": "integer", "minimum": 0 },
+        "rework_cycles": { "type": "integer", "minimum": 0 },
+        "degraded": { "type": "boolean" },
+        "skip_reason": { "type": ["string", "null"] },
+        "block_reason": { "type": ["string", "null"] },
+        "next_eligible_at": { "type": ["string", "null"], "format": "date-time" },
+        "outputs": { "type": "array", "items": { "$ref": "#/$defs/ArtifactRef" } }
+      }
+    },
+    "GateView": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["gate_id", "node_id", "gate_type", "state", "required_roles", "bound_artifacts", "deadline_at"],
+      "properties": {
+        "gate_id": { "type": "string", "pattern": "^gat_[0-9A-HJKMNP-TV-Z]{26}$" },
+        "node_id": { "type": "string" },
+        "gate_type": { "enum": ["clarify", "design", "security", "exception", "release", "corrective"] },
+        "state": { "enum": ["OPEN", "ESCALATED", "APPROVED", "REJECTED_REWORK", "REJECTED_TERMINATE", "TIMED_OUT", "REVOKED"] },
+        "instance_no": { "type": "integer", "minimum": 1 },
+        "required_roles": { "type": "array", "items": { "enum": ["engineer", "approver", "release-owner"] }, "minItems": 1 },
+        "bound_artifacts": { "type": "array", "items": { "$ref": "#/$defs/ArtifactRef" } },
+        "questions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["question_id", "text", "classification"],
+            "properties": {
+              "question_id": { "type": "string" },
+              "text": { "type": "string" },
+              "classification": { "enum": ["missing_information", "unclear_term", "internal_conflict", "policy_conflict"] },
+              "affected_text": { "type": "string" },
+              "options": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["option_id", "label"],
+                  "properties": {
+                    "option_id": { "type": "string" },
+                    "label": { "type": "string" },
+                    "consequence": { "type": "string" },
+                    "recommended": { "type": "boolean" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "opened_at": { "type": "string", "format": "date-time" },
+        "deadline_at": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "decision_id": "dec_01JAB0D7E8F9G0H1J2K3M4N5P6",
+  "choice": "answer",
+  "bound_artifacts": [
+    { "artifact_id": "art_01JAB0D1A2B3C4D5E6F7G8H9J0", "type": "quality-report", "version": 1, "hash": "sha256:2c624232cdd221771294dfbb310aca000a0df6ac8b66b696d90ef06fdefb64a3" },
+    { "artifact_id": "art_01JAB0D0Z9Y8X7W6V5T4S3R2Q1", "type": "normalized-requirement", "version": 1, "hash": "sha256:19581e27de7ced00ff1ce50b2047e7a567c76b1cbaebabe5ef03f7c3017bb5b7" }
+  ],
+  "rationale": "ILLUSTRATIVE EXAMPLE: 'who' means aggregate daily click counts per link; no personal data.",
+  "answers": [
+    { "question_id": "Q1", "option_id": "A" },
+    { "question_id": "Q2", "free_text": "Keep daily buckets for the lifetime of the link." }
+  ],
+  "decision_source": "interactive"
+}

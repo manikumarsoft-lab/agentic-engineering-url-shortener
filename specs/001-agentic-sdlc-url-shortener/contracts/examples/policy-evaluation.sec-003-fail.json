@@ -1,0 +1,21 @@
+{
+  "eval_id": "pev_01JAB0E1A2B3C4D5E6F7G8H9J0",
+  "run_id": "run_01JAB0BZ9Y8X7W6V5T4S3R2Q1P",
+  "node_id": "ST-11b",
+  "policy_set_version": "1.0.0",
+  "check_id": "SEC-003",
+  "domain": "security",
+  "mandatory": true,
+  "outcome": "FAIL",
+  "blocking": true,
+  "subject_artifacts": [
+    { "artifact_id": "art_01JAB0E0Z9Y8X7W6V5T4S3R2Q1", "type": "workspace", "version": 1, "hash": "sha256:4a44dc15364204a80fe80e9039455cc1608281820fe2b24f1e5233ade6af1dd5" }
+  ],
+  "evidence": [
+    { "kind": "tool_output", "ref": "var/work/run_01JAB0BZ9Y8X7W6V5T4S3R2Q1P/ST-11b-3/pip-audit.json", "summary": "ILLUSTRATIVE EXAMPLE: advisory source unreachable after 3 attempts; no scan evidence" }
+  ],
+  "reason": "on_tool_unavailable=FAIL: dependency vulnerability scan could not be executed",
+  "exception_id": null,
+  "supersedes_eval_id": null,
+  "evaluated_at": "2026-10-17T10:22:31Z"
+}

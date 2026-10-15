@@ -1,0 +1,541 @@
+openapi: 3.1.0
+info:
+  title: Agentic SDLC Orchestrator API
+  version: 1.0.0
+  description: |
+    Control-plane API of the in-repository orchestration engine. The `orch` CLI is a thin client
+    of this API. Role requirements are declared per operation in `x-required-roles`; actor
+    identity and role are always taken from the authenticated key (FR-GOV-003/013). Agent-role
+    keys are refused for every human-reserved operation and the refusal is audited (SC-011).
+  x-owner: human-owner
+servers:
+  - url: http://127.0.0.1:8200
+security:
+  - ApiKeyAuth: []
+tags:
+  - { name: runs }
+  - { name: gates }
+  - { name: policy }
+  - { name: audit }
+  - { name: trace }
+  - { name: metrics }
+  - { name: health }
+paths:
+  /api/v1/runs:
+    post:
+      operationId: createRun
+      tags: [runs]
+      x-required-roles: [engineer]
+      x-requirements: [FR-ORC-001, FR-ORC-027, FR-ORC-030, FR-ORC-031]
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RunCreateRequest' }
+      responses:
+        '201':
+          description: Run created
+          content: { application/json: { schema: { $ref: './schemas/workflow-state.schema.json' } } }
+        '200': { description: Idempotent replay, content: { application/json: { schema: { $ref: './schemas/workflow-state.schema.json' } } } }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+    get:
+      operationId: listRuns
+      tags: [runs]
+      x-required-roles: [engineer, approver, release-owner]
+      parameters:
+        - { name: state, in: query, schema: { type: string } }
+        - { name: scenario_ref, in: query, schema: { type: string } }
+        - { $ref: '#/components/parameters/Limit' }
+        - { $ref: '#/components/parameters/Cursor' }
+      responses:
+        '200':
+          description: Page of runs
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items: { type: array, items: { $ref: './schemas/workflow-state.schema.json' } }
+                  next_cursor: { type: [string, 'null'] }
+  /api/v1/runs/{run_id}:
+    get:
+      operationId: getRun
+      tags: [runs]
+      x-required-roles: [engineer, approver, release-owner]
+      x-requirements: [FR-ORC-024]
+      parameters: [{ $ref: '#/components/parameters/RunId' }]
+      responses:
+        '200': { description: Run state, content: { application/json: { schema: { $ref: './schemas/workflow-state.schema.json' } } } }
+        '404': { $ref: '#/components/responses/Problem' }
+  /api/v1/runs/{run_id}/graph:
+    get:
+      operationId: getRunGraph
+      tags: [runs]
+      x-required-roles: [engineer, approver, release-owner]
+      parameters:
+        - { $ref: '#/components/parameters/RunId' }
+        - { name: version, in: query, schema: { type: integer, minimum: 1 } }
+      responses:
+        '200':
+          description: Graph instance (nodes, edges, conditions, resolved state)
+          content: { application/json: { schema: { $ref: '#/components/schemas/GraphInstance' } } }
+  /api/v1/runs/{run_id}/timeline:
+    get:
+      operationId: getRunTimeline
+      tags: [runs, audit]
+      x-required-roles: [engineer, approver, release-owner]
+      x-requirements: [FR-OBS-002, US-5]
+      parameters: [{ $ref: '#/components/parameters/RunId' }]
+      responses:
+        '200':
+          description: Ordered audit events with terminal outcome
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [run_id, events, chain_valid]
+                properties:
+                  run_id: { type: string }
+                  terminal_outcome: { type: [string, 'null'] }
+                  chain_valid: { type: boolean }
+                  events: { type: array, items: { $ref: './schemas/audit-event.schema.json' } }
+  /api/v1/runs/{run_id}/artifacts:
+    get:
+      operationId: listRunArtifacts
+      tags: [runs]
+      x-required-roles: [engineer, approver, release-owner]
+      parameters: [{ $ref: '#/components/parameters/RunId' }]
+      responses:
+        '200': { description: Artifacts with versions and provenance, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/ArtifactVersion' } } } } }
+  /api/v1/artifacts/{artifact_id}/versions/{version}:
+    get:
+      operationId: getArtifactVersion
+      tags: [runs]
+      x-required-roles: [engineer, approver, release-owner]
+      parameters:
+        - { name: artifact_id, in: path, required: true, schema: { type: string } }
+        - { name: version, in: path, required: true, schema: { type: integer, minimum: 1 } }
+      responses:
+        '200': { description: Artifact version, content: { application/json: { schema: { $ref: '#/components/schemas/ArtifactVersion' } } } }
+        '404': { $ref: '#/components/responses/Problem' }
+  /api/v1/runs/{run_id}/decisions:
+    get:
+      operationId: listRunDecisions
+      tags: [runs, gates]
+      x-required-roles: [engineer, approver, release-owner]
+      x-requirements: [FR-ORC-013]
+      parameters: [{ $ref: '#/components/parameters/RunId' }]
+      responses:
+        '200': { description: Decisions with lineage, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/DecisionRecord' } } } } }
+  /api/v1/runs/{run_id}/resume:
+    post:
+      operationId: resumeRun
+      tags: [runs]
+      x-required-roles: [approver]
+      x-requirements: [FR-ORC-019, FR-GOV-014, A-016]
+      parameters: [{ $ref: '#/components/parameters/RunId' }, { $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [rationale]
+              properties:
+                rationale: { type: string, minLength: 10 }
+                cause_resolution_ref: { type: string, description: Exception ID or evidence reference for non-timeout causes }
+      responses:
+        '202': { description: Resuming, content: { application/json: { schema: { $ref: './schemas/workflow-state.schema.json' } } } }
+        '403': { $ref: '#/components/responses/Problem' }
+        '409': { description: 'Not safe-stopped, or cause unresolved (code resume_precondition_failed)', content: { application/problem+json: { schema: { $ref: './schemas/problem.schema.json' } } } }
+  /api/v1/runs/{run_id}/abort:
+    post:
+      operationId: abortRun
+      tags: [runs]
+      x-required-roles: [approver]
+      parameters: [{ $ref: '#/components/parameters/RunId' }]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [rationale], properties: { rationale: { type: string, minLength: 10 } } } } }
+      responses:
+        '202': { description: Aborting (summary will be produced), content: { application/json: { schema: { $ref: './schemas/workflow-state.schema.json' } } } }
+        '409': { $ref: '#/components/responses/Problem' }
+  /api/v1/runs/{run_id}/exceptions:
+    post:
+      operationId: requestException
+      tags: [policy]
+      x-required-roles: [engineer]
+      x-requirements: [FR-GOV-007, FR-GOV-008]
+      parameters: [{ $ref: '#/components/parameters/RunId' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [eval_id, reason, scope, compensating_control]
+              properties:
+                eval_id: { type: string }
+                reason: { type: string, minLength: 10 }
+                scope: { $ref: './schemas/policy-exception.schema.json#/properties/scope' }
+                compensating_control: { type: string, minLength: 10 }
+                requested_expires_at: { type: string, format: date-time }
+                review_condition: { type: string }
+      responses:
+        '201': { description: Exception requested; G-EXCEPTION opened, content: { application/json: { schema: { $ref: './schemas/policy-exception.schema.json' } } } }
+        '422': { description: 'Check is non-waivable (code check_non_waivable) or evaluation not FAIL', content: { application/problem+json: { schema: { $ref: './schemas/problem.schema.json' } } } }
+  /api/v1/runs/{run_id}/policy-evaluations:
+    get:
+      operationId: listPolicyEvaluations
+      tags: [policy]
+      x-required-roles: [engineer, approver, release-owner]
+      parameters: [{ $ref: '#/components/parameters/RunId' }]
+      responses:
+        '200': { description: All evaluations (append-only history), content: { application/json: { schema: { type: array, items: { $ref: './schemas/policy-evaluation.schema.json' } } } } }
+  /api/v1/runs/{run_id}/trace:
+    get:
+      operationId: getRunSpans
+      tags: [trace]
+      x-required-roles: [engineer, approver, release-owner]
+      parameters: [{ $ref: '#/components/parameters/RunId' }]
+      responses:
+        '200': { description: Spans of the run trace, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Span' } } } } }
+  /api/v1/runs/{run_id}/evidence:
+    get:
+      operationId: exportEvidence
+      tags: [audit]
+      x-required-roles: [engineer, approver, release-owner]
+      x-requirements: [SC-002, SC-003]
+      parameters: [{ $ref: '#/components/parameters/RunId' }]
+      responses:
+        '200': { description: Evidence manifest (EV-001..EV-007) with audit head hash, content: { application/json: { schema: { $ref: '#/components/schemas/EvidenceManifest' } } } }
+  /api/v1/gates:
+    get:
+      operationId: listOpenGates
+      tags: [gates]
+      x-required-roles: [engineer, approver, release-owner]
+      parameters:
+        - { name: state, in: query, schema: { type: string, default: OPEN } }
+        - { name: run_id, in: query, schema: { type: string } }
+      responses:
+        '200': { description: Gates, content: { application/json: { schema: { type: array, items: { $ref: './schemas/workflow-state.schema.json#/$defs/GateView' } } } } }
+  /api/v1/gates/{gate_id}:
+    get:
+      operationId: getGate
+      tags: [gates]
+      x-required-roles: [engineer, approver, release-owner]
+      parameters: [{ $ref: '#/components/parameters/GateId' }]
+      responses:
+        '200': { description: Gate with bound artifacts and evidence links, content: { application/json: { schema: { $ref: './schemas/workflow-state.schema.json#/$defs/GateView' } } } }
+  /api/v1/gates/{gate_id}/decisions:
+    post:
+      operationId: decideGate
+      tags: [gates]
+      x-required-roles-by-gate-type:
+        clarify: [engineer, approver]
+        design: [approver]
+        security: [approver]
+        exception: [approver]
+        corrective: [approver]
+        release: [release-owner]
+      x-requirements: [FR-GOV-001, FR-GOV-002, FR-GOV-003, FR-GOV-004, FR-GOV-011, FR-GOV-013, FR-GOV-015, FR-GOV-016, FR-ORC-028]
+      parameters: [{ $ref: '#/components/parameters/GateId' }]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: './schemas/gate-decision.schema.json' } } }
+      responses:
+        '201': { description: Decision recorded, content: { application/json: { schema: { $ref: '#/components/schemas/DecisionRecord' } } } }
+        '200': { description: Duplicate decision_id; original returned (applied once), content: { application/json: { schema: { $ref: '#/components/schemas/DecisionRecord' } } } }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { description: 'Wrong role or agent credential (code forbidden / agent_not_permitted); audited', content: { application/problem+json: { schema: { $ref: './schemas/problem.schema.json' } } } }
+        '409': { description: 'stale_artifact_version | gate_not_open | assessment_not_eligible | rework_limit_exceeded', content: { application/problem+json: { schema: { $ref: './schemas/problem.schema.json' } } } }
+        '422': { $ref: '#/components/responses/Problem' }
+  /api/v1/audit:
+    get:
+      operationId: queryAudit
+      tags: [audit]
+      x-required-roles: [engineer, approver, release-owner]
+      x-requirements: [FR-OBS-005]
+      parameters:
+        - { name: run_id, in: query, schema: { type: string } }
+        - { name: requirement_id, in: query, schema: { type: string } }
+        - { name: actor, in: query, schema: { type: string }, description: key_id or agent role }
+        - { name: event_type, in: query, schema: { type: string } }
+        - { $ref: '#/components/parameters/Limit' }
+        - { $ref: '#/components/parameters/Cursor' }
+      responses:
+        '200': { description: Matching events, content: { application/json: { schema: { type: object, required: [items], properties: { items: { type: array, items: { $ref: './schemas/audit-event.schema.json' } }, next_cursor: { type: [string, 'null'] } } } } } }
+    put:
+      operationId: auditModificationRefused
+      tags: [audit]
+      description: Always refused (append-only). The attempt is audited as AUDIT_TAMPER_REFUSED (FR-OBS-004).
+      responses:
+        '405': { $ref: '#/components/responses/Problem' }
+    delete:
+      operationId: auditDeletionRefused
+      tags: [audit]
+      description: Always refused (append-only). The attempt is audited as AUDIT_TAMPER_REFUSED (FR-OBS-004).
+      responses:
+        '405': { $ref: '#/components/responses/Problem' }
+  /api/v1/audit/verify:
+    get:
+      operationId: verifyAuditChain
+      tags: [audit]
+      x-required-roles: [engineer, approver, release-owner]
+      parameters: [{ name: run_id, in: query, schema: { type: string } }]
+      responses:
+        '200': { description: Hash chain verification, content: { application/json: { schema: { type: object, required: [valid, checked_events], properties: { valid: { type: boolean }, checked_events: { type: integer }, first_invalid_seq: { type: [integer, 'null'] }, head_hash: { type: string } } } } } }
+  /api/v1/trace/requirements/{requirement_id}:
+    get:
+      operationId: traceRequirement
+      tags: [trace]
+      x-required-roles: [engineer, approver, release-owner]
+      x-requirements: [FR-OBS-008]
+      parameters:
+        - { name: requirement_id, in: path, required: true, schema: { type: string }, description: Spec ID (e.g. FR-SHR-008) or run-level ID (RQ-...) }
+        - { name: direction, in: query, schema: { type: string, enum: [forward, reverse, both], default: both } }
+      responses:
+        '200': { description: Traceability graph, content: { application/json: { schema: { $ref: '#/components/schemas/TraceView' } } } }
+  /api/v1/metrics/reliability:
+    get:
+      operationId: getReliabilityMetrics
+      tags: [metrics]
+      x-required-roles: [engineer, approver, release-owner]
+      x-requirements: [FR-OBS-006, FR-OBS-007, NFR-RCV-002]
+      parameters:
+        - { name: run_id, in: query, schema: { type: string } }
+        - { name: scenario_ref, in: query, schema: { type: string } }
+        - { name: include_fault_injection, in: query, schema: { type: boolean, default: true } }
+      responses:
+        '200': { description: Metrics computed from audit events, content: { application/json: { schema: { $ref: '#/components/schemas/ReliabilityMetrics' } } } }
+  /health/live:
+    get:
+      operationId: orchestratorLiveness
+      tags: [health]
+      security: []
+      responses: { '200': { description: Alive } }
+  /health/ready:
+    get:
+      operationId: orchestratorReadiness
+      tags: [health]
+      security: []
+      responses: { '200': { description: Ready }, '503': { description: Not ready } }
+components:
+  securitySchemes:
+    ApiKeyAuth: { type: apiKey, in: header, name: X-API-Key }
+  parameters:
+    RunId: { name: run_id, in: path, required: true, schema: { $ref: './schemas/workflow-state.schema.json#/$defs/RunId' } }
+    GateId: { name: gate_id, in: path, required: true, schema: { type: string, pattern: '^gat_[0-9A-HJKMNP-TV-Z]{26}$' } }
+    IdempotencyKey: { name: Idempotency-Key, in: header, required: false, schema: { type: string, pattern: '^[A-Za-z0-9_-]{1,128}$' } }
+    Limit: { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 500, default: 100 } }
+    Cursor: { name: cursor, in: query, schema: { type: string } }
+  responses:
+    Problem:
+      description: Error
+      content: { application/problem+json: { schema: { $ref: './schemas/problem.schema.json' } } }
+  schemas:
+    RunCreateRequest:
+      type: object
+      additionalProperties: false
+      required: [requirement]
+      properties:
+        requirement:
+          type: object
+          additionalProperties: false
+          oneOf: [{ required: [text] }, { required: [ref] }]
+          properties:
+            text: { type: string, minLength: 1, maxLength: 20000 }
+            ref: { type: string, description: 'Repository path under scenarios/, e.g. scenarios/scn-b/requirement.md' }
+        scenario_type: { enum: [greenfield, brownfield, ambiguous, unspecified], default: unspecified }
+        scenario_ref: { type: string, pattern: '^scn-[a-c]$' }
+        change_set_ref: { type: string, pattern: '^changesets/[a-z0-9-]+/[a-z0-9-]+$' }
+        variant: { type: string }
+        agent_mode: { enum: [deterministic, ai_backed], default: deterministic }
+        fault_injection:
+          type: array
+          description: Only accepted when the orchestrator runs with fault injection enabled; labels the run fault-injection.
+          items:
+            type: object
+            required: [fault, node_id]
+            properties:
+              fault: { enum: [transient_n, permanent, timeout, kill_after, scanner_unavailable, smoke_fail, compensation_fail, db_locked, raise_ambiguity] }
+              node_id: { type: string }
+              n: { type: integer, minimum: 1 }
+              payload: { type: object }
+    ArtifactVersion:
+      type: object
+      required: [artifact_id, type, version, hash, status, provenance]
+      properties:
+        artifact_id: { type: string }
+        type: { type: string }
+        version: { type: integer }
+        hash: { type: string }
+        status: { enum: [current, stale, superseded, rolled_back] }
+        degraded: { type: boolean }
+        provenance:
+          type: object
+          required: [produced_by_node, actor_type, run_id, input_versions, created_at]
+          properties:
+            produced_by_node: { type: string }
+            attempt_id: { type: string }
+            actor_type: { enum: [agent, human, system] }
+            actor_id: { type: string }
+            agent_mode: { enum: [deterministic, ai_backed, null] }
+            run_id: { type: string }
+            input_versions: { type: array, items: { $ref: './schemas/workflow-state.schema.json#/$defs/ArtifactRef' } }
+            provenance_label: { type: [string, 'null'] }
+            created_at: { type: string, format: date-time }
+        content: {}
+    DecisionRecord:
+      type: object
+      required: [decision_id, run_id, type, choice, actor, bound_artifacts, rationale, decision_source, created_at]
+      properties:
+        decision_id: { type: string }
+        run_id: { type: string }
+        gate_id: { type: [string, 'null'] }
+        type: { enum: [clarification, approval, rejection, escalation, exception, release, corrective, resume, abort] }
+        choice: { type: string }
+        actor:
+          type: object
+          required: [type, key_id, role]
+          properties:
+            type: { const: human }
+            key_id: { type: string }
+            role: { enum: [engineer, approver, release-owner] }
+        bound_artifacts: { type: array, items: { $ref: './schemas/workflow-state.schema.json#/$defs/ArtifactRef' } }
+        rationale: { type: string }
+        answers: { type: array }
+        accepted_risks: { type: array }
+        affected_artifacts: { type: array, items: { $ref: './schemas/workflow-state.schema.json#/$defs/ArtifactRef' }, description: Decision lineage (FR-ORC-013) }
+        decision_source: { enum: [interactive, scripted] }
+        created_at: { type: string, format: date-time }
+    GraphInstance:
+      type: object
+      required: [run_id, version, template_version, nodes, edges]
+      properties:
+        run_id: { type: string }
+        version: { type: integer }
+        template_version: { type: string }
+        created_reason: { type: string }
+        nodes: { type: array, items: { $ref: './schemas/workflow-state.schema.json#/$defs/NodeView' } }
+        edges:
+          type: array
+          items: { type: object, required: [from, to], properties: { from: { type: string }, to: { type: string }, condition: { type: [string, 'null'] } } }
+    Span:
+      type: object
+      required: [trace_id, span_id, name, kind, start]
+      properties:
+        trace_id: { type: string }
+        span_id: { type: string }
+        parent_span_id: { type: [string, 'null'] }
+        name: { type: string }
+        kind: { enum: [node_attempt, http_client, subprocess, gate_wait] }
+        start: { type: string, format: date-time }
+        end: { type: [string, 'null'], format: date-time }
+        status: { enum: [ok, error, unset] }
+        attributes: { type: object }
+    TraceView:
+      type: object
+      required: [root, links]
+      properties:
+        root: { type: string }
+        links:
+          type: array
+          items:
+            type: object
+            required: [from_type, from_id, to_type, to_id, relation]
+            properties:
+              from_type: { enum: [requirement, scenario, decision, task, artifact, test, result, documentation, evidence] }
+              from_id: { type: string }
+              to_type: { enum: [requirement, scenario, decision, task, artifact, test, result, documentation, evidence] }
+              to_id: { type: string }
+              relation: { type: string }
+        gaps: { type: array, items: { type: string } }
+    ReliabilityMetrics:
+      type: object
+      required: [measurement_class, disclaimer, population, runs, success_rate, failure_rate, retry_frequency, rollback_frequency, compensation_frequency, mttr, latency]
+      properties:
+        measurement_class: { const: demonstration }
+        disclaimer: { type: string, description: 'Always: synthetic demonstration measurements on a single workstation; not production statistics.' }
+        population:
+          type: object
+          required: [definition, run_count, fault_injected_run_count, exclusions]
+          properties:
+            definition: { type: string }
+            run_count: { type: integer }
+            fault_injected_run_count: { type: integer }
+            exclusions: { type: array, items: { type: string } }
+        runs:
+          type: object
+          properties:
+            completed: { type: integer }
+            failed: { type: integer }
+            aborted: { type: integer }
+            safe_stopped: { type: integer }
+            non_terminal: { type: integer }
+        success_rate: { type: [number, 'null'] }
+        failure_rate: { type: [number, 'null'] }
+        retry_frequency: { type: object, properties: { retries: { type: integer }, attempts: { type: integer }, ratio: { type: [number, 'null'] } } }
+        rollback_frequency: { type: object, properties: { runs_with_rollback: { type: integer }, ratio: { type: [number, 'null'] } } }
+        compensation_frequency: { type: object, properties: { runs_with_compensation: { type: integer }, ratio: { type: [number, 'null'] } } }
+        mttr:
+          type: object
+          required: [formula, recovered_count, total_recovery_seconds, mttr_seconds, unrecovered_count, open_count, by_mechanism, episodes]
+          properties:
+            formula: { const: 'sum(recovery_duration of recovered episodes) / count(recovered episodes)' }
+            recovered_count: { type: integer }
+            total_recovery_seconds: { type: number }
+            mttr_seconds: { type: [number, 'null'] }
+            mttr_excluding_human_wait_seconds: { type: [number, 'null'] }
+            unrecovered_count: { type: integer }
+            open_count: { type: integer }
+            by_mechanism: { type: object, additionalProperties: { type: object, properties: { count: { type: integer }, mttr_seconds: { type: [number, 'null'] } } } }
+            episodes:
+              type: array
+              items:
+                type: object
+                required: [episode_id, run_id, node_id, failure_detected_at, status, mechanism]
+                properties:
+                  episode_id: { type: string }
+                  run_id: { type: string }
+                  node_id: { type: string }
+                  failure_detected_at: { type: string, format: date-time }
+                  recovery_started_at: { type: [string, 'null'], format: date-time }
+                  recovery_completed_at: { type: [string, 'null'], format: date-time }
+                  recovery_duration_seconds: { type: [number, 'null'] }
+                  mechanism: { enum: [retry, rollback, compensation, human_resume, fallback, none] }
+                  status: { enum: [recovered, unrecovered, open] }
+                  includes_human_wait: { type: boolean }
+                  fault_injected: { type: boolean }
+        latency:
+          type: object
+          properties:
+            end_to_end_seconds: { type: object, properties: { p50: { type: [number, 'null'] }, p95: { type: [number, 'null'] } } }
+            active_seconds: { type: object, properties: { p50: { type: [number, 'null'] }, p95: { type: [number, 'null'] } } }
+            human_wait_seconds: { type: object, properties: { p50: { type: [number, 'null'] }, p95: { type: [number, 'null'] } } }
+            per_stage: { type: object, additionalProperties: { type: object, properties: { p50: { type: [number, 'null'] }, p95: { type: [number, 'null'] } } } }
+    EvidenceManifest:
+      type: object
+      required: [run_id, labels, generated_at, audit_head_hash, items]
+      properties:
+        run_id: { type: string }
+        labels: { type: array, items: { type: string } }
+        generated_at: { type: string, format: date-time }
+        audit_head_hash: { type: string }
+        items:
+          type: array
+          items:
+            type: object
+            required: [evidence_id, path, sha256]
+            properties:
+              evidence_id: { type: string, pattern: '^EV-00[1-8]$' }
+              path: { type: string }
+              sha256: { type: string }
+              source_artifacts: { type: array, items: { $ref: './schemas/workflow-state.schema.json#/$defs/ArtifactRef' } }

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.local/001/policy-evaluation.schema.json",
+  "title": "Policy check evaluation (append-only)",
+  "version": "1.0.0",
+  "description": "Exactly one outcome per applicable check per evaluation (CON VI, FR-GOV-006). Re-evaluations append and reference the superseded evaluation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["eval_id", "run_id", "node_id", "policy_set_version", "check_id", "domain", "mandatory", "outcome", "reason", "evaluated_at"],
+  "properties": {
+    "eval_id": { "type": "string", "pattern": "^pev_[0-9A-HJKMNP-TV-Z]{26}$" },
+    "run_id": { "type": "string" },
+    "node_id": { "type": "string" },
+    "policy_set_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "check_id": { "type": "string", "pattern": "^(SEC|PRIV|ARCH|AUD|DEP|LIC|CHG|REL)-\\d{3}$" },
+    "domain": { "enum": ["security", "privacy", "architecture", "audit_retention", "dependencies", "licensing", "change_control", "release"] },
+    "mandatory": { "type": "boolean" },
+    "outcome": { "enum": ["PASS", "FAIL", "EXCEPTION-REQUESTED", "NOT-APPLICABLE"] },
+    "blocking": { "type": "boolean", "description": "Derived: mandatory AND (FAIL OR (EXCEPTION-REQUESTED AND exception not APPROVED/unexpired))." },
+    "subject_artifacts": { "type": "array", "items": { "$ref": "workflow-state.schema.json#/$defs/ArtifactRef" } },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind"],
+        "properties": {
+          "kind": { "enum": ["file_hash", "tool_output", "artifact", "rule_match", "config_value"] },
+          "ref": { "type": "string" },
+          "hash": { "type": "string" },
+          "summary": { "type": "string", "maxLength": 2000 }
+        }
+      }
+    },
+    "reason": { "type": "string" },
+    "exception_id": { "type": ["string", "null"] },
+    "supersedes_eval_id": { "type": ["string", "null"] },
+    "evaluated_at": { "type": "string", "format": "date-time" }
+  },
+  "allOf": [
+    { "if": { "properties": { "outcome": { "const": "EXCEPTION-REQUESTED" } } }, "then": { "required": ["exception_id"], "properties": { "exception_id": { "type": "string" } } } }
+  ]
+}

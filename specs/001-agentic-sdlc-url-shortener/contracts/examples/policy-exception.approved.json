@@ -1,0 +1,17 @@
+{
+  "exception_id": "exc_01JAB0F1A2B3C4D5E6F7G8H9J0",
+  "run_id": "run_01JAB0BZ9Y8X7W6V5T4S3R2Q1P",
+  "check_id": "SEC-003",
+  "policy_set_version": "1.0.0",
+  "reason": "ILLUSTRATIVE EXAMPLE: offline demo environment; advisory source unreachable.",
+  "scope": { "level": "run" },
+  "compensating_control": "Re-run pip-audit with network before any repository merge; result attached to PR.",
+  "requested_by": { "key_id": "k_2d8e4b10", "role": "engineer" },
+  "requested_at": "2026-10-17T10:25:00Z",
+  "status": "APPROVED",
+  "approving_authority": { "key_id": "k_7f3a9c21", "role": "approver" },
+  "decision_id": "dec_01JAB0F2Z9Y8X7W6V5T4S3R2Q1",
+  "approved_at": "2026-10-17T10:31:40Z",
+  "expires_at": "2026-10-24T10:31:40Z",
+  "review_condition": null
+}

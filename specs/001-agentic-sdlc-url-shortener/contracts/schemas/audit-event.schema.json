@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.local/001/audit-event.schema.json",
+  "title": "Audit event (append-only, hash-chained)",
+  "version": "1.0.0",
+  "description": "CON IX / FR-OBS-001..004. Required fields: actor type, actor identity where applicable, action, timestamp, affected artifact or state, result, reason. hash = sha256(canonical_json(event without 'hash')).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["event_id", "run_id", "seq", "ts", "event_type", "actor", "action", "target", "result", "reason", "labels", "prev_hash", "hash"],
+  "properties": {
+    "event_id": { "type": "string", "pattern": "^evt_[0-9A-HJKMNP-TV-Z]{26}$" },
+    "run_id": { "type": ["string", "null"], "description": "Correlation ID; null only for system-wide events (e.g. KEY_ISSUED)." },
+    "seq": { "type": "integer", "minimum": 1, "description": "Gapless per run." },
+    "ts": { "type": "string", "format": "date-time" },
+    "event_type": {
+      "enum": [
+        "RUN_CREATED", "RUN_STATE_CHANGED", "RUN_TERMINATED",
+        "GRAPH_VERSION_CREATED",
+        "NODE_STATE_CHANGED", "NODE_ENTRY_REFUSED", "NODE_SKIPPED",
+        "NODE_ATTEMPT_STARTED", "NODE_ATTEMPT_SUCCEEDED", "NODE_ATTEMPT_FAILED",
+        "RETRY_SCHEDULED", "TIMEOUT", "FALLBACK_USED",
+        "GATE_OPENED", "GATE_DECISION_RECORDED", "GATE_DECISION_REFUSED", "GATE_ESCALATED", "GATE_TIMED_OUT", "GATE_REVOKED",
+        "CLARIFICATION_REQUESTED", "CLARIFICATION_ANSWERED", "AMBIGUITY_RAISED",
+        "ARTIFACT_VERSION_CREATED", "ARTIFACT_STALE", "ARTIFACT_ROLLED_BACK",
+        "REPLAN_STARTED", "REPLAN_COMPLETED",
+        "POLICY_EVALUATED", "EXCEPTION_REQUESTED", "EXCEPTION_DECIDED", "EXCEPTION_EXPIRED",
+        "CHANGE_SET_VERIFIED", "CHANGE_SET_APPLIED",
+        "ROLLBACK_STARTED", "ROLLBACK_COMPLETED",
+        "PROMOTION_STARTED", "PROMOTION_COMPLETED", "SMOKE_CHECK_RECORDED",
+        "COMPENSATION_STARTED", "COMPENSATION_COMPLETED", "COMPENSATION_FAILED", "CORRECTIVE_ACTION_APPLIED",
+        "SAFE_STOP_ENTERED", "RESUME_REQUESTED", "RESUME_REFUSED", "RESUMED",
+        "FAILURE_DETECTED", "RECOVERY_STARTED", "RECOVERY_COMPLETED",
+        "PERMISSION_REFUSED", "ILLEGAL_TRANSITION_REFUSED", "AUDIT_TAMPER_REFUSED", "AUTH_REFUSED",
+        "FAULT_INJECTED", "SUMMARY_PRODUCED", "KEY_ISSUED"
+      ]
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": { "enum": ["agent", "human", "system"] },
+        "id": { "type": ["string", "null"], "description": "Agent role name, human key_id, or system component." },
+        "role": { "type": ["string", "null"], "enum": ["consumer", "engineer", "approver", "release-owner", "agent", null] },
+        "key_id": { "type": ["string", "null"], "pattern": "^k_[A-Za-z0-9]{8,32}$", "description": "Never the secret (FR-GOV-013)." },
+        "agent_mode": { "enum": ["deterministic", "ai_backed", null] }
+      }
+    },
+    "action": { "type": "string", "minLength": 1 },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": {
+        "type": { "enum": ["run", "node", "gate", "artifact", "policy_check", "exception", "release", "workspace", "audit", "key"] },
+        "id": { "type": "string" },
+        "version": { "type": ["integer", "string", "null"] },
+        "from_state": { "type": ["string", "null"] },
+        "to_state": { "type": ["string", "null"] }
+      }
+    },
+    "result": { "enum": ["success", "refused", "failed", "recorded"] },
+    "reason": { "type": "string", "description": "Why the action happened or was refused; reason codes like policy_fail:SEC-002." },
+    "data": { "type": "object", "description": "Event-specific payload; must not contain secrets or personal data." },
+    "transition_key": { "type": ["string", "null"], "description": "Unique; enforces at-most-once transitions." },
+    "episode_id": { "type": ["string", "null"], "pattern": "^eps_[0-9A-HJKMNP-TV-Z]{26}$" },
+    "policy_set_version": { "type": ["string", "null"] },
+    "graph_version": { "type": ["integer", "null"] },
+    "labels": { "type": "array", "items": { "enum": ["demonstration", "fault-injection", "finding-injection", "test"] } },
+    "trace": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": { "trace_id": { "type": "string", "pattern": "^[0-9a-f]{32}$" }, "span_id": { "type": "string", "pattern": "^[0-9a-f]{16}$" } }
+    },
+    "prev_hash": { "type": "string", "pattern": "^(sha256:[0-9a-f]{64}|GENESIS)$" },
+    "hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+  }
+}

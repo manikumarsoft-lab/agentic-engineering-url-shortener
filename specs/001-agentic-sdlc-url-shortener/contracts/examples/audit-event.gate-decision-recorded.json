@@ -1,0 +1,26 @@
+{
+  "event_id": "evt_01JAB0C2D3E4F5G6H7J8K9M0NP",
+  "run_id": "run_01JAB0BZ9Y8X7W6V5T4S3R2Q1P",
+  "seq": 27,
+  "ts": "2026-10-17T10:04:12Z",
+  "event_type": "GATE_DECISION_RECORDED",
+  "actor": { "type": "human", "id": "k_7f3a9c21", "role": "approver", "key_id": "k_7f3a9c21", "agent_mode": null },
+  "action": "approve",
+  "target": { "type": "gate", "id": "gat_01JAB0C1A2B3C4D5E6F7G8H9J0", "version": 1, "from_state": "OPEN", "to_state": "APPROVED" },
+  "result": "success",
+  "reason": "ILLUSTRATIVE EXAMPLE (not execution evidence): design and change-control approved",
+  "data": {
+    "decision_id": "dec_01JAB0C1Z9Y8X7W6V5T4S3R2Q1",
+    "bound_artifacts": [
+      { "artifact_id": "art_01JAB0C0K1M2N3P4Q5R6S7T8V9", "type": "design", "version": 1, "hash": "sha256:4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a" }
+    ]
+  },
+  "transition_key": "run_01JAB0BZ9Y8X7W6V5T4S3R2Q1P/G-DESIGN/1/decision/dec_01JAB0C1Z9Y8X7W6V5T4S3R2Q1",
+  "episode_id": null,
+  "policy_set_version": "1.0.0",
+  "graph_version": 1,
+  "labels": ["demonstration"],
+  "trace": { "trace_id": "0192f0a1b2c3d4e5f60718293a4b5c6d", "span_id": "a1b2c3d4e5f60718" },
+  "prev_hash": "sha256:ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d",
+  "hash": "sha256:e7f6c011776e8db7cd330b54174fd76f7d0216b612387a5ffcfb81e6f0919683"
+}

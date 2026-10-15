@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.local/001/problem.schema.json",
+  "title": "Problem (RFC 9457) with machine-readable code",
+  "version": "1.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type", "title", "status", "code", "correlation_id"],
+  "properties": {
+    "type": { "type": "string", "format": "uri-reference" },
+    "title": { "type": "string" },
+    "status": { "type": "integer", "minimum": 400, "maximum": 599 },
+    "code": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{2,63}$",
+      "description": "Stable machine-readable reason (FR-SHR-002). New values are MINOR changes."
+    },
+    "detail": { "type": "string", "maxLength": 500, "description": "Human-readable; never contains stack traces, secrets, SQL, or persistence identifiers (FR-SHR-018)." },
+    "correlation_id": { "type": "string" },
+    "retriable": { "type": "boolean" },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["field", "code"],
+        "properties": { "field": { "type": "string" }, "code": { "type": "string" }, "message": { "type": "string" } }
+      }
+    },
+    "current_versions": {
+      "type": "array",
+      "description": "Orchestrator only: on stale_artifact_version, the current bound versions.",
+      "items": { "$ref": "workflow-state.schema.json#/$defs/ArtifactRef" }
+    }
+  }
+}

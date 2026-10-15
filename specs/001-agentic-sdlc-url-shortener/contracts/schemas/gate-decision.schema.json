@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.local/001/gate-decision.schema.json",
+  "title": "Gate decision request (human-only)",
+  "version": "1.0.0",
+  "description": "Body of POST /api/v1/gates/{gate_id}/decisions. Actor identity and role come from the authenticated key, never from the body (FR-GOV-003, FR-GOV-013).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["decision_id", "choice", "bound_artifacts", "rationale"],
+  "properties": {
+    "decision_id": {
+      "type": "string",
+      "pattern": "^dec_[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "Client-generated; duplicate submissions are applied at most once (FR-ORC-028)."
+    },
+    "choice": { "enum": ["approve", "reject_rework", "reject_terminate", "escalate", "answer", "ready", "not_ready"] },
+    "bound_artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Must equal the gate's current bound versions, else 409 stale_artifact_version (FR-GOV-004).",
+      "items": { "$ref": "workflow-state.schema.json#/$defs/ArtifactRef" }
+    },
+    "rationale": { "type": "string", "minLength": 1, "maxLength": 4000 },
+    "answers": {
+      "type": "array",
+      "description": "Required when choice = answer (clarify gates).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["question_id"],
+        "properties": {
+          "question_id": { "type": "string" },
+          "option_id": { "type": "string" },
+          "free_text": { "type": "string", "maxLength": 4000 }
+        },
+        "anyOf": [{ "required": ["option_id"] }, { "required": ["free_text"] }]
+      }
+    },
+    "accepted_risks": {
+      "type": "array",
+      "description": "Release gate: every open risk with severity >= medium must be listed, else the decision is refused.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["risk_id", "acceptance_rationale"],
+        "properties": { "risk_id": { "type": "string" }, "acceptance_rationale": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "not_ready_action": { "enum": ["rework", "terminate"], "description": "Required when choice = not_ready." },
+    "corrective_action": { "enum": ["disable_listed_links", "retain_data_accept_risk"], "description": "G-CORRECTIVE only." },
+    "decision_source": { "enum": ["interactive", "scripted"], "default": "interactive" }
+  },
+  "allOf": [
+    { "if": { "properties": { "choice": { "enum": ["reject_rework", "reject_terminate", "escalate"] } } },
+      "then": { "properties": { "rationale": { "minLength": 10 } } } },
+    { "if": { "properties": { "choice": { "const": "answer" } } }, "then": { "required": ["answers"] } },
+    { "if": { "properties": { "choice": { "const": "not_ready" } } }, "then": { "required": ["not_ready_action"] } }
+  ]
+}

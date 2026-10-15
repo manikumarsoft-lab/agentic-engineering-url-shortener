@@ -1,0 +1,412 @@
+# Workflow graph template: authoritative node definitions for the orchestration engine.
+# Validated at engine start against a meta-schema; runs pin this version (graph_template_version).
+# Generic state machines (allowed/prohibited transitions) are in data-model.md §2; node-level
+# `prohibited` entries below are additional, node-specific guards.
+version: 1.0.0
+owner: human-owner (workflow owner)
+requirements: [FR-ORC-005, FR-ORC-006, FR-ORC-007, FR-ORC-008, FR-ORC-037, FR-ORC-038, FR-ORC-039]
+
+defaults:
+  timeout_seconds: 300            # PVT-005
+  gate_timeout_seconds: 86400     # PVT-005 (demo profile may shorten; recorded on the run)
+  retry:
+    max_attempts: 3               # PVT-004 (total attempts, including the first)
+    backoff: { kind: exponential, base_seconds: 1, factor: 2, cap_seconds: 30, jitter: seeded }
+  failure_classification:         # PD-003 defaults; nodes extend/override
+    transient: [timeout, db_locked, interrupted, subprocess_crashed]
+    permanent: [input_schema_invalid, input_missing, permission_refused, illegal_transition]
+  unclassified: safe_stop         # FR-ORC-018
+  on_retry_exhausted: safe_stop
+  idempotent: true
+  audit_events_common:
+    [NODE_STATE_CHANGED, NODE_ATTEMPT_STARTED, NODE_ATTEMPT_SUCCEEDED, NODE_ATTEMPT_FAILED,
+     RETRY_SCHEDULED, TIMEOUT, FAILURE_DETECTED, RECOVERY_STARTED, RECOVERY_COMPLETED,
+     ARTIFACT_VERSION_CREATED, NODE_ENTRY_REFUSED, PERMISSION_REFUSED]
+
+agent_roles:   # declared permissions = capability objects injected into StageContext (FR-ORC-025)
+  intake:      [artifacts.read, artifacts.write, repo.read_scenarios]
+  analyst:     [artifacts.read, artifacts.write]
+  quality:     [artifacts.read, artifacts.write, policy.evaluate]
+  impact:      [artifacts.read, artifacts.write, repo.read_sut_snapshot, changeset.read, registry.read]
+  planner:     [artifacts.read, artifacts.write, registry.read]
+  architect:   [artifacts.read, artifacts.write, repo.read_contracts, changeset.read, registry.read]
+  implementer: [artifacts.read, artifacts.write, changeset.read, changeset.verify, workspace.create, workspace.write, workspace.discard, policy.evaluate]
+  tester:      [artifacts.read, artifacts.write, workspace.read, workspace.discard, process.run_tests]
+  writer:      [artifacts.read, artifacts.write, workspace.read]
+  security:    [artifacts.read, artifacts.write, workspace.read, process.run_scanners, policy.evaluate, registry.read]
+  release:     [artifacts.read, artifacts.write, policy.evaluate, audit.verify, trace.read]
+  deployer:    [artifacts.read, artifacts.write, releases.create, staging.promote, staging.smoke, staging.restore, staging.query_effects]
+  reporter:    [artifacts.read, artifacts.write, audit.read, metrics.read, trace.read]
+# Never grantable to any agent role: gate.decide, exception.approve, run.resume, run.abort, audit.modify,
+# repo.write, keys.issue (enforced by loader; FR-GOV-003, NFR-AUT-001).
+
+nodes:
+  - id: ST-01
+    name: Requirement ingestion
+    kind: agent
+    actor: { type: agent, role: intake }
+    purpose: Capture the submitted requirement immutably with provenance.
+    inputs: [run-request]
+    outputs: [raw-requirement]
+    preconditions: ["run.state == RUNNING"]
+    postconditions: ["raw-requirement v1 stored with content hash"]
+    depends_on: []
+    failure_classification:
+      permanent: [request_malformed, unknown_scenario_ref, unknown_change_set_ref]
+    on_permanent_failure: fail_run
+    fallback: none
+
+  - id: ST-02
+    name: Requirement normalization
+    kind: agent
+    actor: { type: agent, role: analyst }
+    purpose: Structure intent, actors, FR/NFR statements, constraints, AC candidates; assign stable IDs; derive change_kind.
+    inputs: [raw-requirement]
+    optional_inputs: [clarification-decision]
+    outputs: [normalized-requirement, assumption-register]
+    preconditions: ["raw-requirement current"]
+    postconditions: ["every statement has RQ-ID", "change_kind in {new_capability, modification, unknown}"]
+    depends_on: [ST-01]
+    requirements: [FR-ORC-002]
+    on_permanent_failure: safe_stop
+    fallback: none
+
+  - id: ST-03
+    name: Requirement quality and policy conformance
+    kind: agent
+    actor: { type: agent, role: quality }
+    purpose: Run completeness, consistency, testability, policy-conformance and architecture-boundary checks.
+    inputs: [normalized-requirement]
+    outputs: [quality-report]
+    policy_checks: [PRIV-001, ARCH-001]
+    preconditions: ["normalized-requirement current"]
+    postconditions: ["five checks recorded with result and rationale", "each failure classified missing_information|unclear_term|internal_conflict|policy_conflict"]
+    depends_on: [ST-02]
+    requirements: [FR-ORC-003, FR-ORC-004]
+    policy_failure_routing: clarify_if_unclarified   # plan §9.1 ST-03 rule
+    on_permanent_failure: safe_stop
+    fallback: none
+
+  - id: G-CLARIFY
+    name: Human clarification (ST-04)
+    kind: gate
+    gate_type: clarify
+    actor: { type: human, roles: [engineer, approver] }
+    condition: quality-report.material_failures > 0
+    skip_reason_template: "All requirement-quality checks passed: {checks}"
+    purpose: Obtain answers for classified ambiguities; never proceed on a guessed interpretation.
+    inputs: [quality-report]
+    outputs: [clarification-decision]
+    binds: [quality-report, normalized-requirement]
+    decisions: [answer, reject_terminate, escalate]
+    on_answer: replan   # new normalized-requirement version → re-run ST-02.. as affected
+    on_timeout: safe_stop
+    depends_on: [ST-03]
+    requirements: [FR-ORC-004, FR-GOV-014, SCN-C-AC2, SCN-C-AC3]
+    prohibited:
+      - "transition to APPROVED/answered by actor.type in {agent, system}"
+      - "any ST-05+ node READY while this gate is OPEN/ESCALATED"
+    audit_events: [GATE_OPENED, CLARIFICATION_REQUESTED, CLARIFICATION_ANSWERED, GATE_DECISION_RECORDED, GATE_DECISION_REFUSED, GATE_ESCALATED, GATE_TIMED_OUT, NODE_SKIPPED]
+
+  - id: ST-05
+    name: Impact analysis
+    kind: agent
+    actor: { type: agent, role: impact }
+    condition: normalized-requirement.change_kind == modification OR run.replanning_active
+    purpose: Identify impacted components, interfaces, data flows, tests, docs, regression risks, rollout/rollback; produce Change Record.
+    inputs: [normalized-requirement, change-set-manifest, component-registry, sut-import-graph]
+    outputs: [impact-analysis, change-record]
+    preconditions: ["base release snapshot available", "change-set manifest valid"]
+    postconditions: ["every impacted item linked to RQ-IDs", "migration class determined"]
+    depends_on: [G-CLARIFY]
+    requirements: [FR-ORC-010, SCN-B-AC1]
+    failure_classification:
+      permanent: [manifest_invalid, registry_component_missing]
+    on_permanent_failure: safe_stop
+    fallback: none
+
+  - id: ST-06
+    name: Task decomposition
+    kind: agent
+    actor: { type: agent, role: planner }
+    purpose: Produce tasks with IDs, dependencies, ordering, requirement links and acceptance criteria.
+    inputs: [normalized-requirement]
+    optional_inputs: [impact-analysis]
+    outputs: [task-plan]
+    preconditions: ["no open clarify gate on this path"]
+    postconditions: ["task graph acyclic", "every RQ-ID covered by ≥1 task", "every task has AC"]
+    depends_on: [ST-05]
+    requirements: [FR-ORC-009, SCN-A-AC2]
+    on_permanent_failure: safe_stop
+    fallback: none
+
+  - id: ST-07
+    name: Architecture and design
+    kind: agent
+    actor: { type: agent, role: architect }
+    purpose: Derive API/schema delta, components, test plan, Change Record linkage, security-sensitivity flags.
+    inputs: [task-plan, contracts, change-set-manifest]
+    optional_inputs: [impact-analysis]
+    outputs: [design]
+    postconditions: ["contract version bump computed per contracts/README rules", "test plan covers each AC"]
+    depends_on: [ST-06]
+    on_permanent_failure: safe_stop
+    fallback: none
+
+  - id: G-DESIGN
+    name: Design and change-control approval
+    kind: gate
+    gate_type: design
+    actor: { type: human, roles: [approver] }
+    purpose: Approve design and authorize applying the change set to an isolated copy (high-impact action).
+    inputs: [design, task-plan, change-set-fingerprint]
+    optional_inputs: [impact-analysis, change-record]
+    outputs: [design-approval]
+    binds: [design, task-plan, impact-analysis, change-record, change-set-fingerprint]
+    decisions: [approve, reject_rework, reject_terminate, escalate]
+    rework_target: ST-07
+    max_rework_cycles: 2        # PVT-013
+    on_timeout: safe_stop
+    depends_on: [ST-07]
+    requirements: [FR-GOV-001, FR-GOV-002, FR-GOV-004, SCN-B-AC2]
+    prohibited: ["APPROVED by agent/system", "TIMED_OUT -> APPROVED", "approve with non-current bound versions"]
+    audit_events: [GATE_OPENED, GATE_DECISION_RECORDED, GATE_DECISION_REFUSED, GATE_ESCALATED, GATE_TIMED_OUT, GATE_REVOKED]
+
+  # ---------------- FORK F1 (FR-ORC-037) ----------------
+  - id: ST-08
+    name: Implementation (apply change set in isolated copy)
+    kind: agent
+    actor: { type: agent, role: implementer }
+    fork: F1
+    branch: a
+    purpose: Verify change-set integrity, copy base release to a workspace, apply patch, verify scope.
+    inputs: [design-approval, change-set, base-release]
+    outputs: [workspace, change-application-record]
+    policy_checks: [CHG-001, CHG-002, CHG-004]
+    preconditions: ["G-DESIGN APPROVED and bound versions current (CHG-004)", "workspace path under var/work/<run_id>/"]
+    postconditions: ["touched files ⊆ approved impact components", "provenance_label set (FR-ORC-034)", "main working tree unchanged"]
+    depends_on: [G-DESIGN]
+    requirements: [FR-ORC-032, FR-ORC-033, FR-ORC-034, SCN-B-AC5]
+    failure_classification:
+      transient: [workspace_io_error]
+      permanent: [integrity_mismatch, undeclared_scope, patch_does_not_apply]
+    on_permanent_failure:
+      integrity_mismatch: safe_stop       # policy FAIL CHG-001
+      undeclared_scope: safe_stop         # policy FAIL CHG-002 → re-analysis on resume
+      patch_does_not_apply: rollback_then_fail_run
+    fallback: none
+    audit_events: [CHANGE_SET_VERIFIED, CHANGE_SET_APPLIED, POLICY_EVALUATED, ROLLBACK_STARTED, ROLLBACK_COMPLETED]
+
+  - id: ST-09
+    name: Testing (new + regression) on isolated copy
+    kind: agent
+    actor: { type: agent, role: tester }
+    fork: F1
+    branch: a
+    purpose: Execute full shortener suite (regression) plus new tests; record JUnit.
+    inputs: [workspace]
+    outputs: [test-results]
+    postconditions: ["JUnit parsed", "zero failures/errors", "required test IDs from design test plan all executed"]
+    depends_on: [ST-08]
+    requirements: [FR-ORC-035, SCN-B-AC3, SCN-B-AC4]
+    failure_classification:
+      transient: [pytest_crashed_without_report]
+      permanent: [test_failures, required_tests_missing]
+    on_permanent_failure: rollback_then_fail_run   # PD-012
+    fallback: none
+    audit_events: [ROLLBACK_STARTED, ROLLBACK_COMPLETED, ARTIFACT_ROLLED_BACK]
+
+  - id: ST-10a
+    name: Documentation drafting
+    kind: agent
+    actor: { type: agent, role: writer }
+    fork: F1
+    branch: b
+    inputs: [design]
+    outputs: [docs-draft]
+    depends_on: [G-DESIGN]
+    on_permanent_failure: fallback
+    fallback: { mode: template_only, marks_degraded: true }
+    audit_events: [FALLBACK_USED]
+
+  - id: ST-11a
+    name: Threat and risk review drafting
+    kind: agent
+    actor: { type: agent, role: security }
+    fork: F1
+    branch: c
+    inputs: [design]
+    optional_inputs: [impact-analysis]
+    outputs: [threat-review]
+    postconditions: ["every impacted interface has ≥1 threat entry with control or accepted-risk proposal"]
+    depends_on: [G-DESIGN]
+    may_raise_ambiguity: true          # SCN-A-AC4 late ambiguity → SUSPENDED + G-CLARIFY-n
+    on_permanent_failure: safe_stop
+    fallback: none
+    audit_events: [AMBIGUITY_RAISED]
+
+  - id: SP-1
+    name: Synchronization point 1
+    kind: sync
+    actor: { type: system }
+    depends_on: [ST-09, ST-10a, ST-11a]
+    policy_checks: [SEC-005]
+    release_rule: all_predecessors_succeeded   # FR-ORC-037, FR-ORC-039
+    prohibited: ["release while any predecessor SUSPENDED/BLOCKED/RUNNING/RETRY_WAIT/FAILED_*"]
+
+  # ---------------- FORK F2 (FR-ORC-038) ----------------
+  - id: ST-10b
+    name: Documentation finalization
+    kind: agent
+    actor: { type: agent, role: writer }
+    fork: F2
+    inputs: [docs-draft, test-results, design]
+    outputs: [docs]
+    depends_on: [SP-1]
+    failure_classification:
+      transient: [openapi_diff_unavailable]
+    on_permanent_failure: fallback
+    fallback: { mode: manual_review_section, marks_degraded: true }
+    audit_events: [FALLBACK_USED]
+
+  - id: ST-11b
+    name: Security validation
+    kind: agent
+    actor: { type: agent, role: security }
+    fork: F2
+    inputs: [workspace, threat-review, lockfile]
+    outputs: [security-report]
+    policy_checks: [SEC-001, SEC-002, SEC-003, SEC-004, PRIV-001, DEP-001, LIC-001, LIC-002, CHG-003]
+    depends_on: [SP-1]
+    requirements: [FR-GOV-012, NFR-SEC-002]
+    failure_classification:
+      transient: [scanner_crashed, advisory_source_unreachable]
+      permanent: [mandatory_policy_fail]
+    on_retry_exhausted: policy_fail   # scanner unavailable → SEC-003 FAIL, never PASS
+    on_permanent_failure: safe_stop
+    fallback: none
+
+  - id: G-SECURITY
+    name: Security-sensitive change sign-off
+    kind: gate
+    gate_type: security
+    actor: { type: human, roles: [approver] }
+    condition: security-report.security_sensitive_touched OR security-report.open_high_threats > 0
+    inputs: [security-report, threat-review]
+    binds: [security-report, threat-review]
+    decisions: [approve, reject_rework, reject_terminate, escalate]
+    rework_target: ST-11b
+    max_rework_cycles: 2
+    on_timeout: safe_stop
+    depends_on: [ST-11b]
+    requirements: [FR-GOV-001]   # PD-007
+
+  - id: SP-2
+    name: Synchronization point 2
+    kind: sync
+    actor: { type: system }
+    depends_on: [ST-10b, G-SECURITY]
+    release_rule: all_predecessors_succeeded_or_skipped
+
+  - id: ST-12
+    name: Release-readiness assessment
+    kind: agent
+    actor: { type: agent, role: release }
+    inputs: [all current artifacts, policy evaluations, exceptions]
+    outputs: [readiness-assessment]
+    policy_checks: [REL-001, REL-002, REL-003, REL-004, REL-005, AUD-001, AUD-002, CHG-004]
+    postconditions: ["assessment ∈ {ELIGIBLE, FAIL}", "each FAIL lists blocking reasons", "open risks enumerated"]
+    depends_on: [SP-2]
+    requirements: [FR-GOV-010, CON-XI]
+    on_permanent_failure: safe_stop
+
+  - id: G-RELEASE
+    name: Release decision
+    kind: gate
+    gate_type: release
+    actor: { type: human, roles: [release-owner] }
+    inputs: [readiness-assessment]
+    binds: [readiness-assessment]
+    decisions: [ready, not_ready, escalate]
+    entry_rule: "decision 'ready' refused unless assessment == ELIGIBLE (409 assessment_not_eligible)"
+    requires: "accepted_risks covers every open risk with severity >= medium"
+    rework_target: ST-12
+    on_timeout: safe_stop
+    depends_on: [ST-12]
+    requirements: [FR-GOV-011, US-4]
+
+  - id: REL-01
+    name: Promote to staging and smoke check
+    kind: agent
+    actor: { type: agent, role: deployer }
+    inputs: [release-decision, workspace, previous-release]
+    outputs: [release, smoke-result]
+    preconditions: ["release-decision == ready"]
+    postconditions: ["staging serves new release", "smoke result recorded"]
+    depends_on: [G-RELEASE]
+    idempotent_key: release_id
+    requirements: [FR-ORC-040, FR-ORC-041]
+    failure_classification:
+      transient: [port_busy, readiness_window_exceeded, process_crashed]
+      permanent: [migration_refused, smoke_failed]
+    on_permanent_failure:
+      smoke_failed: compensate          # → REL-02
+      migration_refused: safe_stop
+    audit_events: [PROMOTION_STARTED, PROMOTION_COMPLETED, SMOKE_CHECK_RECORDED]
+
+  - id: REL-02
+    name: Compensation (re-promote previous release)
+    kind: agent
+    actor: { type: agent, role: deployer }
+    condition: smoke-result.passed == false
+    inputs: [previous-release, promotion record]
+    outputs: [compensation-record]
+    postconditions: ["previous release active and smoke-passing", "non-rollbackable effects listed"]
+    depends_on: [REL-01]
+    requirements: [FR-ORC-042]
+    failure_classification:
+      permanent: [previous_release_smoke_failed]
+    on_permanent_failure: safe_stop_staging_degraded
+    audit_events: [COMPENSATION_STARTED, COMPENSATION_COMPLETED, COMPENSATION_FAILED]
+
+  - id: G-CORRECTIVE
+    name: Corrective action approval for non-rollbackable effects
+    kind: gate
+    gate_type: corrective
+    actor: { type: human, roles: [approver] }
+    condition: compensation-record.non_rollbackable_effects not empty
+    binds: [compensation-record]
+    decisions: [approve, reject_terminate, escalate]
+    on_timeout: safe_stop
+    depends_on: [REL-02]
+    audit_events: [CORRECTIVE_ACTION_APPLIED]
+
+  - id: ST-13
+    name: Final engineering summary
+    kind: agent
+    actor: { type: agent, role: reporter }
+    inputs: [run state, all artifacts, metrics]
+    outputs: [engineering-summary]
+    postconditions: ["plan & rationale, artifacts, risks, trade-offs, validation results, assumptions, limitations present"]
+    depends_on_any: [REL-01, G-CORRECTIVE, run.terminating]   # runs on COMPLETED/FAILED/ABORTED paths
+    requirements: [FR-ORC-026]
+    on_permanent_failure: safe_stop
+    audit_events: [SUMMARY_PRODUCED, RUN_TERMINATED]
+
+dynamic_nodes:
+  - id_pattern: G-CLARIFY-{n}
+    created_when: an agent node returns needs_clarification (may_raise_ambiguity)
+    gate_type: clarify
+    effect: raising node SUSPENDED; siblings continue to next sync point which holds; answer → ST-05 replanning mode
+    requirements: [FR-ORC-022, SCN-A-AC4]
+  - id_pattern: G-EXCEPTION-{n}
+    created_when: engineer requests an exception for a FAILed evaluation
+    gate_type: exception
+    actor: { type: human, roles: [approver] }
+    requirements: [FR-GOV-007, FR-GOV-008]
+
+terminal_rules:   # FR-ORC-023: exactly one outcome
+  COMPLETED: REL-01 smoke passed AND ST-13 succeeded
+  FAILED: (fail_run | rollback_then_fail_run | compensated smoke failure) AND ST-13 succeeded
+  ABORTED: reject_terminate | abort by approver; ST-13 produces summary
+  SAFE_STOPPED: any safe_stop trigger; safe-stop-report produced by system; resumable

@@ -1,0 +1,220 @@
+openapi: 3.1.0
+info:
+  title: URL Shortener API
+  version: 1.0.0
+  description: |
+    Baseline (brownfield) shortener contract. Scenario capabilities (expiration, analytics,
+    custom aliases, daily aggregates) are delivered as MINOR increments by orchestrated runs
+    (see README "Planned increments"). Contract-first: the implementation must reproduce
+    this document (drift test).
+  x-owner: human-owner (API owner role)
+  x-requirements: [FR-SHR-001, FR-SHR-002, FR-SHR-003, FR-SHR-004, FR-SHR-005, FR-SHR-006,
+    FR-SHR-007, FR-SHR-013, FR-SHR-014, FR-SHR-015, FR-SHR-016, FR-SHR-017, FR-SHR-018, FR-SHR-019]
+servers:
+  - url: http://127.0.0.1:8000
+    description: developer instance (staging uses :8100; isolated copies use ephemeral ports)
+security: []
+tags:
+  - name: links
+  - name: redirect
+  - name: health
+paths:
+  /api/v1/links:
+    post:
+      operationId: createLink
+      tags: [links]
+      summary: Create a short link
+      security:
+        - ApiKeyAuth: []
+      x-required-roles: [consumer, engineer, approver, release-owner]
+      x-requirements: [FR-SHR-001, FR-SHR-002, FR-SHR-003, FR-SHR-004, FR-SHR-005, FR-SHR-006, FR-SHR-013, FR-SHR-017, FR-SHR-019]
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/TraceParent'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LinkCreateRequest'
+            examples:
+              basic:
+                value: { url: "https://example.org/articles/2026/10/agentic-sdlc?ref=newsletter" }
+      responses:
+        '201':
+          description: Created
+          headers:
+            Location: { schema: { type: string }, description: Full short link }
+            X-Correlation-Id: { $ref: '#/components/headers/CorrelationId' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Link' }
+              examples:
+                created:
+                  value:
+                    code: "aZ3k9Qx"
+                    short_url: "http://127.0.0.1:8000/aZ3k9Qx"
+                    url: "https://example.org/articles/2026/10/agentic-sdlc?ref=newsletter"
+                    created_at: "2026-10-16T09:12:44Z"
+        '200':
+          description: Idempotent replay of an earlier identical request with the same Idempotency-Key
+          headers:
+            Idempotent-Replayed: { schema: { type: string, const: "true" } }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Link' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '503': { $ref: '#/components/responses/Unavailable' }
+  /{code}:
+    get:
+      operationId: resolveLink
+      tags: [redirect]
+      summary: Resolve a short code (public)
+      x-requirements: [FR-SHR-007, FR-SHR-015, A-001]
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema: { $ref: '#/components/schemas/ShortCode' }
+        - $ref: '#/components/parameters/TraceParent'
+      responses:
+        '302':
+          description: Redirect to destination (PD-002)
+          headers:
+            Location: { schema: { type: string, format: uri } }
+            Cache-Control: { schema: { type: string, const: "no-store" } }
+            Referrer-Policy: { schema: { type: string, const: "no-referrer" } }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '503': { $ref: '#/components/responses/Unavailable' }
+  /health/live:
+    get:
+      operationId: liveness
+      tags: [health]
+      x-requirements: [FR-SHR-016]
+      responses:
+        '200':
+          description: Process is running
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Health' }
+  /health/ready:
+    get:
+      operationId: readiness
+      tags: [health]
+      x-requirements: [FR-SHR-016]
+      responses:
+        '200':
+          description: Able to serve (persistence reachable)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Health' }
+        '503':
+          description: Not ready
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Health' }
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: Format `sk_<key_id>.<secret>`. Never logged or echoed (NFR-SEC-004).
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      schema: { type: string, pattern: '^[A-Za-z0-9_-]{1,128}$' }
+    TraceParent:
+      name: traceparent
+      in: header
+      required: false
+      description: W3C Trace Context; propagated by the orchestrator during smoke checks.
+      schema: { type: string, pattern: '^00-[0-9a-f]{32}-[0-9a-f]{16}-[0-9a-f]{2}$' }
+  headers:
+    CorrelationId:
+      schema: { type: string }
+      description: Request correlation ID (equals trace ID when traceparent supplied).
+  schemas:
+    ShortCode:
+      type: string
+      pattern: '^[A-Za-z0-9]{4,10}$'
+      description: Case-sensitive, URL-safe (A-003). Generated codes are 7 characters.
+    LinkCreateRequest:
+      type: object
+      additionalProperties: false
+      required: [url]
+      properties:
+        url:
+          type: string
+          minLength: 1
+          maxLength: 2048
+          description: Destination URL; http/https only (A-002); normalized server-side.
+    Link:
+      type: object
+      additionalProperties: false
+      required: [code, short_url, url, created_at]
+      properties:
+        code: { $ref: '#/components/schemas/ShortCode' }
+        short_url: { type: string, format: uri }
+        url: { type: string, format: uri, description: Normalized destination }
+        created_at: { type: string, format: date-time }
+    Health:
+      type: object
+      additionalProperties: false
+      required: [status, checks]
+      properties:
+        status: { type: string, enum: [ok, degraded, unavailable] }
+        checks:
+          type: object
+          additionalProperties: { type: string, enum: [ok, failing] }
+        release: { type: string, description: Release identifier when run under orchestrator control }
+    Problem:
+      $ref: './schemas/problem.schema.json'
+  responses:
+    Unauthorized:
+      description: Missing or invalid API key
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } }
+    Forbidden:
+      description: Key lacks required role
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } }
+    Conflict:
+      description: Idempotency key reused with a different payload (`idempotency_conflict`)
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } }
+    ValidationError:
+      description: |
+        Validation failure. `code` ∈ invalid_request, malformed_url, scheme_not_allowed,
+        url_too_long, credentials_in_url, invalid_characters, self_referential_url,
+        private_address_not_allowed.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+          examples:
+            scheme:
+              value:
+                type: "https://errors.local/shortener/scheme_not_allowed"
+                title: "URL scheme not allowed"
+                status: 422
+                code: "scheme_not_allowed"
+                detail: "Only http and https destinations are accepted."
+                correlation_id: "01JABCD7Q5V4XK2M8N3P6R9T0W"
+    RateLimited:
+      description: Rate limit exceeded (60/min per key, PVT-011)
+      headers:
+        Retry-After: { schema: { type: integer, minimum: 1 } }
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } }
+    NotFound:
+      description: Unknown short code (no existence hints)
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } }
+    Unavailable:
+      description: |
+        Persistence unavailable (`persistence_unavailable`, retriable) or code generation exhausted
+        (`code_generation_exhausted`). Never a redirect to an unverified destination (FR-SHR-015).
+      headers:
+        Retry-After: { schema: { type: integer, minimum: 1 } }
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } }

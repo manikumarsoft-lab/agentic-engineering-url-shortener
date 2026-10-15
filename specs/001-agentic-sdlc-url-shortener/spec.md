@@ -274,6 +274,14 @@ Implementation → Testing → Documentation → Validation → Release Readines
    from the correct state (not from the beginning).
 5. **SCN-A-AC5** *(Negative)*: A clarification gate MUST NOT be raised artificially for a
    requirement that passed all quality checks; any raised gate must cite the failed check.
+6. **SCN-A-AC6** (CR-003): Instead of a full impact analysis, the run records a lightweight
+   additive-change check confirming the change only adds optional fields and new endpoints and
+   alters no existing behavior (existing contract operations and existing tests unchanged).
+
+**Classification rationale (CR-003)**: SCN-A is greenfield because it adds a new capability
+through optional request fields and new endpoints without altering existing behavior. Requests
+that omit the new fields behave exactly as in the baseline. This justifies recording the
+additive-change check (SCN-A-AC6) rather than a full impact analysis.
 
 **Required evidence**: EV-001, EV-002, EV-003, EV-004, EV-006, EV-007.
 
@@ -476,6 +484,7 @@ recorded clarification and any policy decision (FR-SHR-023).
 | FR-GOV-014 | C | When an approval or clarification gate times out, the run MUST enter `SAFE_STOPPED` and the timeout MUST be audited as "no decision". Resumption MUST re-open the same gate bound to the same artifact version and MUST require an approver-role key. | Clarification 2026-10-15 Q4, CON III |
 | FR-GOV-015 | C | A rejection MUST specify either "reject and rework" (the producing stage is re-executed with the rejection reason as input; dependent stages do not start) or "reject and terminate" (the run ends as `ABORTED`). A rejection without one of these choices MUST be refused. | Clarification 2026-10-15 Q4 |
 | FR-GOV-016 | C | Rework cycles MUST be bounded per gate per run (PVT-013); a rework request beyond the bound MUST place the run in `SAFE_STOPPED` with reason "rework limit exceeded". | Clarification 2026-10-15 Q4, CON VIII |
+| FR-GOV-017 | C | Separation of duties: the same API key identity MUST NOT both request and approve a policy exception, and MUST NOT approve a request it submitted. Such attempts MUST be refused and the refusal audited. A-008 still allows one person to hold several roles, but only through different key identities. | CR-003, CON III, CON VI |
 
 ### Functional Requirements: Observability and Audit (FR-OBS)
 
@@ -490,6 +499,7 @@ recorded clarification and any policy decision (FR-SHR-023).
 | FR-OBS-007 | C | Metrics derived from demonstration runs MUST be labeled as demonstration measurements. | CON IX |
 | FR-OBS-008 | C | Users MUST be able to retrieve a bidirectional traceability view: requirement → scenario → decision → task → artifact → test → result → documentation → evidence, and the reverse. | CON X, ASMT §6 |
 | FR-OBS-009 | D | The URL shortener MUST emit structured operational logs and request-level correlation identifiers without secrets or personal data. | CON V, CON IX |
+| FR-OBS-010 | C | A repository traceability check MUST flag (a) tests without a requirement ID tag and (b) source modules not referenced by any task; its findings MUST be part of the traceability matrix (EV-008). | CR-003, CON X |
 
 ### Non-Functional Requirements
 
@@ -499,7 +509,7 @@ Targets marked PVT are proposals requiring approval (see Proposed Validation Tar
 |----|------|-------------|--------------|--------|
 | NFR-SEC-001 | Security | All external input is validated at trust boundaries; URL scheme allow-list enforced. | Security test suite incl. negative cases | 100% of negative security cases rejected |
 | NFR-SEC-002 | Security | No secrets or personal data in logs, audit, errors, or repository. | Secret scan + log inspection tests | Zero findings (PVT-012) |
-| NFR-SEC-003 | Security | Threat scenarios (open-redirect abuse, enumeration, injection, abuse volume, approval spoofing) documented with controls or accepted risk. | Threat model review | All listed threats addressed |
+| NFR-SEC-003 | Security | Threat scenarios (open-redirect abuse, enumeration, injection, abuse volume, approval spoofing) documented with controls or accepted risk. Unauthenticated redirect volume (high-volume resolution of public short links) is an **accepted documented risk** with no rate limit in this prototype; redirect rate limiting is backlog item BL-13 (CR-003). | Threat model review | All listed threats addressed; the redirect-volume risk is recorded as accepted |
 | NFR-SEC-004 | Security | API keys are never logged, echoed, or stored in plain text in audit records; protected operations reject missing, invalid, or wrong-role keys. | Authorization and log-inspection tests | 100% of negative authorization cases rejected |
 | NFR-REL-001 | Reliability | Retries bounded; permanent failures never retried; deterministic terminal outcomes. | Orchestration reliability tests with injected faults | PVT-004 |
 | NFR-REL-002 | Reliability | Redirect continues when analytics capture fails. | Fault-injection test | 100% redirects succeed under analytics failure |
@@ -516,6 +526,7 @@ Targets marked PVT are proposals requiring approval (see Proposed Validation Tar
 | NFR-CHG-001 | Change safety | No change to the system under change is applied without approved impact analysis and passing regression tests; failed validation triggers rollback. | SCN-B evidence | 100% of SCN-B changes |
 | NFR-AUT-001 | Controlled autonomy | Agents cannot perform human-reserved actions; out-of-permission actions are refused. | Authorization tests | 100% refused and audited |
 | NFR-RUN-001 | Operability | The full system runs end-to-end on a single developer workstation from documented setup steps, with no AI API key and AI-backed mode disabled. | Fresh-environment setup run | PVT-009 |
+| NFR-DOC-001 | Documentation accuracy | Quickstart commands are executed by an automated test, and the release review compares the documentation with observed behavior, recording every discrepancy found. | Automated quickstart test; release review record | 100% of quickstart commands executed; 0 unresolved discrepancies at release (CR-003) |
 | NFR-DET-001 | Reproducibility | Deterministic-mode scenario runs produce the same stage sequence, gate events, and terminal outcome on repeated execution with the same inputs and decisions (timestamps and identifiers excepted). | Repeat-run comparison test | 100% of scenario runs |
 
 ### Proposed Validation Targets (require human approval)
@@ -631,6 +642,9 @@ All evidence MUST be produced by actual execution; illustrative examples MUST be
     5. MTTR aggregated across runs (FR-OBS-006); per-run MTTR remains required.
   - Not tiered here: FR-OBS-009, NFR-SCL-001, NFR-MNT-001 and NFR-RCV-002 default to
     must-have unless the plan proposes otherwise.
+- **CST-009 (CR-003)**: Submission is through a GitHub repository. The submitted state is marked
+  by the annotated tag `assessment-submission-v1.0`. A GitHub Actions CI workflow runs the test
+  suite. The README contains a section titled "How AI assistance was used and governed".
 
 ### Exclusions (out of scope for this feature)
 
@@ -702,6 +716,33 @@ source `HD-nnn`) and change only through change control (CON VI).
   limitations, not production identity management.
 - **Affected requirements**: FR-SHR-019, FR-GOV-003, FR-GOV-013, NFR-AUT-001, NFR-SEC-004.
 
+## Glossary (CR-003)
+
+- **Personal data**: any data relating to an identified or identifiable natural person,
+  including at least IP addresses, user-agent strings, device or browser identifiers, cookie
+  or session identifiers, geolocation at any precision, email addresses, and visitor account
+  identifiers, plus any combination of stored values that would allow a visitor to be singled
+  out (FR-SHR-012, A-005).
+- **Fails materially** (FR-ORC-004): a requirement-quality check fails materially when its
+  result is FAIL, meaning the requirement cannot be decomposed, implemented or verified without
+  guessing. Applied per check:
+  - completeness: a missing actor, intent or acceptance criterion;
+  - consistency: contradictory statements;
+  - testability: an acceptance criterion without an observable pass/fail condition;
+  - policy conformance: a mandatory policy check FAIL;
+  - architecture boundary: a request for an excluded capability.
+
+  Informational findings that do not change a check's PASS result are not material.
+- **Same stage sequence** (NFR-DET-001, SC-010): under parallel execution, two runs have the
+  same stage sequence when they contain the same set of stage executions (node IDs, attempt
+  counts and outcomes) and the same committed audit event order (event types and targets),
+  timestamps and identifiers excepted. The commit order is defined by the superstep scheduler
+  in ADR-003.
+- **Dependent path** (FR-ORC-022, SCN-A-AC4): for a node affected by ambiguity or change, the set
+  of nodes reachable from it through graph edges (its transitive successors), plus every node
+  whose recorded inputs include an artifact produced by it or by one of its successors. All
+  other nodes are independent and may continue to the next synchronization point.
+
 ## Assumptions
 
 - **A-001**: Redirect resolution is anonymous and public; short links are shareable.
@@ -742,7 +783,8 @@ source `HD-nnn`) and change only through change control (CON VI).
   attempt, with expired, unknown, and invalid links each producing their distinct outcome in
   100% of acceptance tests.
 - **SC-002**: All three required scenarios (SCN-A, SCN-B, SCN-C) complete with their acceptance
-  criteria met and evidence items EV-001 to EV-007 produced by actual execution.
+  criteria met, and each scenario produces, by actual execution, the evidence items assigned to
+  it in the Required Evidence table (not EV-001 to EV-007 for every scenario) (CR-003).
 - **SC-003**: For every scenario run, an assessment reviewer can reconstruct the complete
   timeline and terminal outcome from recorded data alone, without consulting the authoring
   conversation.
@@ -773,3 +815,4 @@ source `HD-nnn`) and change only through change control (CON VI).
 |----|------|----------|--------|--------|
 | CR-001 | 2026-10-15 | Mani Kumar Vadugu | CST-008 marked settled by PD-010 | wording only, no downstream impact |
 | CR-002 | 2026-10-15 | Mani Kumar Vadugu | Plan/ADR conflict resolutions; FR-GOV-003/015 interpretation recorded in plan §5.3 and ADR-016 | no spec requirement text changed |
+| CR-003 | 2026-10-15 | Mani Kumar Vadugu | Close 8 checklist gaps: SC-002 per-scenario evidence; NFR-SEC-003 redirect-volume accepted risk (BL-13); FR-GOV-017 separation of duties; Glossary; FR-OBS-010 orphan detection; NFR-DOC-001 docs accuracy; CST-009 submission; SCN-A classification rationale and SCN-A-AC6 | clarifications and additions only; no approved requirement removed or weakened; downstream: checklists and gates updated; plan, data-model, graph and tasks to pick up FR-GOV-017, FR-OBS-010, NFR-DOC-001, CST-009, SCN-A-AC6 |

@@ -85,7 +85,7 @@ Decider for all answers in this session: Mani Kumar Vadugu (human owner).
 
 - Q: In deterministic mode, what does the Implementation stage (ST-08) actually do to the URL shortener's code? → A: Option A. It applies a pre-authored, human-reviewed change set stored in the repository to an isolated copy of the system under change; the main working tree is never modified by a run. Integrity is verified against the approved version before applying; ST-09 runs new and regression tests on the isolated copy; on failure the copy is discarded (rollback). Provenance is always recorded as "pre-authored, human-reviewed change set, applied by deterministic agent", never as agent- or AI-generated code. A deliberately defective SCN-B variant exists solely to demonstrate rollback. (→ FR-ORC-032 to FR-ORC-036)
 - Q: Which stages run in parallel in the default workflow graph, and where do they synchronize before release readiness? → A: Option B. There are two forks and two synchronization points. Fork 1 opens after design approval (ST-07) and has three branches: implementation then testing (ST-08 → ST-09), documentation drafting (ST-10a) and threat/risk review drafting (ST-11a). Sync point 1 (SP-1) waits for all three. Fork 2 runs documentation finalization (ST-10b) in parallel with security validation (ST-11b). Sync point 2 (SP-2) waits for both before release readiness (ST-12). (→ FR-ORC-037 to FR-ORC-039)
-- Q: Within the 2–3 day timebox, which requirements should be proposed as must-have and which as deferrable? → A: Option A (tiered), recorded as a **proposal only**; the final scope cut is made and approved at `/speckit-plan`. (→ CST-008)
+- Q: Within the 2–3 day timebox, which requirements should be proposed as must-have and which as deferrable? → A: Option A (tiered), recorded as a **proposal only**; the final scope cut is made and approved at `/speckit-plan`. (→ CST-008) Settled by PD-010, approved at plan gate (Mani Kumar Vadugu, 2026-10-15); see plan.md §14.1.
 - Q: When an approval gate times out with no decision, or a reviewer rejects, what exact state should the workflow move to? → A: Option A. A timeout puts the run in `SAFE_STOPPED` (resumable), audited as "no decision" and never as approval; resuming re-opens the same gate on the same artifact version and requires an approver-role key. On rejection the reviewer must choose either "reject and rework" (the producing stage is re-executed with the reason, at most PVT-013 rework cycles per gate per run, then safe-stop) or "reject and terminate" (`ABORTED`). (→ FR-GOV-014 to FR-GOV-016, PVT-013)
 - Q: After the release owner approves release readiness, what does the system actually do with the validated change? → A: Option B. It promotes the validated change to a local staging instance of the shortener, kept separate from the developer working tree and from the isolated test copies, then runs a smoke check. If the smoke check fails, it compensates: it re-promotes the previous release, and data created during the failed interval is handled by a human-approved corrective action because it cannot be rolled back. Merging into the repository remains a manual human action outside the run. (→ FR-ORC-040 to FR-ORC-043, A-012)
 
@@ -611,7 +611,8 @@ All evidence MUST be produced by actual execution; illustrative examples MUST be
   ambiguous click-tracking request) are delivered only through orchestrated workflow runs
   (HD-002).
 - **CST-008: Proposed scope tiering** *(PROPOSAL, not an approved scope cut; the final cut is
-  decided and approved at `/speckit-plan`; Clarification 2026-10-15 Q3)*:
+  decided and approved at `/speckit-plan`; Clarification 2026-10-15 Q3. Settled by PD-010,
+  approved at plan gate (Mani Kumar Vadugu, 2026-10-15); see plan.md §14.1.)*:
   - **Must-have**:
     - the baseline shortener: FR-SHR-001 to FR-SHR-007, FR-SHR-013 to FR-SHR-016, FR-SHR-017
       in simple form, FR-SHR-018, FR-SHR-019;
@@ -765,3 +766,9 @@ source `HD-nnn`) and change only through change control (CON VI).
   stage sequence, gate events, and terminal outcomes (HD-001, NFR-DET-001).
 - **SC-011**: 100% of approval, rejection, exception-approval, and release-decision attempts made
   with agent-role credentials are refused and produce an audit record (HD-003).
+
+## Change Log
+
+| CR | Date | Approver | Change | Impact |
+|----|------|----------|--------|--------|
+| CR-001 | 2026-10-15 | Mani Kumar Vadugu | CST-008 marked settled by PD-010 | wording only, no downstream impact |

@@ -1,0 +1,12 @@
+# Demonstration workflow: fork/join, a human design gate and a policy-checked release step.
+name: demo
+version: 1.0.0
+defaults: {timeout_s: 60, max_attempts: 3, backoff_s: 1, gate_timeout_s: 86400}
+nodes:
+  - {id: intake, agent: emit, params: {artifacts: {requirement: {text: demo requirement}}}, produces: [requirement]}
+  - {id: design, agent: transform, params: {from: requirement, to: design}, consumes: [requirement], produces: [design], depends_on: [intake]}
+  - {id: docs, agent: noop, depends_on: [intake]}
+  - id: approve-design
+    gate: {roles: [approver], binds: [design], rework_target: design}
+    depends_on: [design]
+  - {id: release, agent: emit, params: {facts: {captures_personal_data: false}}, policy_checks: [PRIV-001], depends_on: [approve-design, docs]}

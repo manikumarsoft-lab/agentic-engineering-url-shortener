@@ -31,6 +31,8 @@ def transform(ctx: Ctx) -> dict:
 
 def sleep(ctx: Ctx) -> dict:
     p = ctx["params"]
+    if p.get("first_execution_only") and ctx["execution"] > 1:
+        return {}
     time.sleep(float(p["seconds"]))
     if "marker" in p:
         Path(p["marker"]).write_text("finished", encoding="utf-8")

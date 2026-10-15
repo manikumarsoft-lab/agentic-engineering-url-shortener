@@ -11,6 +11,8 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
+from common import apikeys
+
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS runs (
     run_id TEXT PRIMARY KEY, workflow TEXT, workflow_version TEXT, policy_version TEXT,
@@ -20,6 +22,7 @@ CREATE TABLE IF NOT EXISTS nodes (
     runs_total INTEGER DEFAULT 0, not_before REAL DEFAULT 0, deadline REAL,
     started_at REAL, ended_at REAL, active_s REAL DEFAULT 0, rework INTEGER DEFAULT 0,
     last_error TEXT, degraded INTEGER DEFAULT 0, bound TEXT, episode TEXT, recovery_mech TEXT,
+    escalated INTEGER DEFAULT 0,
     PRIMARY KEY (run_id, node_id));
 CREATE TABLE IF NOT EXISTS artifacts (
     run_id TEXT, name TEXT, version INTEGER, content TEXT, produced_by TEXT, created_at REAL,
@@ -33,8 +36,6 @@ CREATE TABLE IF NOT EXISTS policy_evaluations (
 CREATE TABLE IF NOT EXISTS exceptions (
     exception_id TEXT PRIMARY KEY, run_id TEXT, check_id TEXT, requested_by TEXT, reason TEXT,
     compensating_control TEXT, status TEXT, decided_by TEXT, created_at REAL, decided_at REAL);
-CREATE TABLE IF NOT EXISTS keys (
-    key_id TEXT PRIMARY KEY, secret_sha256 TEXT, role TEXT, label TEXT, created_at REAL);
 CREATE TABLE IF NOT EXISTS audit (
     run_id TEXT, seq INTEGER, ts REAL, actor_type TEXT, actor_id TEXT, action TEXT,
     target TEXT, result TEXT, reason TEXT, data TEXT, prev_hash TEXT, hash TEXT,
@@ -57,7 +58,7 @@ class Store:
         self.conn.row_factory = sqlite3.Row
         self.conn.execute("PRAGMA journal_mode=WAL")
         self.conn.execute("PRAGMA busy_timeout=5000")
-        self.conn.executescript(SCHEMA)
+        self.conn.executescript(SCHEMA + apikeys.SCHEMA)
 
     @contextmanager
     def tx(self) -> Iterator[sqlite3.Connection]:

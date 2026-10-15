@@ -1,0 +1,13 @@
+# Versioned policy set (lean slice). The version is recorded on every run and evaluation.
+version: 1.0.0
+checks:
+  - id: PRIV-001
+    description: No visitor personal data is captured (FR-SHR-012, A-005)
+    fact: captures_personal_data
+    expect: false
+    mandatory: true
+  - id: REL-001
+    description: Required tests executed and passing
+    fact: tests_passed
+    expect: true
+    mandatory: true

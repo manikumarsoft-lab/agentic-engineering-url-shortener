@@ -29,7 +29,8 @@ from orchestrator.store import Store
 
 TERMINAL = frozenset({"COMPLETED", "FAILED", "ABORTED"})
 DONE = frozenset({"SUCCEEDED", "SKIPPED"})
-DECISIONS = ("approve", "reject_rework", "reject_terminate")
+DECISIONS = ("approve", "reject_rework", "reject_terminate", "escalate")
+ESCALATION_ROLES = frozenset({"release-owner"})
 SRC_ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -82,7 +83,7 @@ def _condition_holds(cond: dict[str, Any], facts: dict[str, Any]) -> bool:
     raise EngineError(f"unsupported condition {cond}")
 
 
-def _kill_tree(proc: subprocess.Popen) -> None:
+def kill_tree(proc: subprocess.Popen) -> None:
     if os.name == "nt":
         subprocess.run(["taskkill", "/PID", str(proc.pid), "/T", "/F"], capture_output=True)
     else:
@@ -223,14 +224,17 @@ class Engine:
         node = self.wf.nodes.get(node_id)
         if node is None or node.gate is None:
             raise EngineError(f"{node_id} is not a gate")
-        p = self._principal(run_id, presented, set(node.gate.roles), f"gate.{choice}")
         row = self.store.nodes(run_id)[node_id]
+        roles = set(ESCALATION_ROLES if row["escalated"] else node.gate.roles)
+        p = self._principal(run_id, presented, roles, f"gate.{choice}")
         if row["state"] != "AWAITING_APPROVAL" or self.store.run(run_id)["state"] == "SAFE_STOPPED":
             raise EngineError(f"{node_id} is not awaiting a decision")
         if choice not in DECISIONS:
             raise EngineError(f"unknown decision '{choice}'")
         if choice != "approve" and not reason.strip():
-            raise EngineError("a rejection needs a reason")
+            raise EngineError(f"'{choice}' needs a reason")
+        if choice == "escalate" and row["escalated"]:
+            raise EngineError(f"{node_id} is already escalated")
         bound = json.loads(row["bound"] or "{}")
         current = {a: (self.store.artifact(run_id, a) or (0, None))[0] for a in bound}
         if current != bound:
@@ -252,6 +256,10 @@ class Engine:
                 self._audit(c, run_id, "GATE_APPROVED", target=node_id, reason=reason, data=data, **actor)
                 self._recovered(c, run_id, node_id, row)
                 self.store.set_run(c, run_id, state="RUNNING")
+            elif choice == "escalate":  # gate keeps blocking; the next decision needs a higher role
+                self.store.set_node(c, run_id, node_id, escalated=1)
+                self._audit(c, run_id, "GATE_ESCALATED", target=node_id, reason=reason,
+                            data={**data, "next_roles": sorted(ESCALATION_ROLES)}, **actor)
             elif choice == "reject_terminate":
                 self.store.set_node(c, run_id, node_id, state="FAILED", deadline=None)
                 self._audit(c, run_id, "GATE_REJECTED", target=node_id, reason=reason, data=data, **actor)
@@ -411,7 +419,7 @@ class Engine:
         try:
             proc.wait(timeout=max(0.0, t0 + timeout_s - time.monotonic()))
         except subprocess.TimeoutExpired:
-            _kill_tree(proc)
+            kill_tree(proc)
             return Outcome(False, "timeout", started=started, ended=self.clock.now())
         ended = self.clock.now()
         if proc.returncode != 0 or not result_path.exists():
@@ -603,7 +611,8 @@ class Engine:
         for nid in sorted(nids):
             if rows[nid]["state"] == "PENDING":
                 continue
-            self.store.set_node(c, run_id, nid, state="STALE", attempts=0, deadline=None, not_before=0)
+            self.store.set_node(c, run_id, nid, state="STALE", attempts=0, deadline=None, not_before=0,
+                                escalated=0)
             self._audit(c, run_id, "NODE_STALE", target=nid, reason=reason)
             if self.wf.nodes[nid].gate:
                 revoked = c.execute(

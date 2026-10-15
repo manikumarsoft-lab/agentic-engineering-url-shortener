@@ -64,6 +64,28 @@ def test_non_approver_decisions_are_refused_and_audited(env, key):
     assert env.states(run_id)["approve"] == "AWAITING_APPROVAL"
 
 
+def test_escalate_keeps_gate_blocking_and_requires_release_owner(env):
+    eng = env.engine(GATED)
+    run_id = eng.submit()
+    eng.run(run_id)
+    with pytest.raises(EngineError, match="reason"):
+        eng.decide(run_id, "approve", env.keys["approver"], "escalate")
+    eng.decide(run_id, "approve", env.keys["approver"], "escalate", "needs release-owner judgement")
+    assert env.store.run(run_id)["state"] == "AWAITING_APPROVAL"
+    assert env.states(run_id)["approve"] == "AWAITING_APPROVAL"
+    escalated = [e for e in audit.events(env.store.conn, run_id) if e["action"] == "GATE_ESCALATED"]
+    assert escalated[0]["data"]["next_roles"] == ["release-owner"]
+    assert eng.run(run_id) == "AWAITING_APPROVAL"  # still blocked
+    with pytest.raises(AuthError):  # the escalating role can no longer decide
+        eng.decide(run_id, "approve", env.keys["approver"], "approve")
+    with pytest.raises(EngineError, match="already escalated"):
+        eng.decide(run_id, "approve", env.keys["release-owner"], "escalate", "again")
+    eng.decide(run_id, "approve", env.keys["release-owner"], "approve", "accepted")
+    assert eng.run(run_id) == "COMPLETED"
+    choices = [r[0] for r in env.store.conn.execute("SELECT choice FROM decisions ORDER BY created_at")]
+    assert choices == ["escalate", "approve"]
+
+
 def test_reject_terminate_aborts(env):
     eng = env.engine(GATED)
     run_id = eng.submit()

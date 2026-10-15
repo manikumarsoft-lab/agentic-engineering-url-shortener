@@ -7,12 +7,12 @@ R-07).
 | File | Kind | Version | Owner | Consumers |
 |------|------|---------|-------|-----------|
 | `shortener-api.openapi.yaml` | OpenAPI 3.1 | 1.0.0 (baseline) | Human owner (API owner) | API consumers, public redirect clients, orchestrator smoke checks, contract tests |
-| `orchestrator-api.openapi.yaml` | OpenAPI 3.1 | 1.0.0 | Human owner | `orch` CLI, human reviewers, e2e tests |
-| `workflow-graph.v1.yaml` | Graph definition (YAML, validated by meta-schema) | 1.0.0 | Human owner (workflow owner) | Engine, tests, docs |
+| `orchestrator-api.openapi.yaml` | OpenAPI 3.1 | 2.0.0 (CR-002) | Human owner | `orch` CLI, human reviewers, e2e tests |
+| `workflow-graph.v2.yaml` | Graph definition (YAML, validated by meta-schema) | 2.0.0 (CR-002) | Human owner (workflow owner) | Engine, tests, docs |
 | `policy-set.v1.yaml` | Policy set (YAML) | 1.0.0 | Human owner (policy owner) | Policy evaluator, readiness, docs |
 | `schemas/problem.schema.json` | JSON Schema 2020-12 | 1.0.0 | Shared | Both APIs |
 | `schemas/workflow-state.schema.json` | JSON Schema | 1.0.0 | Orchestrator | API, CLI, evidence export |
-| `schemas/gate-decision.schema.json` | JSON Schema | 1.0.0 | Orchestrator | API, CLI, scripted decisions |
+| `schemas/gate-decision.schema.json` | JSON Schema | 2.0.0 (CR-002) | Orchestrator | API, CLI, scripted decisions |
 | `schemas/audit-event.schema.json` | JSON Schema | 1.0.0 | Orchestrator | Audit store, query API, evidence |
 | `schemas/policy-evaluation.schema.json` | JSON Schema | 1.0.0 | Orchestrator | Policy evaluator, readiness |
 | `schemas/policy-exception.schema.json` | JSON Schema | 1.0.0 | Orchestrator | Exception workflow |
@@ -67,6 +67,25 @@ Copy into the PR description (repository changes) or produce as the `change-reco
 - Required approval: G-DESIGN (run) | human owner PR approval (repo) | + policy exception (if destructive)
 - Approval reference (decision ID / PR):
 ```
+
+## Change history
+
+### Change Record: G-RELEASE rework removal (CR-002), 2026-10-15
+- Owner / approver: human owner, Mani Kumar Vadugu (Human Gate 4, CR-002)
+- Version impact: **MAJOR** for three contracts (rule 4):
+  - `workflow-graph` 1.0.0 → 2.0.0 (file renamed `workflow-graph.v1.yaml` → `workflow-graph.v2.yaml`): G-RELEASE `rework_target` removed and `not_ready` now terminates the run, which changes gate decision semantics.
+  - `gate-decision.schema.json` 1.0.0 → 2.0.0: field `not_ready_action` removed.
+  - `orchestrator-api.openapi.yaml` 1.0.0 → 2.0.0: `decideGate` request body changed via the schema.
+- Backward-compatibility impact: none in practice. No implementation, consumer or run exists that
+  pinned 1.0.0 (pre-implementation).
+- Affected consumers: engine (planned), `orch` CLI (planned), e2e tests (planned).
+- Affected requirements (IDs): FR-GOV-002, FR-GOV-011, FR-GOV-015 (interpretation recorded in plan §5.3), FR-ORC-023, US-4.
+- Tests added/changed: planned governance tests must assert `not_ready` → run `FAILED` with blocking reasons, and no rework option at G-RELEASE.
+- Documentation updated: plan.md §3.2, §3.4, §5.1, §5.3 and Change Log; data-model.md §2.1, §2.3; ADR-016.
+- Rollout / migration steps: none (no data); migration class n/a.
+- Rollback / compensation consideration: revert the three files to 1.0.0 via a new change record.
+- Required approval: human owner (repository change).
+- Approval reference: CR-002 (Human Gate 4, 2026-10-15).
 
 ## Planned increments (delivered only through orchestrated runs, CST-007)
 

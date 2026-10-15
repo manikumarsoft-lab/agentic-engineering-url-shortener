@@ -2,8 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://contracts.local/001/gate-decision.schema.json",
   "title": "Gate decision request (human-only)",
-  "version": "1.0.0",
-  "description": "Body of POST /api/v1/gates/{gate_id}/decisions. Actor identity and role come from the authenticated key, never from the body (FR-GOV-003, FR-GOV-013).",
+  "version": "2.0.0",
+  "description": "Body of POST /api/v1/gates/{gate_id}/decisions. Actor identity and role come from the authenticated key, never from the body (FR-GOV-003, FR-GOV-013). 2.0.0 (CR-002): field not_ready_action removed; choice not_ready at G-RELEASE always terminates the run as FAILED.",
   "type": "object",
   "additionalProperties": false,
   "required": ["decision_id", "choice", "bound_artifacts", "rationale"],
@@ -46,14 +46,12 @@
         "properties": { "risk_id": { "type": "string" }, "acceptance_rationale": { "type": "string", "minLength": 1 } }
       }
     },
-    "not_ready_action": { "enum": ["rework", "terminate"], "description": "Required when choice = not_ready." },
     "corrective_action": { "enum": ["disable_listed_links", "retain_data_accept_risk"], "description": "G-CORRECTIVE only." },
     "decision_source": { "enum": ["interactive", "scripted"], "default": "interactive" }
   },
   "allOf": [
     { "if": { "properties": { "choice": { "enum": ["reject_rework", "reject_terminate", "escalate"] } } },
       "then": { "properties": { "rationale": { "minLength": 10 } } } },
-    { "if": { "properties": { "choice": { "const": "answer" } } }, "then": { "required": ["answers"] } },
-    { "if": { "properties": { "choice": { "const": "not_ready" } } }, "then": { "required": ["not_ready_action"] } }
+    { "if": { "properties": { "choice": { "const": "answer" } } }, "then": { "required": ["answers"] } }
   ]
 }

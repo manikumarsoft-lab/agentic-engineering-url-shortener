@@ -772,3 +772,4 @@ source `HD-nnn`) and change only through change control (CON VI).
 | CR | Date | Approver | Change | Impact |
 |----|------|----------|--------|--------|
 | CR-001 | 2026-10-15 | Mani Kumar Vadugu | CST-008 marked settled by PD-010 | wording only, no downstream impact |
+| CR-002 | 2026-10-15 | Mani Kumar Vadugu | Plan/ADR conflict resolutions; FR-GOV-003/015 interpretation recorded in plan §5.3 and ADR-016 | no spec requirement text changed |

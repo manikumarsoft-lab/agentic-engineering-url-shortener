@@ -89,12 +89,12 @@ DQ-010 are resolved below and were approved at plan gate (Mani Kumar Vadugu, 202
 | Principle | Pre-design | Post-design | Justification (post-design) |
 |-----------|-----------|-------------|-----------------------------|
 | I. Specification Before Implementation | PASS | PASS | No code exists or is planned before task approval. Every component, node and test category maps to FR/NFR IDs (§13). Plan-level additions are isolated as PD-nnn proposals, not silent requirements. |
-| II. Explicit Agentic Orchestration | PASS | PASS | Versioned graph contract (`contracts/workflow-graph.v1.yaml`) defines each node's inputs, outputs, entry/exit criteria, owner, permissions, timeout, retry, failure classification, fallback and audit events. There are two forks, two sync points, conditional and dynamic nodes, replanning, interruption and resume (§3). |
+| II. Explicit Agentic Orchestration | PASS | PASS | Versioned graph contract (`contracts/workflow-graph.v2.yaml`) defines each node's inputs, outputs, entry/exit criteria, owner, permissions, timeout, retry, failure classification, fallback and audit events. There are two forks, two sync points, conditional and dynamic nodes, replanning, interruption and resume (§3). |
 | III. Human Governance | PASS | PASS | Seven gate types, each with approve/reject-rework/reject-terminate/escalate/timeout semantics. Timeout leads to `SAFE_STOPPED` and never to approval. Agent-role credentials are refused at the API and at the engine (§5). |
 | IV. Test-Driven Engineering | PASS | PASS | Red-green-refactor for domain, engine, policy and governance. All seven required test categories are planned (§10). Places where TDD is not practical are recorded in §10.4. |
 | V. Security and Privacy by Design | PASS | PASS | Scheme allow-list, validation at trust boundaries, self/private-address rejection (PD-001), hashed API keys, rate limiting, secret and dependency scans, threat model, no personal data (§8). |
 | VI. Compliance and Change-Control Policy Enforcement | PASS | PASS | Versioned policy set with seven domains. Every check yields exactly one of the four outcomes. A mandatory FAIL blocks progression and release. Exceptions run through a human gate with expiry. Contract and schema change records (§9). |
-| VII. Architecture and Maintainability | PASS | PASS | Domain, API, persistence, orchestration, policy, telemetry and infrastructure are in separate packages. External tools (git, scanners, subprocess, clock) sit behind interfaces. 13 ADR candidates are listed. Complexity is justified in Complexity Tracking. |
+| VII. Architecture and Maintainability | PASS | PASS | Domain, API, persistence, orchestration, policy, telemetry and infrastructure are in separate packages. External tools (git, scanners, subprocess, clock) sit behind interfaces. 19 ADRs are recorded in `docs/adr/`. Complexity is justified in Complexity Tracking. |
 | VIII. Reliability and Recovery | PASS | PASS | Per-stage failure classification table (PD-003), bounded retries with backoff, timeouts, idempotent transitions, fallback, rollback distinct from compensation, safe-stop, human-authorized resume (§6). |
 | IX. Observability and Auditability | PASS | PASS | Run ID used as the correlation and trace ID. Append-only, hash-chained audit with all required fields. Metrics (including MTTR) computed only from recorded events and labeled as demonstration data (§7). |
 | X. Traceability and Repository Integrity | PASS | PASS | Requirement → … → evidence chain built by tooling from spec IDs, task references, pytest markers, JUnit results, doc front matter and run evidence (§13). Evidence comes only from real runs. Scripted decisions are labeled (PD-006). |
@@ -202,12 +202,12 @@ analytics; SCN-B adds custom aliases; SCN-C (conforming option) adds daily aggre
 | Contract | File | Version | Owner |
 |----------|------|---------|-------|
 | Shortener HTTP API | `contracts/shortener-api.openapi.yaml` | 1.0.0 (baseline) | Human owner (API owner role) |
-| Orchestrator HTTP API | `contracts/orchestrator-api.openapi.yaml` | 1.0.0 | Human owner |
-| Workflow graph definition | `contracts/workflow-graph.v1.yaml` | 1.0.0 | Human owner (workflow owner) |
+| Orchestrator HTTP API | `contracts/orchestrator-api.openapi.yaml` | 2.0.0 (CR-002) | Human owner |
+| Workflow graph definition | `contracts/workflow-graph.v2.yaml` | 2.0.0 (CR-002) | Human owner (workflow owner) |
 | Policy set | `contracts/policy-set.v1.yaml` | 1.0.0 | Human owner (policy owner) |
 | Problem (error) schema | `contracts/schemas/problem.schema.json` | 1.0.0 | Shared |
 | Workflow-state schema | `contracts/schemas/workflow-state.schema.json` | 1.0.0 | Orchestrator |
-| Approval/decision schema | `contracts/schemas/gate-decision.schema.json` | 1.0.0 | Orchestrator |
+| Approval/decision schema | `contracts/schemas/gate-decision.schema.json` | 2.0.0 (CR-002) | Orchestrator |
 | Audit-event schema | `contracts/schemas/audit-event.schema.json` | 1.0.0 | Orchestrator |
 | Policy-evaluation schema | `contracts/schemas/policy-evaluation.schema.json` | 1.0.0 | Orchestrator |
 | Exception schema | `contracts/schemas/policy-exception.schema.json` | 1.0.0 | Orchestrator |
@@ -250,7 +250,7 @@ Planned scenario contract increments (delivered only through runs):
 
 ## 3. Agentic Orchestration Architecture
 
-Authoritative definition: [`contracts/workflow-graph.v1.yaml`](./contracts/workflow-graph.v1.yaml)
+Authoritative definition: [`contracts/workflow-graph.v2.yaml`](./contracts/workflow-graph.v2.yaml)
 (each node's purpose, inputs, outputs, preconditions, postconditions, actor, permissions,
 timeout, retry, failure classification, fallback, failure behavior, audit events, prohibited
 transitions). State machines: [data-model.md §2](./data-model.md).
@@ -303,6 +303,7 @@ ST-01 Ingest ─▶ ST-02 Normalize ─▶ ST-03 Quality+policy ─┬─[any ma
                                                          SP-2 (join)
                                                            ▼
                                         ST-12 Readiness assessment ─▶ G-RELEASE (release-owner)
+                                                           │ [not_ready] ─▶ ST-13 Summary ─▶ FAILED (blocking reasons recorded; CR-002)
                                                            ▼ [ready]
                                         REL-01 Promote to staging + smoke
                                           ├─[pass]─▶ ST-13 Summary ─▶ COMPLETED
@@ -363,7 +364,7 @@ release while any branch is `SUSPENDED`/`FAILED_*`/`BLOCKED`; `FAILED_PERMANENT 
 | G-SECURITY | human `approver` | security report (cond: security-sensitive components touched) | 24 h | timeout → `SAFE_STOPPED` | none |
 | SP-2 | system | F2 outputs | n/a | n/a | n/a |
 | ST-12 Readiness | agent `release` + policy | all artifacts → `readiness-assessment` (CON XI's 10 conditions, evaluated through REL-001..005, AUD-001/002 and prior-node policy outcomes) | 300 s / 3 | `SAFE_STOPPED` | none |
-| G-RELEASE | human `release-owner` | assessment (must be non-FAIL), per-risk acceptance → `release-decision` | 24 h | timeout → `SAFE_STOPPED` | none |
+| G-RELEASE | human `release-owner` | assessment (must be non-FAIL), per-risk acceptance → `release-decision` | 24 h | timeout → `SAFE_STOPPED`; `not_ready` → ST-13 → `FAILED` (no rework; CR-002) | none |
 | REL-01 Promote+smoke | agent `deployer` | release decision + workspace → `release` R(n+1), `smoke-result` | 300 s / 3 (transient only, idempotent by release ID) | smoke fail → REL-02 | none |
 | REL-02 Compensate | agent `deployer` | previous release → `compensation-record` (re-promotion + non-rollbackable effects) | 300 s / 3 | `SAFE_STOPPED` (staging degraded) | none |
 | G-CORRECTIVE | human `approver` | compensation record → `corrective-action-decision` | 24 h | timeout → `SAFE_STOPPED` | none |
@@ -378,7 +379,7 @@ not wait for them; the scheduler advances when any node becomes ready or any tim
 `Clock` and `IdGenerator` are injected, so tests run with a virtual clock. The result is real
 concurrency with a reproducible committed event order (NFR-DET-001). The trade-off is that a
 fast branch can wait up to one sibling's step duration. This is acceptable at demo scale and
-recorded in ADR candidate ADR-005.
+recorded in ADR-003.
 
 ### 3.6 Dynamic replanning (FR-ORC-020/021/022)
 
@@ -456,7 +457,7 @@ disclosure (FR-ORC-034).
 | G-DESIGN | Always before F1 | `approver` | design, task-plan, impact-analysis, change-record, change-set fingerprint | approve, reject_rework, reject_terminate, escalate | → `SAFE_STOPPED` | FR-GOV-001, SCN-B-AC2 |
 | G-SECURITY | ST-11b finds security-sensitive components touched (registry flag) or open high/critical threat | `approver` | security-report vN | approve, reject_rework, reject_terminate, escalate | → `SAFE_STOPPED` | FR-GOV-001, CON V (PD-007) |
 | G-EXCEPTION | Engineer requests an exception for a FAILed check | `approver` | policy evaluation + exception request | approve (with expiry and compensating control), reject | → `SAFE_STOPPED` | FR-GOV-007/008 |
-| G-RELEASE | ST-12 produces a non-FAIL assessment | `release-owner` | readiness-assessment vN | ready (with per-risk acceptance), not_ready (rework/terminate), escalate | → `SAFE_STOPPED` | FR-GOV-010/011 |
+| G-RELEASE | ST-12 produces a non-FAIL assessment | `release-owner` | readiness-assessment vN | ready (with per-risk acceptance), not_ready (terminates the run as `FAILED` with blocking reasons; no rework, CR-002), escalate | → `SAFE_STOPPED` | FR-GOV-010/011 |
 | G-CORRECTIVE | Compensation completed with non-rollbackable effects | `approver` | compensation-record | approve listed corrective action, decline (retain data, record risk) | → `SAFE_STOPPED` | FR-ORC-042 |
 | G-RESUME (action) | Resume from `SAFE_STOPPED` | `approver` | safe-stop record; for non-timeout causes, evidence the cause is resolved or excepted | resume | n/a | FR-ORC-019, FR-GOV-014, A-016 |
 
@@ -481,6 +482,12 @@ disclosure (FR-ORC-034).
   input. Dependents stay `PENDING`. At most **2** rework cycles per gate per run (PVT-013); the
   third leads to `SAFE_STOPPED` "rework limit exceeded" (FR-GOV-016).
 - **reject_terminate**: run → `ABORTED` and ST-13 produces the summary.
+- **not_ready** (G-RELEASE only; CR-002, Human Gate 4 ruling 4): there is no rework option at
+  G-RELEASE. The run ends as `FAILED` with the blocking reasons recorded, after ST-13 produces the
+  summary. After fixing the cause, a human starts a new run (consistent with PD-012). `FAILED`
+  rather than `ABORTED` because a release decision is a distinct decision category from an
+  approval rejection (FR-GOV-003 lists them separately), so FR-GOV-015's "reject and terminate →
+  `ABORTED`" does not govern it.
 - **escalate**: gate → `ESCALATED` (still blocking). The escalation reason is recorded and the
   next decision requires `approver` (release-owner for G-RELEASE). Routing beyond recording is
   deferred (CST-008 #4).
@@ -509,7 +516,7 @@ disclosure (FR-ORC-034).
 | Fallback | Declared per node (ST-10a, ST-10b; analytics in the shortener). Use is recorded (`FALLBACK_USED`), sets `degraded=true` on the artifact and appears in readiness as an advisory (REL-005) |
 | Rollback | **Restore prior state with no committed external effect**: discard the isolated workspace and mark artifacts `rolled_back`. The system under change is back at the last known-good release (SCN-B-AC4, FR-ORC-035) |
 | Compensation | **Corrective action after a committed effect**: re-promote the previous release to staging after a failed smoke check. Non-rollbackable data is listed and corrected only with G-CORRECTIVE approval (FR-ORC-042) |
-| Safe-stop | Run → `SAFE_STOPPED` with reason code. No node is `RUNNING`. Workspaces are retained for inspection. State is consistent and resumable. Triggers per FR-ORC-018 plus rework limit and compensation failure |
+| Safe-stop | Run → `SAFE_STOPPED` with reason code. No node is `RUNNING`. Workspaces are retained for inspection. State is consistent and resumable. Triggers per FR-ORC-018 plus rework limit, compensation failure, scheduler stall (no node runnable, no timer pending and no gate open while the run is not terminal) and interruption detected at startup (PD-011) (CR-002) |
 | Resumption | `POST /runs/{id}/resume` (approver). Requires the cause resolved or excepted (A-016). Re-opens timed-out gates on the same version. Re-runs only non-succeeded nodes. Interrupted idempotent nodes are retried within budget |
 | Partial failure | One F1/F2 branch fails or is suspended: siblings finish, the sync point holds (FR-ORC-039), and the run outcome follows the failed branch's failure behavior |
 | Dependency unavailability | Shortener DB unavailable → `503 persistence_unavailable` (create) / `503` (redirect, never a stale redirect). Staging process fails to start → transient. Advisory source unavailable → transient, then SEC-003 `FAIL` (exception possible), never a silent PASS |
@@ -819,15 +826,15 @@ gate.
 | R-03 | Orchestration engine | In-repo engine from scratch, explicit versioned DAG + persisted state machines | **SELECTED (human), 2026-10-15** |
 | R-04 | Deployment topology | Two services + CLI in one repo | **SELECTED (human), 2026-10-15** |
 | R-05 | Scheduler model | Deterministic superstep scheduler (PD-004) | Approved at plan gate (Mani Kumar Vadugu, 2026-10-15) |
-| R-06 | Change-set format and application | Unified diff + manifest + lock, `git apply` into isolated workspace | PROPOSED |
-| R-07 | Contract strategy | Contract-first OpenAPI 3.1 + drift test + schemathesis | PROPOSED |
-| R-08 | Audit integrity | Append-only table + triggers + per-run hash chain | PROPOSED |
-| R-09 | API key scheme | `sk_<id>.<secret>`, SHA-256 at rest, role map file | PROPOSED |
+| R-06 | Change-set format and application | Unified diff + manifest + lock, `git apply` into isolated workspace | Accepted via ADRs (Mani Kumar Vadugu, 2026-10-15) |
+| R-07 | Contract strategy | Contract-first OpenAPI 3.1 + drift test + schemathesis | Accepted via ADRs (Mani Kumar Vadugu, 2026-10-15) |
+| R-08 | Audit integrity | Append-only table + triggers + per-run hash chain | Accepted via ADRs (Mani Kumar Vadugu, 2026-10-15) |
+| R-09 | API key scheme | `sk_<id>.<secret>`, SHA-256 at rest, role map file | Accepted via ADRs (Mani Kumar Vadugu, 2026-10-15) |
 | R-10 | Tracing | In-house spans + W3C traceparent (OpenTelemetry deferred) (PD-005) | Approved at plan gate (Mani Kumar Vadugu, 2026-10-15) |
-| R-11 | Logging | stdlib logging + JSON formatter + redaction | PROPOSED |
-| R-12 | Security scanners | pip-audit, detect-secrets, pip-licenses | PROPOSED |
-| R-13 | CLI | Typer | PROPOSED |
-| R-14 | IDs and time | ULID-style sortable IDs, injectable `IdGenerator` and `Clock` | PROPOSED |
+| R-11 | Logging | stdlib logging + JSON formatter + redaction | Accepted via ADRs (Mani Kumar Vadugu, 2026-10-15) |
+| R-12 | Security scanners | pip-audit, detect-secrets, pip-licenses | Accepted via ADRs (Mani Kumar Vadugu, 2026-10-15) |
+| R-13 | CLI | Typer | Accepted via ADRs (Mani Kumar Vadugu, 2026-10-15) |
+| R-14 | IDs and time | ULID-style sortable IDs, injectable `IdGenerator` and `Clock` | Accepted via ADRs (Mani Kumar Vadugu, 2026-10-15) |
 
 ---
 
@@ -888,6 +895,7 @@ evidence produced)**:
 | BL-09 | PostgreSQL adapter | R-02 |
 | BL-10 | Key rotation and revocation tooling | HD-003 limitation |
 | BL-11 | Malware/phishing reputation checks | EXC-006 |
+| BL-12 | Durable analytics outbox (no lost increments when the analytics write fails) | Human Gate 4 ruling 2; ADR-019 |
 
 **Scope-control rule**: optional work must not displace mandatory validation or reviewer
 evidence. At each checkpoint, any slipping must-have item triggers the cut list above. A backlog
@@ -897,7 +905,7 @@ item may start only after recording "CP-4 met" in the task log.
 
 | # | Slice | Contents | Exit evidence |
 |---|-------|----------|---------------|
-| 1 | Engineering baseline | `pyproject.toml`, uv lock, ruff, mypy strict, pytest config with `req` marker plugin, `.gitignore` (`var/`), detect-secrets baseline, `make`-equivalent `tools/check.py` (lint, type, test, coverage) | `tools/check.py` green on empty skeleton |
+| 1 | Engineering baseline | `pyproject.toml`, uv lock, ruff, mypy strict, pytest config with `req` marker plugin, `.gitignore` (`var/`), `.gitattributes` enforcing LF (`eol=lf`) for `src/`, `tests/`, `changesets/` (incl. `*.diff` patches) and `specs/**/contracts/` (CR-002; the reference workstation has `core.autocrlf=true`), detect-secrets baseline, `make`-equivalent `tools/check.py` (lint, type, test, coverage) | `tools/check.py` green on empty skeleton |
 | 2 | Walking skeleton | Shortener: create + redirect happy path through API → domain → SQLite. Orchestrator: create run with a 2-node graph, persisted state, one audit event, CLI `orch run show` | e2e test: run created, audit visible; link redirects |
 | 3 | Core URL behavior | Validation (incl. PD-001), codes, idempotency, rate limit, auth, health/readiness, persistence-failure handling, problem+json, contract drift and schemathesis, concurrency PVT-003; tag `shortener-baseline-v1` (human) | Shortener suites green; contract v1.0.0 drift-free |
 | 4 | Orchestration state model | Graph contract loader, run/node/gate state tables, superstep scheduler, fork/join, conditions, entry/exit criteria, idempotent transitions, artifacts and provenance | State-transition suite green |
@@ -1051,11 +1059,38 @@ No constitution violations. Justified complexity (CON VII):
 | Hash-chained audit | Tamper evidence for append-only claims (FR-OBS-004) | Triggers alone do not detect out-of-band file edits |
 | Release snapshots (R0..Rn) | Compensation needs a previous release to re-promote; brownfield chain | Re-building from the working tree would violate FR-ORC-043 and break reproducibility |
 
-## ADR Candidates (for the next step; not created here)
+## Architecture Decision Records
 
-ADR-001 stack (R-01) · ADR-002 persistence (R-02) · ADR-003 in-repo engine (R-03) · ADR-004
-topology (R-04) · ADR-005 superstep scheduler · ADR-006 change sets and isolated workspaces ·
-ADR-007 contract-first versioning and additive migrations · ADR-008 audit integrity · ADR-009
-policy model and exceptions · ADR-010 API key auth · ADR-011 observability (in-house tracing,
-MTTR model) · ADR-012 staging promotion and compensation · ADR-013 failure classification and
-retry.
+19 ADRs in [`docs/adr/`](../../docs/adr/README.md) (all **Proposed** until the human owner
+accepts them; numbering updated by CR-002):
+
+ADR-001 language and framework (R-01) · ADR-002 persistence (R-02) · ADR-003 orchestration model:
+in-repo engine and superstep scheduler (R-03, R-05, PD-004) · ADR-004 application architecture,
+topology and local execution (R-04) · ADR-005 dependency graph representation · ADR-006 change
+sets and isolated workspaces (R-06) · ADR-007 contract-first versioning and additive migrations
+(R-07) · ADR-008 audit integrity (R-08) · ADR-009 policy model and exceptions (R-12) · ADR-010
+authentication and authorization (R-09) · ADR-011 observability, metrics and MTTR (R-10, R-11) ·
+ADR-012 rollback versus compensation · ADR-013 retry, fallback and safe-stop policy · ADR-014
+short-code generation and collision handling · ADR-015 workflow state persistence (R-14) · ADR-016
+human approval model · ADR-017 dynamic replanning · ADR-018 testing strategy · ADR-019 analytics
+consistency.
+
+## Change Log
+
+| CR | Date | Approver | Change | Impact |
+|----|------|----------|--------|--------|
+| CR-002 | 2026-10-15 | Mani Kumar Vadugu (Human Gate 4) | Resolve the five ADR-gate conflicts and apply rulings 2 and 4 | See impact analysis below |
+
+### CR-002 impact analysis
+
+| # | Change | Artifacts changed | Downstream impact |
+|---|--------|-------------------|-------------------|
+| 1 | ADR numbering: scheduler is ADR-003, graph representation is ADR-005; 19 ADRs | plan.md (§3.5, Constitution Check VII, Architecture Decision Records list) | References only; no behavior change |
+| 2 | Alembic batch mode prohibited for append-only tables; plain `ADD COLUMN` only | research.md R-02 | Constrains future migrations of `audit_events` and `policy_evaluations`; needs a migration test asserting triggers survive (ADR-002/008). No requirement change |
+| 3 | G-RELEASE rework removed; `not_ready` → ST-13 → `FAILED` with blocking reasons (ruling 4) | plan.md §3.2, §3.4, §5.1, §5.3; data-model.md §2.1, §2.3; contracts: `workflow-graph` 2.0.0 (file renamed to `.v2.yaml`), `gate-decision.schema.json` 2.0.0, `orchestrator-api.openapi.yaml` 2.0.0 (Change Record in contracts/README.md); ADR-016 | MAJOR contract bumps per contracts/README rule 4; no implementation or run exists, so no migration. Interpretation recorded: a release decision is not an approval rejection (FR-GOV-003), so FR-GOV-015's `ABORTED` rule does not apply. Planned governance tests change accordingly |
+| 4 | Safe-stop triggers added: scheduler stall, interruption detected at startup | plan.md §6.1; data-model.md §2.1 | Aligns the plan with ADR-003/ADR-013 and PD-011; adds a scheduler-stall test |
+| 5 | Slice 1 adds `.gitattributes` (LF for `src/`, `tests/`, `changesets/` incl. patches, contracts) | plan.md §14.2 | One additional slice-1 task; mitigates CRLF risk for `git apply` (ADR-006) |
+| 6 | Backlog BL-12 durable analytics outbox (ruling 2) | plan.md §14.1 | Disclosed limitation; no must-have scope change |
+
+Not affected: spec.md requirements, IDs, targets and scope; policy set; shortener API contract;
+other JSON Schemas; quickstart; checklists. ADR statuses remain **Proposed**.

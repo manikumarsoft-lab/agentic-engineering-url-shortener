@@ -244,9 +244,9 @@ allowed transition has a test, and every pair not listed is rejected with `Illeg
 | `RUNNING` | `REPLANNING` | replanning trigger | system |
 | `REPLANNING` | `RUNNING` | replan completed | system |
 | `RUNNING`/`AWAITING_HUMAN` | `COMPLETED` | ST-13 succeeded after smoke pass | system |
-| `RUNNING` | `FAILED` | permanent failure path (bad input, rollback, compensated smoke failure) and ST-13 done | system |
+| `RUNNING`/`AWAITING_HUMAN` | `FAILED` | permanent failure path (bad input, rollback, compensated smoke failure) or G-RELEASE `not_ready` (CR-002), and ST-13 done | system (after the human release decision, for `not_ready`) |
 | `RUNNING`/`AWAITING_HUMAN` | `ABORTED` | `reject_terminate` or `POST /runs/{id}/abort` | human (approver) |
-| `RUNNING`/`AWAITING_HUMAN`/`REPLANNING` | `SAFE_STOPPED` | FR-ORC-018 trigger, gate timeout, rework limit, interruption detected at startup, compensation failure | system |
+| `RUNNING`/`AWAITING_HUMAN`/`REPLANNING` | `SAFE_STOPPED` | FR-ORC-018 trigger, gate timeout, rework limit, interruption detected at startup, compensation failure, scheduler stall (CR-002) | system |
 | `SAFE_STOPPED` | `RESUMING` | `POST /runs/{id}/resume` with preconditions met (A-016) | human (approver) |
 | `RESUMING` | `RUNNING` | recovery plan applied | system |
 | `RESUMING` | `SAFE_STOPPED` | preconditions re-checked and failed | system |
@@ -301,7 +301,9 @@ is `SUCCEEDED` (or `SKIPPED` where conditional). They never release while a bran
 
 Effects: `APPROVED` → gate node `SUCCEEDED`. `REJECTED_REWORK` → producing node `STALE → PENDING`
 with the rejection reason as input; at the third request → run `SAFE_STOPPED` ("rework limit
-exceeded"). `REJECTED_TERMINATE` → run `ABORTED`. `TIMED_OUT` → run `SAFE_STOPPED`. `REVOKED` → new
+exceeded"). `REJECTED_TERMINATE` → run `ABORTED`, except at G-RELEASE: there, `not_ready` is
+recorded as `REJECTED_TERMINATE` and the run ends `FAILED` with blocking reasons. G-RELEASE has
+no `REJECTED_REWORK` (CR-002). `TIMED_OUT` → run `SAFE_STOPPED`. `REVOKED` → new
 gate instance when re-reached.
 
 Prohibited: any agent/system actor → `APPROVED`/`REJECTED_*`/`ESCALATED`; `TIMED_OUT → APPROVED`;

@@ -1,8 +1,12 @@
 openapi: 3.1.0
 info:
   title: Agentic SDLC Orchestrator API
-  version: 1.0.0
+  version: 2.0.0
   description: |
+    2.0.0 (CR-002, 2026-10-15): MAJOR because the decideGate request body (gate-decision schema
+    2.0.0) no longer accepts `not_ready_action`; `not_ready` at G-RELEASE terminates the run as
+    FAILED. No other operation changed.
+
     Control-plane API of the in-repository orchestration engine. The `orch` CLI is a thin client
     of this API. Role requirements are declared per operation in `x-required-roles`; actor
     identity and role are always taken from the authenticated key (FR-GOV-003/013). Agent-role

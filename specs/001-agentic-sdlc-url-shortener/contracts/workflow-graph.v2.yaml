@@ -2,7 +2,9 @@
 # Validated at engine start against a meta-schema; runs pin this version (graph_template_version).
 # Generic state machines (allowed/prohibited transitions) are in data-model.md §2; node-level
 # `prohibited` entries below are additional, node-specific guards.
-version: 1.0.0
+# 2.0.0 (CR-002, 2026-10-15): MAJOR per contracts/README rule 4 — G-RELEASE no longer offers
+# rework; `not_ready` terminates the run as FAILED (gate decision semantics changed).
+version: 2.0.0
 owner: human-owner (workflow owner)
 requirements: [FR-ORC-005, FR-ORC-006, FR-ORC-007, FR-ORC-008, FR-ORC-037, FR-ORC-038, FR-ORC-039]
 
@@ -330,7 +332,7 @@ nodes:
     decisions: [ready, not_ready, escalate]
     entry_rule: "decision 'ready' refused unless assessment == ELIGIBLE (409 assessment_not_eligible)"
     requires: "accepted_risks covers every open risk with severity >= medium"
-    rework_target: ST-12
+    on_not_ready: fail_run   # CR-002: no rework at G-RELEASE; blocking reasons recorded; ST-13 then FAILED
     on_timeout: safe_stop
     depends_on: [ST-12]
     requirements: [FR-GOV-011, US-4]
@@ -407,6 +409,6 @@ dynamic_nodes:
 
 terminal_rules:   # FR-ORC-023: exactly one outcome
   COMPLETED: REL-01 smoke passed AND ST-13 succeeded
-  FAILED: (fail_run | rollback_then_fail_run | compensated smoke failure) AND ST-13 succeeded
+  FAILED: (fail_run | rollback_then_fail_run | compensated smoke failure | G-RELEASE not_ready) AND ST-13 succeeded
   ABORTED: reject_terminate | abort by approver; ST-13 produces summary
   SAFE_STOPPED: any safe_stop trigger; safe-stop-report produced by system; resumable

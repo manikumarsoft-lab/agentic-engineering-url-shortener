@@ -7,8 +7,8 @@ R-07).
 | File | Kind | Version | Owner | Consumers |
 |------|------|---------|-------|-----------|
 | `shortener-api.openapi.yaml` | OpenAPI 3.1 | 1.0.0 (baseline) | Human owner (API owner) | API consumers, public redirect clients, orchestrator smoke checks, contract tests |
-| `orchestrator-api.openapi.yaml` | OpenAPI 3.1 | 2.0.0 (CR-002) | Human owner | `orch` CLI, human reviewers, e2e tests |
-| `workflow-graph.v2.yaml` | Graph definition (YAML, validated by meta-schema) | 2.0.0 (CR-002) | Human owner (workflow owner) | Engine, tests, docs |
+| `orchestrator-api.openapi.yaml` | OpenAPI 3.1 | 2.1.0 (CR-003) | Human owner | `orch` CLI, human reviewers, e2e tests |
+| `workflow-graph.v2.yaml` | Graph definition (YAML, validated by meta-schema) | 2.1.0 (CR-003) | Human owner (workflow owner) | Engine, tests, docs |
 | `policy-set.v1.yaml` | Policy set (YAML) | 1.0.0 | Human owner (policy owner) | Policy evaluator, readiness, docs |
 | `schemas/problem.schema.json` | JSON Schema 2020-12 | 1.0.0 | Shared | Both APIs |
 | `schemas/workflow-state.schema.json` | JSON Schema | 1.0.0 | Orchestrator | API, CLI, evidence export |
@@ -86,6 +86,21 @@ Copy into the PR description (repository changes) or produce as the `change-reco
 - Rollback / compensation consideration: revert the three files to 1.0.0 via a new change record.
 - Required approval: human owner (repository change).
 - Approval reference: CR-002 (Human Gate 4, 2026-10-15).
+
+### Change Record: CR-003 follow-up, 2026-10-15
+- Owner / approver: human owner, Mani Kumar Vadugu (CR-003 follow-up)
+- Version impact: **MINOR** for two contracts:
+  - `workflow-graph` 2.0.0 → 2.1.0: new agent node ST-05a (additive-change check, SCN-A-AC6); ST-05 condition extended to the reroute case and its dependency changed to ST-05a; `repo.read_contracts` granted to the `impact` role; FR-GOV-017 rule on G-EXCEPTION. No existing gate's decisions, roles or bindings change, so rule 4 does not apply.
+  - `orchestrator-api.openapi.yaml` 2.0.0 → 2.1.0: new error code `separation_of_duties_violation` (403) on `decideGate` (rule 3: new error code values are MINOR).
+- Backward-compatibility impact: none in practice (pre-implementation). The FR-GOV-017 refusal tightens who may decide; the human owner may reclassify it as MAJOR.
+- Affected consumers: engine, `orch` CLI, governance and e2e tests (all planned).
+- Affected requirements (IDs): FR-GOV-017, SCN-A-AC6, FR-ORC-007, FR-ORC-010.
+- Tests added/changed: plan §10.1 rows "Approval and rejection" (self-approval refusal) and "Additive-change check".
+- Documentation updated: plan.md §2.2, §3.2, §3.4, §5.1, §5.3, §6.2, §9.2, §10.1, §11.1; data-model.md.
+- Rollout / migration steps: none (no data); migration class n/a.
+- Rollback / compensation consideration: revert to 2.0.0 via a new change record.
+- Required approval: human owner (repository change).
+- Approval reference: CR-003 follow-up (2026-10-15).
 
 ## Planned increments (delivered only through orchestrated runs, CST-007)
 

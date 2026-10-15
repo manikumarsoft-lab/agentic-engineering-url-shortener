@@ -276,7 +276,10 @@ Implementation → Testing → Documentation → Validation → Release Readines
    requirement that passed all quality checks; any raised gate must cite the failed check.
 6. **SCN-A-AC6** (CR-003): Instead of a full impact analysis, the run records a lightweight
    additive-change check confirming the change only adds optional fields and new endpoints and
-   alters no existing behavior (existing contract operations and existing tests unchanged).
+   alters no existing behavior (existing contract operations and existing tests unchanged). If
+   the check finds that existing behavior would change, the run is rerouted to impact analysis
+   (ST-05) and continues on the brownfield path with the reason recorded; it never proceeds as
+   greenfield.
 
 **Classification rationale (CR-003)**: SCN-A is greenfield because it adds a new capability
 through optional request fields and new endpoints without altering existing behavior. Requests
@@ -718,30 +721,20 @@ source `HD-nnn`) and change only through change control (CON VI).
 
 ## Glossary (CR-003)
 
-- **Personal data**: any data relating to an identified or identifiable natural person,
-  including at least IP addresses, user-agent strings, device or browser identifiers, cookie
-  or session identifiers, geolocation at any precision, email addresses, and visitor account
-  identifiers, plus any combination of stored values that would allow a visitor to be singled
-  out (FR-SHR-012, A-005).
-- **Fails materially** (FR-ORC-004): a requirement-quality check fails materially when its
-  result is FAIL, meaning the requirement cannot be decomposed, implemented or verified without
-  guessing. Applied per check:
-  - completeness: a missing actor, intent or acceptance criterion;
-  - consistency: contradictory statements;
-  - testability: an acceptance criterion without an observable pass/fail condition;
-  - policy conformance: a mandatory policy check FAIL;
-  - architecture boundary: a request for an excluded capability.
-
-  Informational findings that do not change a check's PASS result are not material.
+- **Personal data** (FR-SHR-012, A-005): any data about a link visitor that identifies or can
+  reasonably be linked to an individual, including IP address, user agent, cookies, device
+  identifiers and precise location. The creator's API key identity is permitted operational
+  metadata, not visitor personal data.
+- **Fails materially** (FR-ORC-004): a requirement-quality check returns FAIL on completeness,
+  consistency, testability, policy or architecture-boundary conformance such that at least one
+  testable acceptance criterion cannot be written. Advisory warnings are not material.
 - **Same stage sequence** (NFR-DET-001, SC-010): under parallel execution, two runs have the
   same stage sequence when they contain the same set of stage executions (node IDs, attempt
   counts and outcomes) and the same committed audit event order (event types and targets),
   timestamps and identifiers excepted. The commit order is defined by the superstep scheduler
   in ADR-003.
-- **Dependent path** (FR-ORC-022, SCN-A-AC4): for a node affected by ambiguity or change, the set
-  of nodes reachable from it through graph edges (its transitive successors), plus every node
-  whose recorded inputs include an artifact produced by it or by one of its successors. All
-  other nodes are independent and may continue to the next synchronization point.
+- **Dependent path** (FR-ORC-022, SCN-A-AC4): all nodes reachable downstream from the affected
+  node in the run's graph instance, up to and including the next synchronization point.
 
 ## Assumptions
 

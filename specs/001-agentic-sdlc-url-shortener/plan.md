@@ -202,8 +202,8 @@ analytics; SCN-B adds custom aliases; SCN-C (conforming option) adds daily aggre
 | Contract | File | Version | Owner |
 |----------|------|---------|-------|
 | Shortener HTTP API | `contracts/shortener-api.openapi.yaml` | 1.0.0 (baseline) | Human owner (API owner role) |
-| Orchestrator HTTP API | `contracts/orchestrator-api.openapi.yaml` | 2.0.0 (CR-002) | Human owner |
-| Workflow graph definition | `contracts/workflow-graph.v2.yaml` | 2.0.0 (CR-002) | Human owner (workflow owner) |
+| Orchestrator HTTP API | `contracts/orchestrator-api.openapi.yaml` | 2.1.0 (CR-003) | Human owner |
+| Workflow graph definition | `contracts/workflow-graph.v2.yaml` | 2.1.0 (CR-003) | Human owner (workflow owner) |
 | Policy set | `contracts/policy-set.v1.yaml` | 1.0.0 | Human owner (policy owner) |
 | Problem (error) schema | `contracts/schemas/problem.schema.json` | 1.0.0 | Shared |
 | Workflow-state schema | `contracts/schemas/workflow-state.schema.json` | 1.0.0 | Orchestrator |
@@ -282,7 +282,10 @@ transitions). State machines: [data-model.md §2](./data-model.md).
 ST-01 Ingest ─▶ ST-02 Normalize ─▶ ST-03 Quality+policy ─┬─[any material failure]─▶ G-CLARIFY (ST-04) ─┐
                                                          └─[all pass: SKIP gate]────────────────────────┤
                                                                                                         ▼
-                                   ┌─[change_kind = modification OR replanning]─▶ ST-05 Impact analysis ┐
+                                   ┌─[change_kind = new_capability]─▶ ST-05a Additive-change check (SCN-A-AC6) ┐
+                                   └─[otherwise: SKIP]─────────────────────────────────────────────────────────┤
+                                                                                                        ▼
+                                   ┌─[change_kind = modification OR ST-05a failed (reroute, reason recorded) OR replanning]─▶ ST-05 Impact analysis ┐
                                    └─[otherwise: SKIP]───────────────────────────────────────────────────┤
                                                                                                         ▼
                                                       ST-06 Decomposition ─▶ ST-07 Design ─▶ G-DESIGN (approver;
@@ -350,6 +353,7 @@ release while any branch is `SUSPENDED`/`FAILED_*`/`BLOCKED`; `FAILED_PERMANENT 
 | ST-02 Normalize | agent `analyst` | raw → `normalized-requirement` (IDs, FR/NFR, AC candidates, `change_kind`) | 300 s / 3 | `SAFE_STOPPED` | none |
 | ST-03 Quality+policy | agent `quality` + policy | normalized → `quality-report` (5 checks + PRIV-001, ARCH-001) | 300 s / 3 | `SAFE_STOPPED` | none |
 | G-CLARIFY (ST-04) | human `engineer`/`approver` | quality report → `clarification-decision` | 24 h (demo cfg) / n/a | timeout → `SAFE_STOPPED` | none |
+| ST-05a Additive-change check | agent `impact` | normalized + change-set manifest + contract diff + existing-test diff → `additive-change-check` (PASS: only optional fields/new endpoints, additive migration, no existing test modified or removed; FAIL: reason recorded, `change_kind` reclassified to `modification`) | 300 s / 3 | `SAFE_STOPPED` | none |
 | ST-05 Impact | agent `impact` | normalized + change-set manifest + component registry + import graph → `impact-analysis`, `change-record` | 300 s / 3 | `SAFE_STOPPED` | none |
 | ST-06 Decompose | agent `planner` | normalized (+impact) → `task-plan` (tasks, deps, req links, AC) | 300 s / 3 | `SAFE_STOPPED` | none |
 | ST-07 Design | agent `architect` | task plan + contracts + change-set manifest → `design` (API/schema delta, components, test plan) | 300 s / 3 | `SAFE_STOPPED` | none |
@@ -456,7 +460,7 @@ disclosure (FR-ORC-034).
 | G-CLARIFY / G-CLARIFY-n | Material quality-check failure at ST-03, or late ambiguity raised by a node | `engineer` or `approver` | `quality-report` vN / raising artifact | answer (select option or free text), reject_terminate, escalate | → `SAFE_STOPPED` | FR-ORC-004, -022 |
 | G-DESIGN | Always before F1 | `approver` | design, task-plan, impact-analysis, change-record, change-set fingerprint | approve, reject_rework, reject_terminate, escalate | → `SAFE_STOPPED` | FR-GOV-001, SCN-B-AC2 |
 | G-SECURITY | ST-11b finds security-sensitive components touched (registry flag) or open high/critical threat | `approver` | security-report vN | approve, reject_rework, reject_terminate, escalate | → `SAFE_STOPPED` | FR-GOV-001, CON V (PD-007) |
-| G-EXCEPTION | Engineer requests an exception for a FAILed check | `approver` | policy evaluation + exception request | approve (with expiry and compensating control), reject | → `SAFE_STOPPED` | FR-GOV-007/008 |
+| G-EXCEPTION | Engineer requests an exception for a FAILed check | `approver`, with a key identity different from the requesting key (FR-GOV-017) | policy evaluation + exception request | approve (with expiry and compensating control), reject | → `SAFE_STOPPED` | FR-GOV-007/008, FR-GOV-017 |
 | G-RELEASE | ST-12 produces a non-FAIL assessment | `release-owner` | readiness-assessment vN | ready (with per-risk acceptance), not_ready (terminates the run as `FAILED` with blocking reasons; no rework, CR-002), escalate | → `SAFE_STOPPED` | FR-GOV-010/011 |
 | G-CORRECTIVE | Compensation completed with non-rollbackable effects | `approver` | compensation-record | approve listed corrective action, decline (retain data, record risk) | → `SAFE_STOPPED` | FR-ORC-042 |
 | G-RESUME (action) | Resume from `SAFE_STOPPED` | `approver` | safe-stop record; for non-timeout causes, evidence the cause is resolved or excepted | resume | n/a | FR-ORC-019, FR-GOV-014, A-016 |
@@ -472,7 +476,7 @@ disclosure (FR-ORC-034).
 | Constitutional exception | SpecKit-level: Governance §2 written exception approved by the human owner. Engine-level: G-EXCEPTION for policy exceptions |
 | Material risk acceptance | G-RELEASE per-risk acceptance (every open risk ≥ medium must be explicitly accepted or the decision is refused); G-EXCEPTION compensating control |
 | Release readiness | G-RELEASE (engine); repository release-readiness sign-off (SpecKit lifecycle) |
-| Final submission | SpecKit/process gate only: the human owner signs `docs/release-readiness.md`. Never performed by an agent |
+| Final submission | SpecKit/process gate only: the human owner signs `docs/release-readiness.md` and creates the annotated tag `assessment-submission-v1.0` on GitHub (CST-009). Never performed by an agent |
 
 ### 5.3 Decision semantics (all gates)
 
@@ -488,6 +492,10 @@ disclosure (FR-ORC-034).
   rather than `ABORTED` because a release decision is a distinct decision category from an
   approval rejection (FR-GOV-003 lists them separately), so FR-GOV-015's "reject and terminate →
   `ABORTED`" does not govern it.
+- **Separation of duties (FR-GOV-017, CR-003)**: a decision on an exception, or on any request,
+  by the same key identity that submitted that request is refused with
+  `403 separation_of_duties_violation` and audited (`GATE_DECISION_REFUSED`). One person may
+  still hold several roles (A-008), but only through different key identities.
 - **escalate**: gate → `ESCALATED` (still blocking). The escalation reason is recorded and the
   next decision requires `approver` (release-owner for G-RELEASE). Routing beyond recording is
   deferred (CST-008 #4).
@@ -527,7 +535,7 @@ disclosure (FR-ORC-034).
 |------|----------------------|-----------|---------------------------|
 | ST-01 | DB locked, timeout | Malformed request, unknown scenario/change set | `FAILED` (bad input) |
 | ST-02, ST-03, ST-06, ST-07 | DB locked, timeout, interrupted | Input artifact invalid against schema | `SAFE_STOPPED` |
-| ST-05 | DB locked, timeout, interrupted | Change-set manifest invalid, registry missing component | `SAFE_STOPPED` |
+| ST-05, ST-05a | DB locked, timeout, interrupted | Change-set manifest invalid, registry missing component (an additive-check FAIL is a valid result that reroutes the run to ST-05, not a node failure) | `SAFE_STOPPED` |
 | ST-08 | Workspace copy I/O error, timeout, interrupted | Integrity mismatch (CHG-001 FAIL), undeclared scope (CHG-002 FAIL) → `SAFE_STOPPED`; `git apply --check` fails → rollback → `FAILED` | as stated |
 | ST-09 | pytest crashed or killed without JUnit, timeout | Any test failure or error in JUnit | Rollback → `FAILED` |
 | ST-10a/b | Timeout, interrupted | Template render error | Fallback (degraded) if declared, else `SAFE_STOPPED` |
@@ -665,7 +673,7 @@ applies and the run becomes `SAFE_STOPPED`.
 1. Engineer: `POST /runs/{id}/exceptions` for a FAILed evaluation, with policy, reason, scope
    (run / artifact / check), compensating control, and requested expiry or review condition.
 2. A new evaluation is appended with `EXCEPTION-REQUESTED` and a G-EXCEPTION gate opens (blocks).
-3. Approver approves (records approving authority, timestamp, expiry, compensating control) or
+3. An approver whose key identity differs from the requester's (FR-GOV-017) approves (records approving authority, timestamp, expiry, compensating control) or
    rejects (evaluation remains blocking and the run remains safe-stopped).
 4. Resume (approver) is allowed once the cause is excepted (A-016).
 5. ST-12 re-checks expiry. An expired exception makes REL-003 FAIL, so release readiness is FAIL
@@ -710,7 +718,9 @@ than its source artifact (hash comparison).
 | Persistence | `tests/shortener/persistence`, `tests/orchestrator/persistence` | Uniqueness constraint, idempotency record, migrations up from empty, audit triggers reject UPDATE/DELETE | FR-SHR-005/013, FR-OBS-004 |
 | Integration | `tests/*/integration` | Real SQLite file, uvicorn subprocess, redirect + headers, health readiness with DB down | FR-SHR-015/016 |
 | Orchestration state transitions | `tests/orchestrator/state` | Transition tables (allowed and prohibited, parametrized), fork/join, conditional skip, sync holds on suspended branch | FR-ORC-005–008, -037–039 |
-| Approval and rejection | `tests/orchestrator/governance` | Approve, rework (bounded at 2), terminate → ABORTED, escalate, stale version refused, agent key refused | FR-GOV-001–004, -014–016 |
+| Approval and rejection | `tests/orchestrator/governance` | Approve, rework (bounded at 2), terminate → ABORTED, escalate, stale version refused, agent key refused, self-approval of an exception by the requesting key refused and audited | FR-GOV-001–004, -014–017 |
+| Documentation accuracy | `tests/e2e/test_quickstart.py` | Executes every quickstart command against a fresh `var/` and asserts the documented outcome; release review records docs-vs-behavior discrepancies | NFR-DOC-001 |
+| Additive-change check | `tests/orchestrator/state`, `tests/e2e` | SCN-A PASS skips ST-05; a change set that modifies existing behavior FAILs the check, reroutes to ST-05 with the reason recorded, and never proceeds as greenfield | SCN-A-AC6 |
 | Retry | `tests/orchestrator/reliability` | Transient retried with backoff schedule (virtual clock), permanent never retried, budget exhaustion → SAFE_STOPPED | FR-ORC-014 |
 | Timeout | same | Node timeout = transient; gate timeout → SAFE_STOPPED "no decision" | FR-ORC-015, FR-GOV-014 |
 | Fallback | same | ST-10b degraded docs, analytics failure does not block redirect | FR-ORC-016, FR-SHR-011 |
@@ -768,7 +778,7 @@ Releases chain: **R0** (baseline snapshot from git ref `shortener-baseline-v1`, 
 | Initial input | `scenarios/scn-a/requirement.md`: "Link creators can set an optional expiration (UTC). Expired links return a distinct 'expired' outcome. Each link exposes total redirects and last redirect time; analytics must never block redirects and must store no personal data." with 5 explicit ACs |
 | Interpretation | ST-02: 4 FR statements, 1 NFR (privacy), `change_kind = new_capability`, links to FR-SHR-008..012. ST-03: all 5 quality checks PASS, PRIV-001 PASS, ARCH-001 PASS → **G-CLARIFY SKIPPED** with recorded reasons (SCN-A-AC1, AC5) |
 | Decomposition | ST-06: tasks T-A1 schema (expires_at, link_stats), T-A2 create validation for expiry, T-A3 resolve expired → 410, T-A4 analytics counter with fallback, T-A5 analytics endpoint, T-A6 tests, T-A7 docs, with dependencies and AC links (SCN-A-AC2) |
-| Orchestration path | ST-01→02→03→(G-CLARIFY skipped)→(ST-05 skipped)→06→07→G-DESIGN→F1{08→09, 10a, 11a}→SP-1→F2{10b, 11b, (G-SECURITY skipped: no security-sensitive component)}→SP-2→12→G-RELEASE→REL-01→13 |
+| Orchestration path | ST-01→02→03→(G-CLARIFY skipped)→05a (additive-change check PASS, SCN-A-AC6)→(ST-05 skipped)→06→07→G-DESIGN→F1{08→09, 10a, 11a}→SP-1→F2{10b, 11b, (G-SECURITY skipped: no security-sensitive component)}→SP-2→12→G-RELEASE→REL-01→13 |
 | Approvals | G-DESIGN (approver), G-RELEASE (release-owner) |
 | Failure paths | Variant **A-late-ambiguity** (labeled finding-injection): ST-11a raises "Should analytics of expired links remain retrievable?" → ST-11a `SUSPENDED`, G-CLARIFY-1 opens, branches a/b continue to SP-1, which holds; answer → ST-05 replanning mode → only ST-11a (+ ST-10b downstream) re-run → SP-1 releases (SCN-A-AC4). Test-level: transient fault at ST-07 → retry |
 | Validation | ST-09 runs baseline regression + new tests in the workspace; smoke on staging: create with expiry in the near future, redirect 302, wait or virtual-clock → 410, analytics count |
@@ -859,7 +869,9 @@ Documentation → Evidence**.
 Tooling: `tools/trace/build_matrix.py` parses all of the above and produces
 `docs/traceability.md` (EV-008) plus a JSON matrix. `--check` fails if any C/D requirement lacks
 ≥1 test **and** ≥1 doc or evidence item (SC-007), or if evidence is older than its source
-artifact hash. At run level, `GET /trace/requirements/{id}` provides the bidirectional view
+artifact hash. It also flags orphans and includes them in EV-008 (FR-OBS-010, CR-003):
+**tests without a requirement ID tag** (no `@pytest.mark.req`) and **source modules under
+`src/` that no task in `tasks.md` references**. A non-empty orphan list fails `--check`. At run level, `GET /trace/requirements/{id}` provides the bidirectional view
 inside the engine (FR-OBS-008).
 
 ---
@@ -896,6 +908,7 @@ evidence produced)**:
 | BL-10 | Key rotation and revocation tooling | HD-003 limitation |
 | BL-11 | Malware/phishing reputation checks | EXC-006 |
 | BL-12 | Durable analytics outbox (no lost increments when the analytics write fails) | Human Gate 4 ruling 2; ADR-019 |
+| BL-13 | Unauthenticated redirect rate limiting | CR-003; Spec §NFR-SEC-003 (accepted risk) |
 
 **Scope-control rule**: optional work must not displace mandatory validation or reviewer
 evidence. At each checkpoint, any slipping must-have item triggers the cut list above. A backlog
@@ -905,7 +918,7 @@ item may start only after recording "CP-4 met" in the task log.
 
 | # | Slice | Contents | Exit evidence |
 |---|-------|----------|---------------|
-| 1 | Engineering baseline | `pyproject.toml`, uv lock, ruff, mypy strict, pytest config with `req` marker plugin, `.gitignore` (`var/`), `.gitattributes` enforcing LF (`eol=lf`) for `src/`, `tests/`, `changesets/` (incl. `*.diff` patches) and `specs/**/contracts/` (CR-002; the reference workstation has `core.autocrlf=true`), detect-secrets baseline, `make`-equivalent `tools/check.py` (lint, type, test, coverage) | `tools/check.py` green on empty skeleton |
+| 1 | Engineering baseline | `pyproject.toml`, uv lock, ruff, mypy strict, pytest config with `req` marker plugin, `.gitignore` (`var/`), `.gitattributes` enforcing LF (`eol=lf`) for `src/`, `tests/`, `changesets/` (incl. `*.diff` patches) and `specs/**/contracts/` (CR-002; the reference workstation has `core.autocrlf=true`), detect-secrets baseline, `make`-equivalent `tools/check.py` (lint, type, test, coverage), GitHub Actions workflow `.github/workflows/ci.yml` running `tools/check.py` (the test suite) on push and pull request (CST-009) | `tools/check.py` green on empty skeleton, locally and in CI |
 | 2 | Walking skeleton | Shortener: create + redirect happy path through API → domain → SQLite. Orchestrator: create run with a 2-node graph, persisted state, one audit event, CLI `orch run show` | e2e test: run created, audit visible; link redirects |
 | 3 | Core URL behavior | Validation (incl. PD-001), codes, idempotency, rate limit, auth, health/readiness, persistence-failure handling, problem+json, contract drift and schemathesis, concurrency PVT-003; tag `shortener-baseline-v1` (human) | Shortener suites green; contract v1.0.0 drift-free |
 | 4 | Orchestration state model | Graph contract loader, run/node/gate state tables, superstep scheduler, fork/join, conditions, entry/exit criteria, idempotent transitions, artifacts and provenance | State-transition suite green |
@@ -913,7 +926,7 @@ item may start only after recording "CP-4 met" in the task log.
 | 6 | Reliability controls | Retry/backoff/timeout, classification, safe-stop, resume, interruption recovery, SUT adapter (workspace, change-set integrity, patch, test runner), rollback, staging promotion, compensation, replanning | Reliability and replanning suites green |
 | 7 | Observability | Audit hash chain + verify, query API, spans, metrics + MTTR, traceability views | Observability suite green |
 | 8 | Three scenarios | Deterministic agents, scenario packs, change sets authored and reviewed by the human, locked; scripted e2e; then **interactive recorded runs** by the human | EV-001..007 per scenario from real runs |
-| 9 | Release readiness | Scans, traceability `--check`, coverage, README (setup, architecture, testing, limitations, trade-offs), threat model, final summaries, `docs/release-readiness.md` for human sign-off | Release check report; human sign-off |
+| 9 | Release readiness | Scans, traceability `--check` (including FR-OBS-010 orphan checks), coverage, automated quickstart test and a recorded docs-vs-behavior release review (NFR-DOC-001), README (setup, architecture, testing, limitations, trade-offs, and the section "How AI assistance was used and governed", CST-009), threat model, final summaries, `docs/release-readiness.md` for human sign-off; the human owner creates and pushes the annotated tag `assessment-submission-v1.0` after sign-off (CST-009) | Release check report; CI green on the tagged commit; human sign-off |
 
 ### 14.3 Day-level milestones and checkpoints
 
@@ -1005,7 +1018,8 @@ specs/001-agentic-sdlc-url-shortener/
 ### Source Code (repository root)
 
 ```text
-pyproject.toml · uv.lock · README.md
+pyproject.toml · uv.lock · README.md (incl. "How AI assistance was used and governed", CST-009)
+.github/workflows/ci.yml    # GitHub Actions: runs tools/check.py (CST-009)
 src/
 ├── common/                 # JSON logging, correlation/traceparent, Clock, IdGenerator (no domain types)
 ├── shortener/
@@ -1080,6 +1094,7 @@ consistency.
 | CR | Date | Approver | Change | Impact |
 |----|------|----------|--------|--------|
 | CR-002 | 2026-10-15 | Mani Kumar Vadugu (Human Gate 4) | Resolve the five ADR-gate conflicts and apply rulings 2 and 4 | See impact analysis below |
+| CR-003 follow-up | 2026-10-15 | Mani Kumar Vadugu | plan aligned with CR-003; glossary defined by human owner | Contracts: workflow graph 2.0.0 → 2.1.0 and orchestrator API 2.0.0 → 2.1.0 (MINOR; Change Record in contracts/README.md) |
 
 ### CR-002 impact analysis
 

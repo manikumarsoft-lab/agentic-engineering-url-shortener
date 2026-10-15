@@ -4,7 +4,11 @@
 # `prohibited` entries below are additional, node-specific guards.
 # 2.0.0 (CR-002, 2026-10-15): MAJOR per contracts/README rule 4 — G-RELEASE no longer offers
 # rework; `not_ready` terminates the run as FAILED (gate decision semantics changed).
-version: 2.0.0
+# 2.1.0 (CR-003 follow-up, 2026-10-15): MINOR — adds agent node ST-05a (additive-change check,
+# SCN-A-AC6) and extends ST-05's condition to the reroute case; grants repo.read_contracts to the
+# impact role; adds the FR-GOV-017 separation-of-duties rule to G-EXCEPTION. No existing gate's
+# decisions, roles or bindings change, so rule 4 (MAJOR) does not apply.
+version: 2.1.0
 owner: human-owner (workflow owner)
 requirements: [FR-ORC-005, FR-ORC-006, FR-ORC-007, FR-ORC-008, FR-ORC-037, FR-ORC-038, FR-ORC-039]
 
@@ -29,7 +33,7 @@ agent_roles:   # declared permissions = capability objects injected into StageCo
   intake:      [artifacts.read, artifacts.write, repo.read_scenarios]
   analyst:     [artifacts.read, artifacts.write]
   quality:     [artifacts.read, artifacts.write, policy.evaluate]
-  impact:      [artifacts.read, artifacts.write, repo.read_sut_snapshot, changeset.read, registry.read]
+  impact:      [artifacts.read, artifacts.write, repo.read_sut_snapshot, repo.read_contracts, changeset.read, registry.read]
   planner:     [artifacts.read, artifacts.write, registry.read]
   architect:   [artifacts.read, artifacts.write, repo.read_contracts, changeset.read, registry.read]
   implementer: [artifacts.read, artifacts.write, changeset.read, changeset.verify, workspace.create, workspace.write, workspace.discard, policy.evaluate]
@@ -110,18 +114,36 @@ nodes:
       - "any ST-05+ node READY while this gate is OPEN/ESCALATED"
     audit_events: [GATE_OPENED, CLARIFICATION_REQUESTED, CLARIFICATION_ANSWERED, GATE_DECISION_RECORDED, GATE_DECISION_REFUSED, GATE_ESCALATED, GATE_TIMED_OUT, NODE_SKIPPED]
 
+  - id: ST-05a
+    name: Additive-change check
+    kind: agent
+    actor: { type: agent, role: impact }
+    condition: normalized-requirement.change_kind == new_capability
+    purpose: Record a lightweight check that the change only adds optional fields or new endpoints and alters no existing behavior (SCN-A-AC6).
+    inputs: [normalized-requirement, change-set-manifest, contracts]
+    outputs: [additive-change-check]
+    preconditions: ["change-set manifest valid"]
+    postconditions: ["result PASS or FAIL recorded with per-criterion evidence: contract diff adds only optional fields/new operations; migration_class additive; no existing test file modified or removed", "on FAIL: change_kind reclassified to modification with the reason recorded"]
+    depends_on: [G-CLARIFY]
+    requirements: [SCN-A-AC6]
+    failure_classification:
+      permanent: [manifest_invalid]
+    on_check_fail: reroute_to_ST-05   # never proceeds as greenfield; reason recorded
+    on_permanent_failure: safe_stop
+    fallback: none
+
   - id: ST-05
     name: Impact analysis
     kind: agent
     actor: { type: agent, role: impact }
-    condition: normalized-requirement.change_kind == modification OR run.replanning_active
+    condition: normalized-requirement.change_kind == modification OR additive-change-check.result == FAIL OR run.replanning_active
     purpose: Identify impacted components, interfaces, data flows, tests, docs, regression risks, rollout/rollback; produce Change Record.
     inputs: [normalized-requirement, change-set-manifest, component-registry, sut-import-graph]
     outputs: [impact-analysis, change-record]
     preconditions: ["base release snapshot available", "change-set manifest valid"]
     postconditions: ["every impacted item linked to RQ-IDs", "migration class determined"]
-    depends_on: [G-CLARIFY]
-    requirements: [FR-ORC-010, SCN-B-AC1]
+    depends_on: [ST-05a]
+    requirements: [FR-ORC-010, SCN-B-AC1, SCN-A-AC6]
     failure_classification:
       permanent: [manifest_invalid, registry_component_missing]
     on_permanent_failure: safe_stop
@@ -405,7 +427,8 @@ dynamic_nodes:
     created_when: engineer requests an exception for a FAILed evaluation
     gate_type: exception
     actor: { type: human, roles: [approver] }
-    requirements: [FR-GOV-007, FR-GOV-008]
+    prohibited: ["decision by the key identity that requested the exception (FR-GOV-017): refused with 403 separation_of_duties_violation and audited"]
+    requirements: [FR-GOV-007, FR-GOV-008, FR-GOV-017]
 
 terminal_rules:   # FR-ORC-023: exactly one outcome
   COMPLETED: REL-01 smoke passed AND ST-13 succeeded

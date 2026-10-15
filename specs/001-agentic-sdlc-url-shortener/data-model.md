@@ -112,7 +112,7 @@ dynamic nodes), `edges` json, `created_reason` (`initial`/`replan:<replan_id>`),
 
 | Field | Rules |
 |-------|-------|
-| `artifact_id`, `run_id`, `type` | type ∈ `raw-requirement`, `normalized-requirement`, `quality-report`, `clarification-decision`, `impact-analysis`, `change-record`, `task-plan`, `design`, `assumption-register`, `workspace`, `change-application-record`, `test-results`, `docs-draft`, `docs`, `threat-review`, `security-report`, `readiness-assessment`, `release-decision`, `release`, `smoke-result`, `compensation-record`, `corrective-action-decision`, `engineering-summary`, `safe-stop-report` |
+| `artifact_id`, `run_id`, `type` | type ∈ `raw-requirement`, `normalized-requirement`, `quality-report`, `clarification-decision`, `additive-change-check` (ST-05a, SCN-A-AC6), `impact-analysis`, `change-record`, `task-plan`, `design`, `assumption-register`, `workspace`, `change-application-record`, `test-results`, `docs-draft`, `docs`, `threat-review`, `security-report`, `readiness-assessment`, `release-decision`, `release`, `smoke-result`, `compensation-record`, `corrective-action-decision`, `engineering-summary`, `safe-stop-report` |
 | `version` | int ≥ 1, monotonically increasing per artifact |
 | `content` | json (or `content_path` for large files under `var/`) |
 | `content_hash` | SHA-256 of canonical content |
@@ -313,6 +313,9 @@ decisions bound to non-current versions; decisions on `REVOKED` gates.
 
 `REQUESTED → APPROVED | REJECTED`; `APPROVED → EXPIRED` (clock passes `expires_at` or review
 condition triggered). Non-waivable checks (Governance §3) cannot be `REQUESTED`.
+`REQUESTED → APPROVED | REJECTED` is refused when the deciding key identity equals
+`requested_by.key_id` (FR-GOV-017; `403 separation_of_duties_violation`, audited
+`GATE_DECISION_REFUSED`).
 
 ### 2.5 Release
 

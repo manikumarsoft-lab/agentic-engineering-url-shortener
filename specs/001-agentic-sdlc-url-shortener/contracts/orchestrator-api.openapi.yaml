@@ -1,8 +1,11 @@
 openapi: 3.1.0
 info:
   title: Agentic SDLC Orchestrator API
-  version: 2.0.0
+  version: 2.1.0
   description: |
+    2.1.0 (CR-003 follow-up, 2026-10-15): MINOR — new error code `separation_of_duties_violation`
+    (403) on decideGate (FR-GOV-017). New error code values are MINOR per contracts/README rule 3.
+
     2.0.0 (CR-002, 2026-10-15): MAJOR because the decideGate request body (gate-decision schema
     2.0.0) no longer accepts `not_ready_action`; `not_ready` at G-RELEASE terminates the run as
     FAILED. No other operation changed.
@@ -258,7 +261,7 @@ paths:
         '201': { description: Decision recorded, content: { application/json: { schema: { $ref: '#/components/schemas/DecisionRecord' } } } }
         '200': { description: Duplicate decision_id; original returned (applied once), content: { application/json: { schema: { $ref: '#/components/schemas/DecisionRecord' } } } }
         '401': { $ref: '#/components/responses/Problem' }
-        '403': { description: 'Wrong role or agent credential (code forbidden / agent_not_permitted); audited', content: { application/problem+json: { schema: { $ref: './schemas/problem.schema.json' } } } }
+        '403': { description: 'Wrong role or agent credential (code forbidden / agent_not_permitted), or decision by the key identity that submitted the request (code separation_of_duties_violation, FR-GOV-017); audited', content: { application/problem+json: { schema: { $ref: './schemas/problem.schema.json' } } } }
         '409': { description: 'stale_artifact_version | gate_not_open | assessment_not_eligible | rework_limit_exceeded', content: { application/problem+json: { schema: { $ref: './schemas/problem.schema.json' } } } }
         '422': { $ref: '#/components/responses/Problem' }
   /api/v1/audit:

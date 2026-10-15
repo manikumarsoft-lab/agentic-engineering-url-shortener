@@ -5,9 +5,7 @@
 
 **Created**: 2026-10-15
 
-**Status**: Draft. AMB-001 to AMB-003 resolved by human decisions HD-001 to HD-003 (2026-10-15).
-Pending: `/speckit-clarify`, approval of PVT-001 to PVT-012, and the human specification approval
-gate.
+**Status**: Approved (Human Gate 3, 2026-10-15, Mani Kumar Vadugu). Ready for /speckit-plan.
 
 **Input**: User description: "Build a production-grade prototype titled 'Agentic Software
 Engineering System: URL Shortener'": a governed agentic execution system that turns software
@@ -75,7 +73,36 @@ capability 1.
 The table lists stages, not execution order; the default graph runs independent stages in parallel and synchronizes them before release readiness (FR-ORC-006, FR-ORC-007).
 
 The required topology properties (sequencing, parallelism, synchronization, conditional
-branching) are specified in FR-ORC requirements, not by this table.
+branching) are specified in FR-ORC requirements, not by this table. ST-10 and ST-11 each run in
+two phases: drafting (ST-10a, ST-11a) and finalization/validation (ST-10b, ST-11b), with
+synchronization points SP-1 and SP-2 (FR-ORC-037 to FR-ORC-039).
+
+## Clarifications
+
+### Session 2026-10-15
+
+Decider for all answers in this session: Mani Kumar Vadugu (human owner).
+
+- Q: In deterministic mode, what does the Implementation stage (ST-08) actually do to the URL shortener's code? → A: Option A. It applies a pre-authored, human-reviewed change set stored in the repository to an isolated copy of the system under change; the main working tree is never modified by a run. Integrity is verified against the approved version before applying; ST-09 runs new and regression tests on the isolated copy; on failure the copy is discarded (rollback). Provenance is always recorded as "pre-authored, human-reviewed change set, applied by deterministic agent", never as agent- or AI-generated code. A deliberately defective SCN-B variant exists solely to demonstrate rollback. (→ FR-ORC-032 to FR-ORC-036)
+- Q: Which stages run in parallel in the default workflow graph, and where do they synchronize before release readiness? → A: Option B. There are two forks and two synchronization points. Fork 1 opens after design approval (ST-07) and has three branches: implementation then testing (ST-08 → ST-09), documentation drafting (ST-10a) and threat/risk review drafting (ST-11a). Sync point 1 (SP-1) waits for all three. Fork 2 runs documentation finalization (ST-10b) in parallel with security validation (ST-11b). Sync point 2 (SP-2) waits for both before release readiness (ST-12). (→ FR-ORC-037 to FR-ORC-039)
+- Q: Within the 2–3 day timebox, which requirements should be proposed as must-have and which as deferrable? → A: Option A (tiered), recorded as a **proposal only**; the final scope cut is made and approved at `/speckit-plan`. (→ CST-008)
+- Q: When an approval gate times out with no decision, or a reviewer rejects, what exact state should the workflow move to? → A: Option A. A timeout puts the run in `SAFE_STOPPED` (resumable), audited as "no decision" and never as approval; resuming re-opens the same gate on the same artifact version and requires an approver-role key. On rejection the reviewer must choose either "reject and rework" (the producing stage is re-executed with the reason, at most PVT-013 rework cycles per gate per run, then safe-stop) or "reject and terminate" (`ABORTED`). (→ FR-GOV-014 to FR-GOV-016, PVT-013)
+- Q: After the release owner approves release readiness, what does the system actually do with the validated change? → A: Option B. It promotes the validated change to a local staging instance of the shortener, kept separate from the developer working tree and from the isolated test copies, then runs a smoke check. If the smoke check fails, it compensates: it re-promotes the previous release, and data created during the failed interval is handled by a human-approved corrective action because it cannot be rolled back. Merging into the repository remains a manual human action outside the run. (→ FR-ORC-040 to FR-ORC-043, A-012)
+
+**Deferred and residual items** (not asked within the 5-question limit; recorded so they are not decided silently):
+
+| ID | Question | Impact | Current assumption | Owner | Decision point |
+|----|----------|--------|--------------------|-------|----------------|
+| DQ-001 | Should creating the same URL twice without an idempotency key return the existing link? | Data model, API behavior, tests | A-004: no implicit deduplication | Human owner | **Resolved** at spec approval gate (Human Gate 3, 2026-10-15): assumption approved as written |
+| DQ-002 | Must analytics counts be exact under concurrent redirects? | Persistence design, US-1 AC3 testability | A-013: exact, with no lost increments | Human owner | **Resolved** at spec approval gate (Human Gate 3, 2026-10-15): assumption approved as written |
+| DQ-003 | How is expiration evaluated at the boundary, and in which time zone? | Expiration tests | A-014: UTC; expired when resolution time ≥ expiration time | Human owner | **Resolved** at spec approval gate (Human Gate 3, 2026-10-15): assumption approved as written |
+| DQ-004 | Is rate limiting keyed per API key or per network client? | Abuse control, tests | A-015: per API key for creation | Human owner | **Resolved** at spec approval gate (Human Gate 3, 2026-10-15): assumption approved as written |
+| DQ-005 | What is the audit retention period? | Policy set content | A-007 | Human owner | `/speckit-plan` (policy set) |
+| DQ-006 | Who may resume a run from a safe-stop not caused by a timeout (e.g., a policy FAIL)? | Governance, authorization tests | A-016: approver role, after the cause is resolved or excepted | Human owner | **Resolved** at spec approval gate (Human Gate 3, 2026-10-15): assumption approved as written |
+| DQ-007 | Which concrete failure types are transient (retryable) and which are permanent? | Retry tests | Classified per stage in the plan (CON VIII) | Agent proposes, human approves | `/speckit-plan` |
+| DQ-008 | Which technology stack (language, persistence, agent framework, runtime)? | Everything downstream | Deferred (CST-002) | Human owner | `/speckit-plan` and ADR gate |
+| DQ-009 | Are PVT-001 to PVT-013 approved, changed, or rejected? | Pass/fail criteria | Proposals only | Human owner | **Resolved** at spec approval gate (Human Gate 3, 2026-10-15): PVT-003 to PVT-013 approved; PVT-001/002 approved as non-gating demonstration targets |
+| DQ-010 | What is the final must-have vs deferrable scope cut? | Schedule, limitations | CST-008 proposal | Human owner | `/speckit-plan` |
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -158,14 +185,18 @@ verify the resulting state transition and audit record.
 1. **Given** a pending design approval, **When** the reviewer approves, **Then** the run
    proceeds to dependent stages and the approval (approver, timestamp, artifact version,
    rationale) is recorded.
-2. **Given** a pending approval, **When** the reviewer rejects with a reason, **Then** the
-   rejected stage returns to rework (or the run terminates, if rework is not possible or the
-   reviewer requests termination), and no dependent stage starts.
+2. **Given** a pending approval, **When** the reviewer selects "reject and rework" with a
+   reason, **Then** the producing stage is re-executed with the reason attached and no dependent
+   stage starts; **When** the reviewer selects "reject and terminate", **Then** the run ends as
+   `ABORTED` (FR-GOV-015).
 3. **Given** a pending approval that exceeds its approval timeout, **When** the timeout
-   elapses, **Then** the run stays blocked or enters safe-stop and is never treated as
-   approved.
+   elapses, **Then** the run enters `SAFE_STOPPED`, the timeout is audited as "no decision", and
+   the gate is never treated as approved (FR-GOV-014).
 4. *(Negative)* **Given** an agent actor, **When** it attempts to record an approval, **Then**
    the attempt is refused and audited.
+5. *(Negative)* **Given** a gate already rejected for rework PVT-013 times in the same run,
+   **When** it is rejected for rework again, **Then** the run enters `SAFE_STOPPED` instead of
+   starting another rework cycle (FR-GOV-016).
 
 ---
 
@@ -297,9 +328,12 @@ recorded clarification and any policy decision (FR-SHR-023).
    possible) is presented to a human; the answer is recorded as a decision with lineage.
 4. **SCN-C-AC4**: After the decision, downstream impact is identified, the affected artifacts are
    re-versioned, and the run resumes at the earliest affected stage.
-5. **SCN-C-AC5** *(Negative)*: If clarification is rejected, unanswered beyond timeout, or
-   contradicts policy, the run enters safe-stop or terminates with a recorded reason, and never
-   proceeds on a guessed interpretation.
+5. **SCN-C-AC5** *(Negative)*: The run never proceeds on a guessed interpretation. Specifically:
+   if clarification is unanswered beyond the timeout, the run enters `SAFE_STOPPED`
+   (FR-GOV-014); if it is rejected, the run follows the reviewer's choice of rework or
+   termination (FR-GOV-015); if the answer contradicts a mandatory policy without an approved
+   exception, the policy check yields `FAIL` and the run enters `SAFE_STOPPED` (FR-GOV-007,
+   FR-ORC-018). Each outcome has a recorded reason.
 
 **Required evidence**: EV-001, EV-002, EV-003, EV-004, EV-006, EV-007.
 
@@ -330,6 +364,16 @@ recorded clarification and any policy decision (FR-SHR-023).
   dependent branch is invalidated or suspended; unaffected branches continue.
 - Retry budget exhausted on a mandatory stage: safe-stop with recorded reason.
 - A permanent (non-transient) failure is never retried.
+- A change set has been modified after approval (integrity mismatch): it is not applied;
+  mandatory policy `FAIL` and safe-stop (FR-ORC-033).
+- The isolated copy cannot be created or cleaned up: the stage fails, and the main working tree
+  remains untouched (FR-ORC-032).
+- The staging smoke check fails after promotion: the previous release is re-promoted
+  (compensation). Data created during the failed interval is listed, and corrective action
+  awaits human approval (FR-ORC-042).
+- The previous release cannot be re-promoted (compensation itself fails): the run enters
+  `SAFE_STOPPED` with staging marked as degraded, and the human is notified through the pending
+  gate.
 - A duplicate approval or duplicate stage-completion event is applied at most once.
 - A human approves a policy exception that later expires before release: release readiness
   reverts to FAIL.
@@ -399,6 +443,18 @@ recorded clarification and any policy decision (FR-SHR-023).
 | FR-ORC-029 | C | Automated tests and recorded scenario evidence MUST use deterministic mode only; each run MUST record the agent mode used, and evidence from AI-backed runs MUST NOT be presented as scenario evidence. | HD-001, CON X |
 | FR-ORC-030 | C | AI-backed mode MUST be subject to identical stage gates, policy checks, permission checks, and audit recording as deterministic mode; enabling it MUST be an explicit configuration choice, and its absence (including a missing API key) MUST NOT prevent any other capability from working. | HD-001 |
 | FR-ORC-031 | C | Each required scenario (SCN-A, SCN-B, SCN-C) MUST be executed as a workflow run of the orchestration system and produce recorded state transitions, gate events, approvals, and audit records. | HD-002 |
+| FR-ORC-032 | C | In deterministic mode, ST-08 MUST implement a change by applying a pre-authored change set stored in the repository to an isolated copy of the system under change; a workflow run MUST NOT modify the main working tree. | Clarification 2026-10-15 Q1 |
+| FR-ORC-033 | C | A change set MUST be human-reviewed and approved before use; before applying it, ST-08 MUST verify its integrity against the approved version, and any mismatch MUST produce a mandatory policy `FAIL` and safe-stop. | Clarification 2026-10-15 Q1, CON VI |
+| FR-ORC-034 | C | Change-set artifacts MUST carry the provenance label "pre-authored, human-reviewed change set, applied by deterministic agent" (including disclosure if AI assistance was used during authoring) and MUST NOT be presented as agent-generated or AI-generated at run time. | Clarification 2026-10-15 Q1, CON X |
+| FR-ORC-035 | C | ST-09 MUST execute new and regression tests against the isolated copy; on test failure the isolated copy MUST be discarded (rollback to last known-good), and the rollback MUST be recorded with evidence. | Clarification 2026-10-15 Q1, SCN-B-AC4 |
+| FR-ORC-036 | C | A deliberately defective SCN-B change-set variant MUST exist solely to demonstrate rollback; runs using it MUST be labeled as fault-injection demonstrations. | Clarification 2026-10-15 Q1, CON IX |
+| FR-ORC-037 | C | The default graph MUST contain fork 1 after design approval (ST-07), with three parallel branches: (a) ST-08 Implementation → ST-09 Testing; (b) ST-10a Documentation drafting from the approved design; (c) ST-11a Threat and risk review drafting from the approved design. Synchronization point SP-1 MUST wait for all three branches to reach a successful exit. | Clarification 2026-10-15 Q2 |
+| FR-ORC-038 | C | After SP-1, fork 2 MUST run ST-10b Documentation finalization (against the tested change) and ST-11b Security validation (dependency/secret scans, policy checks, validation against the tested change) in parallel. Synchronization point SP-2 MUST wait for both before ST-12 Release readiness may start. | Clarification 2026-10-15 Q2 |
+| FR-ORC-039 | C | When a branch of fork 1 or fork 2 is suspended (e.g., pending clarification, SCN-A-AC4) or fails, sibling branches MAY continue to their synchronization point, but that synchronization point MUST NOT release until every branch has a successful exit or the run reaches a terminal or safe-stop outcome. | Clarification 2026-10-15 Q2, FR-ORC-022 |
+| FR-ORC-040 | C | After a recorded human "ready" release decision, the system MUST promote the validated change to a local staging instance of the shortener that is separate from the developer working tree and from isolated test copies; promotion MUST NOT occur without that decision. | Clarification 2026-10-15 Q5, CON III |
+| FR-ORC-041 | C | After promotion the system MUST run a smoke check against staging and record the result; the run reaches `COMPLETED` only after a passing smoke check and the final engineering summary (ST-13). | Clarification 2026-10-15 Q5 |
+| FR-ORC-042 | C | If the smoke check fails, the system MUST compensate by re-promoting the previous release to staging. Effects that cannot be rolled back (data created in staging during the failed interval, such as links using custom aliases, analytics counts, and audit records) MUST be listed, and any corrective action on that data (e.g., marking affected links disabled) MUST require explicit human approval. Audit records are never altered. | Clarification 2026-10-15 Q5, CON VIII |
+| FR-ORC-043 | C | The system MUST NOT merge, commit, or otherwise modify the source repository; integrating a released change into the repository is a manual human action outside the run, which the run's evidence MAY reference. | Clarification 2026-10-15 Q5, FR-ORC-032 |
 
 ### Functional Requirements: Governance and Policy (FR-GOV)
 
@@ -417,6 +473,9 @@ recorded clarification and any policy decision (FR-SHR-023).
 | FR-GOV-011 | C | Release readiness MUST become "ready" only through a recorded human release decision on a non-FAIL assessment. | CON III, Governance §6 |
 | FR-GOV-012 | C | Release-readiness checks MUST include executed dependency-vulnerability and secret scans with recorded results. | CON V |
 | FR-GOV-013 | C | Every audited human decision MUST record the authenticated role and key identity (never the key secret) under which it was made. | HD-003, CON IX |
+| FR-GOV-014 | C | When an approval or clarification gate times out, the run MUST enter `SAFE_STOPPED` and the timeout MUST be audited as "no decision". Resumption MUST re-open the same gate bound to the same artifact version and MUST require an approver-role key. | Clarification 2026-10-15 Q4, CON III |
+| FR-GOV-015 | C | A rejection MUST specify either "reject and rework" (the producing stage is re-executed with the rejection reason as input; dependent stages do not start) or "reject and terminate" (the run ends as `ABORTED`). A rejection without one of these choices MUST be refused. | Clarification 2026-10-15 Q4 |
+| FR-GOV-016 | C | Rework cycles MUST be bounded per gate per run (PVT-013); a rework request beyond the bound MUST place the run in `SAFE_STOPPED` with reason "rework limit exceeded". | Clarification 2026-10-15 Q4, CON VIII |
 
 ### Functional Requirements: Observability and Audit (FR-OBS)
 
@@ -463,18 +522,19 @@ Targets marked PVT are proposals requiring approval (see Proposed Validation Tar
 
 | ID | Target | Rationale |
 |----|--------|-----------|
-| PVT-001 | 95% of redirect resolutions complete in under 100 ms at the service boundary, at 50 concurrent clients, in the local reference environment | Redirects are latency-sensitive; modest local target suitable for a prototype |
-| PVT-002 | 95% of creations complete in under 250 ms under the same conditions | Creation is less latency-critical than redirect |
-| PVT-003 | 1,000 concurrent creations produce 1,000 distinct codes with zero collisions or lost writes | Verifies uniqueness under contention |
-| PVT-004 | Default retry budget of 3 attempts per stage with exponential backoff; zero retries for permanent failures | Common bounded-retry default |
-| PVT-005 | Each stage declares a timeout; default 5 minutes for agent stages, configurable; approval-gate timeout configurable (default 24 hours, shortened in demos) | Prevents indefinite hangs while allowing human response time |
-| PVT-006 | 100% of interruption tests (one per stage boundary) resume to the same terminal outcome without duplicate side effects | Recoverability proof |
-| PVT-007 | All test categories in NFR-TST-001 present; ≥ 85% line coverage of domain, orchestration, and policy logic; 100% of mandatory tests passing at release | Evidence-based completion (CON XI) |
-| PVT-008 | 100% of state transitions and decisions in scenario runs have complete audit records | Audit-grade evidence |
-| PVT-009 | A reviewer completes setup and runs all three scenarios in under 30 minutes following the documentation | Reviewability of the deliverable |
-| PVT-010 | Maximum destination URL length 2,048 characters | Widely used practical limit |
-| PVT-011 | Default creation rate limit 60 requests per minute per client | Abuse control without hindering demo use |
-| PVT-012 | Zero high or critical findings from dependency and secret scans at release, or an approved exception per CON VI | Release-readiness gate |
+| PVT-001 | 95% of redirect resolutions complete in under 100 ms at the service boundary, at 50 concurrent clients, in the local reference environment | Redirects are latency-sensitive; modest local target suitable for a prototype. **Approved as non-gating demonstration target.** |
+| PVT-002 | 95% of creations complete in under 250 ms under the same conditions | Creation is less latency-critical than redirect. **Approved as non-gating demonstration target.** |
+| PVT-003 | 1,000 concurrent creations produce 1,000 distinct codes with zero collisions or lost writes | Verifies uniqueness under contention. **Approved by Mani Kumar Vadugu, 2026-10-15.** |
+| PVT-004 | Default retry budget of 3 attempts per stage with exponential backoff; zero retries for permanent failures | Common bounded-retry default. **Approved by Mani Kumar Vadugu, 2026-10-15.** |
+| PVT-005 | Each stage declares a timeout; default 5 minutes for agent stages, configurable; approval-gate timeout configurable (default 24 hours, shortened in demos) | Prevents indefinite hangs while allowing human response time. **Approved by Mani Kumar Vadugu, 2026-10-15.** |
+| PVT-006 | 100% of interruption tests (one per stage boundary) resume to the same terminal outcome without duplicate side effects | Recoverability proof. **Approved by Mani Kumar Vadugu, 2026-10-15.** |
+| PVT-007 | All test categories in NFR-TST-001 present; ≥ 85% line coverage of domain, orchestration, and policy logic; 100% of mandatory tests passing at release | Evidence-based completion (CON XI). **Approved by Mani Kumar Vadugu, 2026-10-15.** |
+| PVT-008 | 100% of state transitions and decisions in scenario runs have complete audit records | Audit-grade evidence. **Approved by Mani Kumar Vadugu, 2026-10-15.** |
+| PVT-009 | A reviewer completes setup and runs all three scenarios in under 30 minutes following the documentation | Reviewability of the deliverable. **Approved by Mani Kumar Vadugu, 2026-10-15.** |
+| PVT-010 | Maximum destination URL length 2,048 characters | Widely used practical limit. **Approved by Mani Kumar Vadugu, 2026-10-15.** |
+| PVT-011 | Default creation rate limit 60 requests per minute per API key (A-015) | Abuse control without hindering demo use. **Approved by Mani Kumar Vadugu, 2026-10-15.** |
+| PVT-012 | Zero high or critical findings from dependency and secret scans at release, or an approved exception per CON VI | Release-readiness gate. **Approved by Mani Kumar Vadugu, 2026-10-15.** |
+| PVT-013 | At most 2 "reject and rework" cycles per gate per run | Bounds rework loops (FR-GOV-016) while still demonstrating rework. **Approved by Mani Kumar Vadugu, 2026-10-15.** |
 
 ### Key Entities
 
@@ -494,6 +554,9 @@ Targets marked PVT are proposals requiring approval (see Proposed Validation Tar
 - **Dependency Graph (Plan)**: versioned set of stages and dependency edges for a run; new
   version on replanning.
 - **Agent**: role, declared permissions, execution mode (deterministic or AI-backed, HD-001).
+- **Change Set**: scenario reference, variant (normal or fault-injection), approved version
+  fingerprint, reviewer and approval timestamp, provenance label (FR-ORC-034), AI-assistance
+  disclosure.
 - **API Key / Role Binding**: key identity (non-secret), role (`consumer`, `engineer`,
   `approver`, `release-owner`, `agent`), actor type (human or agent), status (HD-003).
 - **Artifact**: type (normalized requirement, task plan, design, code change, test result,
@@ -508,6 +571,9 @@ Targets marked PVT are proposals requiring approval (see Proposed Validation Tar
 - **Impact Analysis**: change reference, impacted components, interfaces, data flows, tests,
   docs, regression risks, rollout/rollback considerations.
 - **Release-Readiness Assessment**: per-condition results, blocking reasons, human decision.
+- **Staging Promotion**: promoted change-set version, previous release version, smoke-check
+  result, compensation record (re-promotion result, non-rollbackable effects, approved
+  corrective actions).
 - **Engineering Summary**: final report per FR-ORC-026.
 
 ### Required Evidence
@@ -544,6 +610,26 @@ All evidence MUST be produced by actual execution; illustrative examples MUST be
   and traceability; scenario capabilities (expiration plus analytics, custom aliases, the
   ambiguous click-tracking request) are delivered only through orchestrated workflow runs
   (HD-002).
+- **CST-008: Proposed scope tiering** *(PROPOSAL, not an approved scope cut; the final cut is
+  decided and approved at `/speckit-plan`; Clarification 2026-10-15 Q3)*:
+  - **Must-have**:
+    - the baseline shortener: FR-SHR-001 to FR-SHR-007, FR-SHR-013 to FR-SHR-016, FR-SHR-017
+      in simple form, FR-SHR-018, FR-SHR-019;
+    - the scenario capabilities: FR-SHR-008 to FR-SHR-012 (SCN-A), FR-SHR-020 to FR-SHR-022
+      (SCN-B), FR-SHR-023 (SCN-C);
+    - all FR-ORC and all FR-GOV requirements, subject to the deferrals below;
+    - FR-OBS-001 to FR-OBS-008;
+    - NFR-SEC, NFR-REL, NFR-AUD, NFR-OBS, NFR-RCV-001, NFR-TST, NFR-CHG, NFR-AUT, NFR-RUN
+      and NFR-DET.
+  - **Deferrable** (if deferred, MUST be disclosed as a documented limitation):
+    1. AI-backed agent adapter: interface plus a disabled stub only, which still satisfies
+       FR-ORC-030.
+    2. Performance targets PVT-001 and PVT-002: measured and reported, not a release gate.
+    3. Horizontal scaling (NFR-SCL-002): documentation only.
+    4. Escalation routing beyond recording the "escalate" decision (FR-GOV-002).
+    5. MTTR aggregated across runs (FR-OBS-006); per-run MTTR remains required.
+  - Not tiered here: FR-OBS-009, NFR-SCL-001, NFR-MNT-001 and NFR-RCV-002 default to
+    must-have unless the plan proposes otherwise.
 
 ### Exclusions (out of scope for this feature)
 
@@ -621,7 +707,7 @@ source `HD-nnn`) and change only through change control (CON VI).
 - **A-002**: Only `http` and `https` destinations are accepted.
 - **A-003**: Short codes are case-sensitive, URL-safe, and at most 10 characters.
 - **A-004**: Creating the same destination twice without an idempotency key yields two distinct
-  short links (no implicit deduplication); idempotency is opt-in via key.
+  short links (no implicit deduplication); idempotency is opt-in via key. *(Approved by Mani Kumar Vadugu, 2026-10-15.)*
 - **A-005**: Analytics are aggregate counts and timestamps only; no IP addresses, user agents, or
   personal data are stored.
 - **A-006**: Expiration is optional; links without expiration do not expire. Expired links are
@@ -637,6 +723,15 @@ source `HD-nnn`) and change only through change control (CON VI).
   run).
 - **A-011**: Inspection interfaces (run, audit, traceability, metrics) may be API- or
   command-line-based; a graphical interface is not required (EXC-001).
+- **A-012**: "Release" in this prototype means promotion to a local staging instance of the
+  shortener (FR-ORC-040); no production or cloud deployment occurs (EXC-004).
+- **A-013**: Analytics counts are exact under concurrent redirects (no lost increments); this
+  also defines "correct, non-corrupted" for FR-SHR-014 analytics behavior (DQ-002). *(Approved by Mani Kumar Vadugu, 2026-10-15.)*
+- **A-014**: Expiration is evaluated in UTC; a link is expired when resolution time ≥ its
+  expiration time (DQ-003). *(Approved by Mani Kumar Vadugu, 2026-10-15.)*
+- **A-015**: Creation rate limiting is keyed per API key (DQ-004). *(Approved by Mani Kumar Vadugu, 2026-10-15.)*
+- **A-016**: Resuming a run from any safe-stop requires an approver-role key and, for non-timeout
+  causes, evidence that the cause is resolved or covered by an approved exception (DQ-006). *(Approved by Mani Kumar Vadugu, 2026-10-15.)*
 
 ## Success Criteria *(mandatory)*
 
@@ -662,9 +757,9 @@ source `HD-nnn`) and change only through change control (CON VI).
   evidence or documentation item (bidirectional traceability completeness 100%).
 - **SC-008**: Release readiness is reported FAIL in 100% of test cases containing a mandatory
   policy failure or an unapproved or expired exception.
-- **SC-009**: Performance, concurrency, and setup targets PVT-001, PVT-002, PVT-003, and
-  PVT-009 are met once approved; until approved, results are reported as demonstration
-  measurements only.
+- **SC-009**: Performance targets PVT-001 and PVT-002 are measured and reported as
+  demonstration measurements (non-gating); concurrency and setup targets PVT-003 and PVT-009
+  are met as pass/fail criteria.
 - **SC-010**: A reviewer with no AI API key can set up the project, run all automated tests, and
   execute all three scenarios in deterministic mode; repeated deterministic runs yield the same
   stage sequence, gate events, and terminal outcomes (HD-001, NFR-DET-001).

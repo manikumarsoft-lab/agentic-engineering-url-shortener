@@ -914,6 +914,14 @@ evidence produced)**:
 | BL-11 | Malware/phishing reputation checks | EXC-006 |
 | BL-12 | Durable analytics outbox (no lost increments when the analytics write fails) | Human Gate 4 ruling 2; ADR-019 |
 | BL-13 | Unauthenticated redirect rate limiting | CR-003; Spec §NFR-SEC-003 (accepted risk) |
+| BL-14 | Full end-to-end interruption test at every node boundary (beyond engine-level stub-agent tests and 3 full E2E interruptions) — *planned, not implemented* | HD-CUT-001 #1 |
+| BL-15 | OpenAPI drift normalizer and schemathesis contract tests (T019; drift parts of T035/T099) — *planned, not implemented* | HD-CUT-001 #2 |
+| BL-16 | W3C `traceparent` propagation and spans table (T016, T092) — *planned, not implemented* | HD-CUT-001 #3 |
+| BL-17 | Full metrics set beyond per-run counts and simple MTTR (T093–T095) — *planned, not implemented* | HD-CUT-001 #4 |
+| BL-18 | CI on a second OS (windows-latest) — *planned, not implemented* | HD-CUT-001 #5 |
+| BL-19 | Separate evidence-assembly tasks (T138–T145) instead of one generated evidence index — *planned, not implemented* | HD-CUT-001 #6 |
+| BL-20 | G-SECURITY conditional gate (PD-007) — *planned, not implemented* | HD-CUT-001 #7 |
+| BL-21 | SCN-C option-B-with-exception path (exception shown once via another check instead) — *planned, not implemented* | HD-CUT-001 #8 |
 
 **Scope-control rule**: optional work must not displace mandatory validation or reviewer
 evidence. At each checkpoint, any slipping must-have item triggers the cut list above. A backlog
@@ -1000,6 +1008,89 @@ owner makes the final decision (Governance §6).
 | PD-010 (DQ-010) | Final scope cut and backlog | §14.1 | CST-008 |
 | PD-011 | Interruption recovery parks runs in `SAFE_STOPPED` (human resume), not auto-resume | §6.3 | FR-ORC-019 "authorized human action" |
 | PD-012 | ST-09 test failure → rollback → run `FAILED` (no automatic rework loop) | §6.2 | Deterministic terminal outcome; rework is a human choice via a new run |
+
+---
+
+## 16. Pre-Implementation Review Rulings (CR-006)
+
+**Source**: [docs/reviews/pre-implementation-review.md](../../docs/reviews/pre-implementation-review.md).
+**Ruled by**: Mani Kumar Vadugu (human owner), 2026-10-15, CR-006 step 2. Where this section
+conflicts with earlier sections of this plan (§3.4 ST-05 row, §3.6 step 5, §6, §11.1, §11.3,
+§11.4), this section governs.
+
+### 16.1 Rulings on critical findings
+
+| Finding | Ruling |
+|---------|--------|
+| C1 Change-set binding | For runs that open G-CLARIFY, the change set is selected **after** the clarification decision, from a human-locked catalog keyed by `(scenario, option_id)`. No catalog entry for the decided option → run `FAILED` (reason recorded). A `free_text` answer is never interpreted: it reopens clarification with the text recorded. At most **2** clarification rounds per gate per run; a third → `SAFE_STOPPED` ("clarification limit exceeded") |
+| C2 Impact independence | ST-05 computes impact only from the normalized requirement, the component registry and the baseline (current release) import graph. The change-set manifest is **never** an ST-05 input, so CHG-002 compares touched files against an analysis made independently of the change |
+| C3 Late-ambiguity routing | A G-CLARIFY-n answer is an input **only to the raising node**, which resumes from `SUSPENDED`. No ST-05 replanning occurs, G-DESIGN is not revoked, and ST-08/ST-09 are not re-run (their attempt counts stay unchanged) |
+| C5 Scanner determinism | In runs, SEC-003 evaluates against a local, hash-pinned advisory snapshot (hash recorded on every evaluation; no network access). Missing snapshot or hash mismatch → SEC-003 `FAIL`, never PASS. The live scan runs only in `orch release check` |
+
+### 16.2 Join and skip semantics (single authoritative table)
+
+| Predecessor states | Successor effect |
+|--------------------|------------------|
+| All `SUCCEEDED`/`SKIPPED`, condition true, entry criteria met | `READY` |
+| All `SUCCEEDED`/`SKIPPED`, condition false | `SKIPPED` with reason; a skip never counts as a failure downstream |
+| All done, entry criteria unmet | `BLOCKED` (`NODE_ENTRY_REFUSED`) |
+| Any `PENDING`/`READY`/`RUNNING`/`RETRY_WAIT`/`SUSPENDED`/`BLOCKED`/`STALE` | Stays `PENDING`; sync points hold |
+| `FAILED_PERMANENT` with a declared failure edge (e.g. REL-01 `smoke_failed` → REL-02) | Only the edge target may become `READY`; normal successors stay `PENDING` |
+| `FAILED_PERMANENT` without a declared edge, or retry budget exhausted | The node's declared failure behavior applies (`safe_stop`, `fail_run`, `rollback_then_fail_run`); no successor becomes `READY` |
+| Sync node (SP-1, SP-2) | Releases only when every incoming branch is `SUCCEEDED` (or `SKIPPED` where conditional) |
+| ST-13 | `READY` once the run's terminal path (COMPLETED, FAILED or ABORTED) is decided, regardless of other predecessor states |
+
+### 16.3 Runtime and governance specifications
+
+- **Timeout enforcement and attempt fencing**: each agent attempt runs in a child subprocess
+  (Windows: new process group, process-tree kill on timeout). Each attempt carries a fencing
+  token; artifact writes and transitions with a superseded token are refused and audited.
+  Timeout → tree killed → `FAILED_TRANSIENT` → retry per §6.
+- **Re-promotion without migration**: REL-02 starts the previous release snapshot against the
+  current staging DB without running migrations; readiness and smoke checks never compare
+  migration heads. Migrations run only on forward promotion (REL-01), additive-only (CHG-003).
+- **Demo reset**: `orch demo reset` never deletes or truncates `var/orchestrator/orchestrator.db`.
+- **`decision_source`**: derived server-side from the authenticated key's class (test-only keys →
+  `scripted`, human keys → `interactive`); any client-supplied value is ignored.
+- **Key custody**: approver (and other human-role) keys are created by the human in their own
+  terminal, outside the coding-assistant session; secrets are never stored in the repository.
+- **Change-set lock**: `changesets/approved.lock.yaml` is verified against an annotated git tag
+  created by the human owner; a missing or lightweight tag, or any difference from the tagged
+  content → CHG-001 `FAIL`.
+- **Retry-budget extension on resume**: an approver may grant additional attempts to named nodes
+  when resuming; the grant (approver, key ID, nodes, attempts, reason) is audited. Without a
+  grant, a node with an exhausted budget keeps resume refused.
+
+### 16.4 Disclosed limitations (to be listed in `docs/limitations.md`)
+
+- **Separation of duties is single-person**: FR-GOV-017 is enforced between key identities, but
+  one person holds all human keys (A-008); this is not organizational segregation of duties.
+- **SCN-A-AC4** is demonstrated only through the labelled `finding-injection` variant.
+- **NFR-DET-001** holds only for virtual-clock, scripted-decision runs; interactive recorded
+  runs are not repeat-comparable.
+
+### 16.5 HD-CUT-001: Scope cut (human decision)
+
+**Decider**: Mani Kumar Vadugu (human owner) · **Date**: 2026-10-15 · **Source**: review file,
+"Q21 cut list". Cut items are listed in the §14.1 backlog (BL-14..BL-21) as *planned, not
+implemented*. Where this decision conflicts with earlier sections (e.g. the §14.1 must-have
+list, PD-005, PD-007), this decision governs.
+
+| # | Cut | Retained instead | Backlog |
+|---|-----|------------------|---------|
+| 1 | PVT-006 full E2E interruption at every boundary | Engine-level interruption at every boundary with stub agents, plus 3 full E2E interruptions (mid-F1, open gate, REL-01) | BL-14 |
+| 2 | OpenAPI drift normalizer and schemathesis (T019, drift parts of T035/T099) | JSON Schema validation and hand-written contract tests | BL-15 |
+| 3 | `traceparent` and spans (T016, T092) | `run_id` correlation and attempt timestamps | BL-16 |
+| 4 | Full metrics (T093–T095) | Per-run counts and a simple MTTR | BL-17 |
+| 5 | CI on two OSes | CI on one OS | BL-18 |
+| 6 | Separate evidence assembly (T138–T145) | One generated evidence index | BL-19 |
+| 7 | G-SECURITY (PD-007, not a spec requirement) | — | BL-20 |
+| 8 | SCN-C option B with exception | SCN-C variants A, C (abort) and timeout; exception path shown once (e.g. SEC-003 offline exception) | BL-21 |
+
+**Never cut**: transitions + audit, fork/join with sync points, gates (timeout, rework,
+terminate), policy blocking + exceptions, retry/safe-stop/resume, workspace rollback, staging
+compensation, stale-closure replanning, and the human's interactive recorded runs of SCN-A,
+SCN-B and SCN-C.
 
 ---
 
@@ -1108,6 +1199,11 @@ consistency.
 | CR-003 follow-up | 2026-10-15 | Mani Kumar Vadugu | plan aligned with CR-003; glossary defined by human owner | Contracts: workflow graph 2.0.0 → 2.1.0 and orchestrator API 2.0.0 → 2.1.0 (MINOR; Change Record in contracts/README.md) |
 | CR-004 | 2026-10-15 | Mani Kumar Vadugu | Provenance label replaced with the fixed AI-assistance text (§Summary, §4) | Spec FR-ORC-034, research R-06, data model, ADR-006 and tasks aligned; no contract version change |
 | CR-005 | 2026-10-15 | Mani Kumar Vadugu | Spec interruption edge case aligned with §6.3 / PD-011 | No plan change needed |
+| CR-006 step 2 | 2026-10-15 | Mani Kumar Vadugu | Pre-implementation review rulings C1, C2, C3, C5; join/skip table; runtime and governance specifications; three disclosed limitations (§16) | plan.md only. Pending alignment: workflow graph (ST-05 inputs, REL-01/REL-02 edge, clarify rounds), gate-decision schema (`decision_source`), ADRs, quickstart, tasks |
+| CR-006 step 3 | 2026-10-15 | Mani Kumar Vadugu | HD-CUT-001 scope cut recorded (§16.5); cut items added to backlog BL-14..BL-21 as planned, not implemented | plan.md only. Pending alignment: §14.1 must-have list (G-SECURITY), PD-005, PD-007, policy SEC-004, workflow graph (G-SECURITY node), tasks |
+| CR-006 | 2026-10-15 | Mani Kumar Vadugu | Pre-implementation review dispositioned: §16 rulings (steps 2–3); tasks.md regenerated to 54 tasks with false dependencies removed, change sets authored in parallel with the engine and traceability check in CI from Phase 1 (step 4); change-log rows in spec.md and plan.md (steps 5–6) | Contracts, ADRs and quickstart alignment is task T201 (human approval required before T003) |
+| HD-CUT-001 | 2026-10-15 | Mani Kumar Vadugu | Human scope-cut decision (§16.5): 8 review cut-list items deferred | Backlog BL-14..BL-21 marked planned, not implemented; disclosed in docs/limitations.md (T248) |
+| HD-CUT-002 | 2026-10-15 15:55 | Mani Kumar Vadugu | The re-cut schedule cannot meet the 2026-10-16 15:30 deadline. Deliver a lean implementation that demonstrates every assessed capability, without per-task ceremony. tasks.md is retained as the planning record; implementation follows the lean slice in [docs/scope/lean-slice.md](../../docs/scope/lean-slice.md) | Built scope and items "planned, not implemented" listed in docs/scope/lean-slice.md; T201 relabelled "CR-006 step 7"; open questions for the human owner listed there |
 | Analysis remediation | 2026-10-15 | Mani Kumar Vadugu | §3.1 modules added (criteria, fallback, faults; tools/perf); §10.3 `raise_ambiguity` → `finding-injection`; CEX-001 recorded under Complexity Tracking | Tasks regenerated with stable IDs (see tasks.md) |
 
 ### CR-002 impact analysis

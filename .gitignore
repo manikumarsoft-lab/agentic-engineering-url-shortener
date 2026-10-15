@@ -21,6 +21,7 @@ venv/
 htmlcov/
 
 # Local data
+var/
 *.db
 *.sqlite3
 

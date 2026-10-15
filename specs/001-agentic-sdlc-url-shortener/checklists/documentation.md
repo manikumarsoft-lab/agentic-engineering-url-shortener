@@ -13,7 +13,7 @@
 
 - [ ] CHK001 Are the required deliverable documents enumerated (setup, architecture overview, testing approach, limitations, trade-offs)? [Completeness, Spec §CST-003] [Mandatory]
 - [ ] CHK002 Is the documentation set specified with file locations (README, architecture, threat model, testing, limitations, release readiness, traceability)? [Completeness, Plan §Project Structure] [Mandatory]
-- [ ] CHK003 Is the limitations document required to list every backlog item (BL-01 to BL-12) and every accepted residual risk? [Completeness, Plan §14.1; ADRs] [Mandatory]
+- [ ] CHK003 Is the limitations document required to list every backlog item (BL-01 to BL-13) and every accepted residual risk? [Completeness, Plan §14.1; ADRs] [Mandatory]
 - [ ] CHK004 Is the final engineering summary content enumerated? [Completeness, Spec §FR-ORC-026] [Mandatory]
 - [ ] CHK005 Is the rule that the confidential assessment source is never committed, and is referenced by section only, stated? [Completeness, CON X; Spec §CST-004] [Mandatory]
 

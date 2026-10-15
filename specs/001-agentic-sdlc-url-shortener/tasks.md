@@ -57,6 +57,7 @@ Default **Trace**: Tests carry `@pytest.mark.req(<Req IDs>)`; new modules carry 
   - **Artifact**: Reviewed checklists: items marked [x] by the human owner, or new CRs for unsatisfied items · **TDD**: N/A — human decision or action (no code) · **Validate**: `/speckit-implement` checklist table shows each file's status
   - **Docs**: None · **Trace**: default · **Risk**: Agents must not mark checklist items
   - **Done**: Every checklist item is either marked by the human owner or covered by a recorded CR/decision to proceed · **Verified by**: CEX-001: recorded human decision (approver, timestamp, artifact version) in the decision/audit log; existence confirmed by T127 traceability check · **Human**: REQUIRED — human owner only
+  - **Decision record**: T001 decision (Mani Kumar Vadugu, 2026-10-15): I reviewed the per-file summary of all 19 checklists and read orchestration.md, human-approvals.md and scenario-ambiguous.md in full. I accept the checklist set as the requirements-quality gate for /speckit-implement. Items remain unchecked until verified against evidence.
 - [ ] T002 Run /speckit-analyze (read-only) over all artifacts; the human owner reviews the report and may save it as specs/001-agentic-sdlc-url-shortener/analysis.md
   - **Obj**: Cross-artifact consistency analysis before implementation (CON workflow: CRITICAL findings block) · **Req**: CON Development Workflow; Governance §1 · **Scn**: — · **ADR**: —
   - **Paths**: `specs/001-agentic-sdlc-url-shortener/analysis.md`

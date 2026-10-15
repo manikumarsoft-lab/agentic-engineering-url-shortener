@@ -22,7 +22,7 @@ def main(ctx_path: str, result_path: str) -> int:
         try:
             result = {"ok": True, "outputs": agent(request["ctx"]) or {}}
         except AgentError as err:
-            result = {"ok": False, "code": err.code, "message": str(err)}
+            result = {"ok": False, "code": err.code, "message": str(err), "details": err.details}
     Path(result_path).write_text(json.dumps(result), encoding="utf-8")
     return 0
 

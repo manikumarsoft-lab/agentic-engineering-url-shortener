@@ -11,7 +11,10 @@ from typing import Any
 import yaml
 
 DEFAULT_TRANSIENT = frozenset({"timeout", "io_error", "db_locked"})
-DEFAULT_PERMANENT = frozenset({"invalid_input", "tests_failed", "policy_fail", "permission_refused"})
+DEFAULT_PERMANENT = frozenset({"invalid_input", "tests_failed", "policy_fail", "permission_refused",
+                               "integrity_mismatch", "undeclared_scope", "tests_not_red",
+                               "patch_does_not_apply", "no_approved_change_set"})
+GATE_KINDS = frozenset({"approval", "clarify"})
 ON_FAILURE = frozenset({"safe_stop", "fail_run", "rollback", "compensate"})
 
 
@@ -32,6 +35,9 @@ class Gate:
     binds: tuple[str, ...] = ()
     rework_target: str | None = None
     max_rework: int = 2
+    kind: str = "approval"  # approval | clarify
+    options: dict[str, dict[str, Any]] = field(default_factory=dict)  # clarify: option_id -> {label, action?}
+    max_rounds: int = 2  # clarify: free-text answers reopen the gate up to this many rounds
 
 
 @dataclass(frozen=True)
@@ -50,6 +56,7 @@ class Node:
     fallback: AgentCall | None = None
     compensate: AgentCall | None = None
     condition: dict[str, Any] | None = None
+    skip_reason: str | None = None
     consumes: tuple[str, ...] = ()
     produces: tuple[str, ...] = ()
     policy_checks: tuple[str, ...] = ()
@@ -64,6 +71,7 @@ class Workflow:
     name: str
     version: str
     nodes: dict[str, Node]
+    workspace_include: tuple[str, ...] = ()  # repo paths copied into each run's isolated workspace
 
     def downstream(self, start: set[str]) -> set[str]:
         """All nodes reachable from `start` along dependency edges, excluding `start`."""
@@ -105,6 +113,9 @@ def _node(raw: dict[str, Any], defaults: dict[str, Any]) -> Node:
             binds=tuple(gate.get("binds", ())),
             rework_target=gate.get("rework_target"),
             max_rework=int(gate.get("max_rework", 2)),
+            kind=gate.get("kind", "approval"),
+            options={str(k): dict(v) for k, v in gate.get("options", {}).items()},
+            max_rounds=int(gate.get("max_rounds", 2)),
         ) if gate is not None else None,
         timeout_s=float(raw.get("timeout_s", defaults.get("timeout_s", 300))),
         max_attempts=int(raw.get("retry", {}).get("max_attempts", defaults.get("max_attempts", 3))),
@@ -115,6 +126,7 @@ def _node(raw: dict[str, Any], defaults: dict[str, Any]) -> Node:
         fallback=_call(raw.get("fallback")),
         compensate=_call(raw.get("compensate")),
         condition=raw.get("conditional"),
+        skip_reason=raw.get("skip_reason"),
         consumes=tuple(raw.get("consumes", ())),
         produces=tuple(raw.get("produces", ())),
         policy_checks=tuple(raw.get("policy_checks", ())),
@@ -134,6 +146,10 @@ def _validate(wf: Workflow) -> None:
                 raise GraphError(f"{node.id}: unknown dependency '{dep}'")
         if node.gate and node.gate.rework_target and node.gate.rework_target not in wf.nodes:
             raise GraphError(f"{node.id}: unknown rework_target '{node.gate.rework_target}'")
+        if node.gate and node.gate.kind not in GATE_KINDS:
+            raise GraphError(f"{node.id}: unknown gate kind '{node.gate.kind}'")
+        if node.gate and node.gate.kind == "clarify" and not node.gate.options:
+            raise GraphError(f"{node.id}: a clarify gate needs options")
     state: dict[str, int] = {}  # 1 = visiting, 2 = done
 
     def visit(nid: str, path: list[str]) -> None:
@@ -159,7 +175,8 @@ def load_workflow_text(text: str) -> Workflow:
         if node.id in nodes:
             raise GraphError(f"duplicate node id '{node.id}'")
         nodes[node.id] = node
-    wf = Workflow(name=raw["name"], version=str(raw["version"]), nodes=nodes)
+    wf = Workflow(name=raw["name"], version=str(raw["version"]), nodes=nodes,
+                  workspace_include=tuple(raw.get("workspace", {}).get("include", ())))
     _validate(wf)
     return wf
 

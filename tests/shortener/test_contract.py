@@ -1,19 +1,15 @@
-"""The running app must match the committed OpenAPI contract (contracts/shortener-api.openapi.json)."""
-import json
-
-from shortener.openapi import CONTRACT, generate, render
+"""The running app must match the generated contract (specs/.../contracts/shortener-api.openapi.yaml)."""
+from shortener.openapi import CONTRACT, generate, load, render
 
 
 def test_app_matches_committed_contract(svc):
-    committed = json.loads(CONTRACT.read_text(encoding="utf-8"))
-    assert generate() == committed, "contract drift: run `python -m shortener.openapi` and review"
     svc.client()
-    assert render(svc.app.openapi()) == CONTRACT.read_text(encoding="utf-8")
+    assert svc.app.openapi() == load(), "contract drift: run `python -m shortener.openapi` and review"
+    assert render(generate()) == CONTRACT.read_text(encoding="utf-8")
 
 
 def test_responses_carry_the_contract_fields(svc):
-    contract = json.loads(CONTRACT.read_text(encoding="utf-8"))
-    schemas = contract["components"]["schemas"]
+    schemas = load()["components"]["schemas"]
     c = svc.client()
     created = svc.create(c, "https://example.com/").json()
     assert set(created) == set(schemas["LinkOut"]["properties"])

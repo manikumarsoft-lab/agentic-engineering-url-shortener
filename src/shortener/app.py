@@ -7,8 +7,11 @@ import hashlib
 import json
 import logging
 import math
+import re
 import sqlite3
 import threading
+import time
+import uuid
 from collections import defaultdict, deque
 from collections.abc import Callable
 from contextlib import closing
@@ -28,8 +31,31 @@ from shortener.store import LinkStore
 from shortener.validation import InvalidURL, validate_url
 
 log = logging.getLogger("shortener")
+access_log = logging.getLogger("shortener.access")
 Clock = Callable[[], datetime]
 PROBLEM = "application/problem+json"
+REQUEST_ID = re.compile(r"^[A-Za-z0-9._-]{1,64}$")
+API_VERSION = "2.0.0"
+
+
+class JsonFormatter(logging.Formatter):
+    """One JSON object per line. Only fields passed explicitly in `fields` are emitted, so
+    headers, keys, client addresses and user agents can never leak into the log (FR-OBS-009)."""
+
+    def format(self, record: logging.LogRecord) -> str:
+        payload = {"ts": datetime.fromtimestamp(record.created, timezone.utc).isoformat(),
+                   "level": record.levelname, "logger": record.name, "msg": record.getMessage(),
+                   **getattr(record, "fields", {})}
+        return json.dumps(payload, sort_keys=True)
+
+
+def configure_logging() -> None:
+    logger = logging.getLogger("shortener")
+    if not any(isinstance(h.formatter, JsonFormatter) for h in logger.handlers):
+        handler = logging.StreamHandler()
+        handler.setFormatter(JsonFormatter())
+        logger.addHandler(handler)
+        logger.setLevel(logging.INFO)
 
 
 # ---- models -------------------------------------------------------------------------------------
@@ -126,8 +152,28 @@ def create_app(settings: Settings | None = None, *, clock: Clock | None = None,
     counters = {"analytics_write_failures": 0}
     counter_lock = threading.Lock()
 
-    app = FastAPI(title="URL Shortener", version="1.0.0", docs_url=None, redoc_url=None)
+    configure_logging()
+    app = FastAPI(title="URL Shortener", version=API_VERSION, docs_url=None, redoc_url=None)
     app.state.store, app.state.counters = store, counters
+
+    @app.middleware("http")
+    async def request_log(request: Request, call_next: Callable) -> Any:
+        """Correlation ID per request (X-Request-ID) and one structured access-log line."""
+        presented = request.headers.get("x-request-id", "")
+        request_id = presented if REQUEST_ID.match(presented) else uuid.uuid4().hex
+        started = time.perf_counter()
+        try:
+            response = await call_next(request)
+        except Exception:
+            log.exception("unhandled error", extra={"fields": {"request_id": request_id}})
+            response = _problem(500, "internal_error", "Internal error")
+        response.headers["X-Request-ID"] = request_id
+        route = request.scope.get("route")
+        access_log.info("request", extra={"fields": {
+            "request_id": request_id, "method": request.method,
+            "route": getattr(route, "path", "unmatched"), "status": response.status_code,
+            "duration_ms": round((time.perf_counter() - started) * 1000, 2)}})
+        return response
 
     @app.exception_handler(ProblemError)
     async def _on_problem(_: Request, exc: ProblemError) -> JSONResponse:

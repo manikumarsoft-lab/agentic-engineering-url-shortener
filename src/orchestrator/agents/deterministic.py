@@ -84,3 +84,7 @@ AGENTS: dict[str, Callable[[Ctx], dict]] = {
     f.__name__: f for f in (noop, emit, transform, sleep, flaky, fail, crash, write_file,
                             check_file, record)
 }
+
+from orchestrator.agents.scenario import AGENTS as _SCENARIO_AGENTS  # noqa: E402
+
+AGENTS.update(_SCENARIO_AGENTS)

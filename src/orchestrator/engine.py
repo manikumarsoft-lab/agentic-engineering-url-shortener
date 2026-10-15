@@ -30,6 +30,7 @@ from orchestrator.store import Store
 TERMINAL = frozenset({"COMPLETED", "FAILED", "ABORTED"})
 DONE = frozenset({"SUCCEEDED", "SKIPPED"})
 DECISIONS = ("approve", "reject_rework", "reject_terminate", "escalate")
+CLARIFY_DECISIONS = ("answer", "reject_terminate", "escalate")
 ESCALATION_ROLES = frozenset({"release-owner"})
 SRC_ROOT = Path(__file__).resolve().parents[1]
 
@@ -72,6 +73,7 @@ class Outcome:
     outputs: dict[str, Any] = field(default_factory=dict)
     started: float = 0.0
     ended: float = 0.0
+    details: dict[str, Any] = field(default_factory=dict)
 
 
 def _condition_holds(cond: dict[str, Any], facts: dict[str, Any]) -> bool:
@@ -119,7 +121,11 @@ class Engine:
                 "workflow": self.wf.name, "workflow_version": self.wf.version,
                 "policy_version": policy_version, "labels": list(labels)})
         if self.source_dir:
-            path = workspace.create(self.work_root, run_id, self.source_dir)
+            if self.wf.workspace_include:
+                path = workspace.create_from(self.work_root, run_id, self.source_dir,
+                                             self.wf.workspace_include)
+            else:
+                path = workspace.create(self.work_root, run_id, self.source_dir)
             with self.store.tx() as c:
                 self._audit(c, run_id, "WORKSPACE_CREATED", target=str(path))
         return run_id
@@ -220,7 +226,7 @@ class Engine:
 
     # ---- human gates ---------------------------------------------------------------------------
     def decide(self, run_id: str, node_id: str, presented: str | None, choice: str,
-               reason: str = "") -> str:
+               reason: str = "", *, option: str | None = None, text: str | None = None) -> str:
         node = self.wf.nodes.get(node_id)
         if node is None or node.gate is None:
             raise EngineError(f"{node_id} is not a gate")
@@ -229,9 +235,15 @@ class Engine:
         p = self._principal(run_id, presented, roles, f"gate.{choice}")
         if row["state"] != "AWAITING_APPROVAL" or self.store.run(run_id)["state"] == "SAFE_STOPPED":
             raise EngineError(f"{node_id} is not awaiting a decision")
-        if choice not in DECISIONS:
-            raise EngineError(f"unknown decision '{choice}'")
-        if choice != "approve" and not reason.strip():
+        clarify = node.gate.kind == "clarify"
+        if choice not in (CLARIFY_DECISIONS if clarify else DECISIONS):
+            raise EngineError(f"decision '{choice}' is not available at a {node.gate.kind} gate")
+        if choice == "answer":
+            if (option is None) == (text is None):
+                raise EngineError("an answer needs exactly one of an option or free text")
+            if option is not None and option not in node.gate.options:
+                raise EngineError(f"unknown option '{option}'; offered: {sorted(node.gate.options)}")
+        elif choice != "approve" and not reason.strip():
             raise EngineError(f"'{choice}' needs a reason")
         if choice == "escalate" and row["escalated"]:
             raise EngineError(f"{node_id} is already escalated")
@@ -251,7 +263,9 @@ class Engine:
             c.execute("INSERT INTO decisions VALUES (?,?,?,?,?,?,?,?,?,?)",
                       (decision_id, run_id, node_id, p.key_id, p.role, choice, reason,
                        row["bound"], "ACTIVE", now))
-            if choice == "approve":
+            if choice == "answer":
+                self._answer(c, run_id, node, row, option, text, data, actor)
+            elif choice == "approve":
                 self.store.set_node(c, run_id, node_id, state="SUCCEEDED", ended_at=now, deadline=None)
                 self._audit(c, run_id, "GATE_APPROVED", target=node_id, reason=reason, data=data, **actor)
                 self._recovered(c, run_id, node_id, row)
@@ -278,6 +292,42 @@ class Engine:
                     facts = {**self.store.run(run_id)["facts"], "rework_reason": reason}
                     self.store.set_run(c, run_id, facts=facts, state="RUNNING")
         return decision_id
+
+    def _answer(self, c: sqlite3.Connection, run_id: str, node: Node, row: dict, option: str | None,
+                text: str | None, data: dict[str, Any], actor: dict[str, Any]) -> None:
+        """Clarification answer: a listed option resolves the gate; free text is never interpreted
+        and reopens it, up to the gate's round limit (plan §16.1 C1)."""
+        gate = node.gate
+        assert gate is not None
+        now = self.clock.now()
+        if text is not None:
+            rounds = row["rework"] + 1
+            self.store.set_node(c, run_id, node.id, rework=rounds)
+            self._audit(c, run_id, "CLARIFICATION_FREE_TEXT", target=node.id, reason=text,
+                        data={**data, "round": rounds}, **actor)
+            if rounds >= gate.max_rounds:
+                self._safe_stop(c, run_id, "clarification_limit_exceeded", node.id)
+            else:
+                self.store.set_node(c, run_id, node.id, deadline=now + gate.timeout_s)
+                self._audit(c, run_id, "CLARIFICATION_REOPENED", target=node.id,
+                            reason="free text cannot be interpreted; choose an offered option",
+                            data={"round": rounds + 1, "options": gate.options})
+            return
+        chosen = gate.options[option]
+        version = self.store.add_artifact(c, run_id, "clarification", {
+            "option_id": option, "label": chosen.get("label"), "decided_by": actor["actor_id"]},
+            f"human:{actor['actor_id']}", now)
+        self._audit(c, run_id, "CLARIFICATION_ANSWERED", target=node.id,
+                    data={**data, "option_id": option, "label": chosen.get("label"),
+                          "artifact": {"clarification": version}}, **actor)
+        facts = {**self.store.run(run_id)["facts"], "clarification_option": option}
+        self.store.set_run(c, run_id, facts=facts)
+        if chosen.get("action") == "abort":
+            self.store.set_node(c, run_id, node.id, state="FAILED", deadline=None)
+            self._finish(c, run_id, "ABORTED", f"clarification option {option}: {chosen.get('label')}")
+        else:
+            self.store.set_node(c, run_id, node.id, state="SUCCEEDED", ended_at=now, deadline=None)
+            self.store.set_run(c, run_id, state="RUNNING")
 
     # ---- replanning ------------------------------------------------------------------------------
     def new_artifact_version(self, run_id: str, name: str, content: Any, presented: str | None,
@@ -356,14 +406,16 @@ class Engine:
                 if node.condition and not _condition_holds(node.condition, facts):
                     self.store.set_node(c, run_id, nid, state="SKIPPED")
                     self._audit(c, run_id, "NODE_SKIPPED", target=nid,
-                                reason=f"condition not met: {node.condition}")
+                                reason=node.skip_reason or f"condition not met: {node.condition}",
+                                data={"condition": node.condition})
                 elif node.gate:
                     bound = {a: (self.store.artifact(run_id, a) or (0, None))[0] for a in node.gate.binds}
                     deadline = self.clock.now() + node.gate.timeout_s
                     self.store.set_node(c, run_id, nid, state="AWAITING_APPROVAL", deadline=deadline,
                                         bound=json.dumps(bound))
                     self._audit(c, run_id, "GATE_OPENED", target=nid, data={
-                        "bound": bound, "roles": list(node.gate.roles), "deadline": deadline})
+                        "bound": bound, "roles": list(node.gate.roles), "deadline": deadline,
+                        "kind": node.gate.kind, "options": node.gate.options})
                 else:
                     self.store.set_node(c, run_id, nid, state="READY", not_before=0)
                     self._audit(c, run_id, "NODE_READY", target=nid)
@@ -402,8 +454,9 @@ class Engine:
         inputs = {a: (self.store.artifact(run_id, a) or (0, None))[1] for a in node.consumes}
         execution = self.store.nodes(run_id)[nid]["runs_total"]
         ctx = {"run_id": run_id, "node_id": nid, "attempt": attempt, "execution": execution,
-               "params": call.params,
-               "inputs": inputs, "facts": facts, "workspace": str(self.workspace_path(run_id))}
+               "params": call.params, "inputs": inputs, "facts": facts,
+               "workspace": str(self.workspace_path(run_id)), "var_dir": str(self.var),
+               "repo_root": str(self.source_dir) if self.source_dir else None}
         ctx_path.write_text(json.dumps({"agent": call.agent, "ctx": ctx}), encoding="utf-8")
         env = {**os.environ, "PYTHONPATH": str(SRC_ROOT)}
         with (io / f"{tag}.stderr.txt").open("w", encoding="utf-8") as err:
@@ -425,7 +478,9 @@ class Engine:
         if proc.returncode != 0 or not result_path.exists():
             return Outcome(False, "unclassified", started=started, ended=ended)
         result = json.loads(result_path.read_text(encoding="utf-8"))
-        return Outcome(result["ok"], result.get("code"), result.get("outputs", {}), started, ended)
+        return Outcome(result["ok"], result.get("code"), result.get("outputs", {}), started, ended,
+                       {**result.get("details", {}), **({"message": result["message"]}
+                                                         if result.get("message") else {})})
 
     def _commit(self, run_id: str, nid: str, out: Outcome) -> None:
         node = self.wf.nodes[nid]
@@ -476,7 +531,7 @@ class Engine:
             if code == "timeout":
                 self._audit(c, run_id, "TIMEOUT", target=nid, data={"timeout_s": node.timeout_s})
             self._audit(c, run_id, "NODE_ATTEMPT_FAILED", target=nid, result="failed", reason=code,
-                        data={"attempt": row["attempts"], "classification": kind})
+                        data={"attempt": row["attempts"], "classification": kind, **out.details})
             self._failure_detected(c, run_id, nid, row, code)
             if kind == "transient" and row["attempts"] < node.max_attempts:
                 delay = node.backoff_s * 2 ** (row["attempts"] - 1)

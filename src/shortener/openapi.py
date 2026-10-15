@@ -1,16 +1,23 @@
-"""Export the shortener OpenAPI contract: `python -m shortener.openapi [path]`."""
+"""Generate the shortener OpenAPI contract from the app: `python -m shortener.openapi [path]`.
+
+The generated file is the single source of the contract (CR-007). Never edit it by hand.
+"""
 from __future__ import annotations
 
-import json
 import sys
 import tempfile
 from pathlib import Path
 from typing import Any
 
+import yaml
+
 from shortener.app import create_app
 from shortener.config import Settings
 
-CONTRACT = Path(__file__).resolve().parents[2] / "contracts" / "shortener-api.openapi.json"
+CONTRACT = (Path(__file__).resolve().parents[2] / "specs" / "001-agentic-sdlc-url-shortener"
+            / "contracts" / "shortener-api.openapi.yaml")
+HEADER = ("# GENERATED from the running app by `python -m shortener.openapi` (CR-007).\n"
+          "# Single source of the shortener contract; do not edit by hand.\n")
 
 
 def generate() -> dict[str, Any]:
@@ -20,11 +27,14 @@ def generate() -> dict[str, Any]:
 
 
 def render(spec: dict[str, Any]) -> str:
-    return json.dumps(spec, indent=2, sort_keys=True) + "\n"
+    return HEADER + yaml.safe_dump(spec, sort_keys=True, allow_unicode=True, width=100)
+
+
+def load(path: Path = CONTRACT) -> dict[str, Any]:
+    return yaml.safe_load(path.read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":
     target = Path(sys.argv[1]) if len(sys.argv) > 1 else CONTRACT
-    target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(render(generate()), encoding="utf-8")
     print(f"wrote {target}")

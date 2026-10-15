@@ -1061,8 +1061,8 @@ No constitution violations. Justified complexity (CON VII):
 
 ## Architecture Decision Records
 
-19 ADRs in [`docs/adr/`](../../docs/adr/README.md) (all **Proposed** until the human owner
-accepts them; numbering updated by CR-002):
+19 ADRs in [`docs/adr/`](../../docs/adr/README.md) (all accepted at Human Gate 4, Mani Kumar Vadugu,
+2026-10-15; numbering updated by CR-002):
 
 ADR-001 language and framework (R-01) · ADR-002 persistence (R-02) · ADR-003 orchestration model:
 in-repo engine and superstep scheduler (R-03, R-05, PD-004) · ADR-004 application architecture,

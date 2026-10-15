@@ -1,0 +1,31 @@
+# Claude Code local/private settings (keep .claude/skills tracked)
+.claude/settings.local.json
+.claude/*.local.*
+.claude/credentials*
+
+# Secrets
+.env
+.env.*
+
+# Assignment source files are company-internal: never commit
+*.pdf
+*.docx
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local data
+*.db
+*.sqlite3
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

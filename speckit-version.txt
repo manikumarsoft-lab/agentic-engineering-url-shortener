@@ -1,0 +1,1 @@
+specify-cli 1.2.1.dev0 (installed from github.com/github/spec-kit, 2026-10-15)

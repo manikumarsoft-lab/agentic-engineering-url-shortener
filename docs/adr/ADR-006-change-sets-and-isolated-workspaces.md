@@ -4,13 +4,15 @@
 
 **Accepted (Mani Kumar Vadugu, human owner, 2026-10-15)**
 
-History: Proposed 2026-10-15. Related plan-gate approvals: PD-009 (baseline ref), PD-012 (test
+History: Proposed 2026-10-15. Amended 2026-10-15 by CR-004 (provenance wording only; the
+decision is unchanged). Related plan-gate approvals: PD-009 (baseline ref), PD-012 (test
 failure → rollback → FAILED) (Mani Kumar Vadugu, 2026-10-15). Change-set format (research R-06) is
 pending this ADR.
 
 ## Context
 
-In deterministic mode, ST-08 applies a pre-authored, human-reviewed change set to an isolated copy
+In deterministic mode, ST-08 applies a change set authored with AI assistance (Claude Code) during
+development and reviewed and locked by the human owner (CR-004) to an isolated copy
 of the system under change; a run never modifies the main working tree (Clarification Q1,
 FR-ORC-032..036). Integrity must be verified against the approved version (CHG-001), the
 actually-touched scope must stay within the approved impact analysis (SCN-B-AC5, CHG-002), and a
@@ -55,8 +57,8 @@ on each other (R0 → R1 → R2 → R3). The reference workstation has `core.aut
 ## Decision
 
 Option A. Additional rules:
-1. Manifest fields: `scenario`, `variant` (`normal`/`defective`/`undeclared-scope`/…), `base_release`, `declared_components`, `contract_version_after`, `migration_class`, `reviewer`, `ai_assistance_disclosure`.
-2. Provenance label on applied artifacts: "pre-authored, human-reviewed change set, applied by deterministic agent" (FR-ORC-034).
+1. Manifest fields: `scenario`, `variant` (`normal`/`defective`/`undeclared-scope`/…), `base_release`, `declared_components`, `contract_version_after`, `migration_class`, `reviewer`, `ai_assistance_disclosure` (fixed required text equal to the provenance label below; a manifest without it, or with different text, is `manifest_invalid`; CR-004).
+2. Provenance label on applied artifacts: "Authored with AI assistance (Claude Code) during development; reviewed and locked by the human owner (Mani Kumar Vadugu); applied by the deterministic agent, not generated at run time." (FR-ORC-034 as amended by CR-004).
 3. **Change sets may not add or change third-party dependencies** (the lockfile is repository-level and outside the workspace); a manifest declaring dependency changes is rejected (`manifest_invalid`). *(Ruled by the human owner at Human Gate 4, ruling 3, 2026-10-15: change sets may NOT add or
    change dependencies.)*
 4. Release snapshots: R0 from git ref `shortener-baseline-v1` (PD-009) via `git archive`; R(n+1) = workspace of the run that promoted it. Snapshots are immutable under `var/releases/`.

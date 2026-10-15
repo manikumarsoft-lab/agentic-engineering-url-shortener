@@ -118,7 +118,7 @@ dynamic nodes), `edges` json, `created_reason` (`initial`/`replan:<replan_id>`),
 | `content_hash` | SHA-256 of canonical content |
 | `status` | `current` / `stale` / `superseded` / `rolled_back` |
 | `degraded` | bool |
-| provenance | `produced_by_node`, `attempt_id`, `actor_type`, `actor_id`, `agent_mode`, `input_versions` json `[{artifact_id, version, hash}]`, `created_at`, `provenance_label` (fixed text for change sets, FR-ORC-034) |
+| provenance | `produced_by_node`, `attempt_id`, `actor_type`, `actor_id`, `agent_mode`, `input_versions` json `[{artifact_id, version, hash}]`, `created_at`, `provenance_label` (for change sets the fixed text "Authored with AI assistance (Claude Code) during development; reviewed and locked by the human owner (Mani Kumar Vadugu); applied by the deterministic agent, not generated at run time."; FR-ORC-034, CR-004) |
 
 #### Requirement — table `requirements` (run level)
 

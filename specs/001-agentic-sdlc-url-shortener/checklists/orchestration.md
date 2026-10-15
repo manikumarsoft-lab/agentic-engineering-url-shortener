@@ -23,7 +23,7 @@
 
 - [ ] CHK008 Is each conditional branch listed with its condition and a recorded skip reason (G-CLARIFY, ST-05, G-SECURITY, REL-02/G-CORRECTIVE)? [Clarity, Spec §FR-ORC-007; Plan §3.2; workflow-graph.v2.yaml] [D01] [Mandatory]
 - [ ] CHK009 Are sync-point release conditions specified for suspended, failed and blocked branches? [Edge Case, Spec §FR-ORC-039] [D04] [Mandatory]
-- [ ] CHK010 Does the Glossary definition of "dependent path" (transitive successors plus consumers of their artifacts) let every node be classified unambiguously as dependent or independent? [Clarity, Spec §Glossary (CR-003), §FR-ORC-022; ADR-017] [D21] [Mandatory]
+- [ ] CHK010 Does the Glossary definition of "dependent path" (all nodes reachable downstream from the affected node in the run's graph instance, up to and including the next synchronization point) let every node be classified unambiguously as dependent or independent? [Clarity, Spec §Glossary (CR-003), §FR-ORC-022; ADR-017] [D21] [Mandatory]
 - [ ] CHK011 Is a scheduler-stall condition defined, with safe-stop as its outcome? [Edge Case, Plan §6.1 (CR-002); ADR-013] [D19] [Mandatory]
 - [ ] CHK012 Is it specified that deterministic late-ambiguity demonstrations use labeled finding injection, so they are not presented as organic detection? [Clarity, ADR-017; CON X] [D23] [Mandatory]
 

@@ -5,7 +5,7 @@
 
 **Created**: 2026-10-15
 
-**Status**: Approved (Human Gate 3, 2026-10-15, Mani Kumar Vadugu). Ready for /speckit-plan.
+**Status**: Approved; plan, ADRs, checklists and tasks complete; awaiting T001 checklist review and T003 task-plan approval
 
 **Input**: User description: "Build a production-grade prototype titled 'Agentic Software
 Engineering System: URL Shortener'": a governed agentic execution system that turns software
@@ -83,7 +83,7 @@ synchronization points SP-1 and SP-2 (FR-ORC-037 to FR-ORC-039).
 
 Decider for all answers in this session: Mani Kumar Vadugu (human owner).
 
-- Q: In deterministic mode, what does the Implementation stage (ST-08) actually do to the URL shortener's code? → A: Option A. It applies a pre-authored, human-reviewed change set stored in the repository to an isolated copy of the system under change; the main working tree is never modified by a run. Integrity is verified against the approved version before applying; ST-09 runs new and regression tests on the isolated copy; on failure the copy is discarded (rollback). Provenance is always recorded as "pre-authored, human-reviewed change set, applied by deterministic agent", never as agent- or AI-generated code. A deliberately defective SCN-B variant exists solely to demonstrate rollback. (→ FR-ORC-032 to FR-ORC-036)
+- Q: In deterministic mode, what does the Implementation stage (ST-08) actually do to the URL shortener's code? → A: Option A. It applies a pre-authored, human-reviewed change set stored in the repository to an isolated copy of the system under change; the main working tree is never modified by a run. Integrity is verified against the approved version before applying; ST-09 runs new and regression tests on the isolated copy; on failure the copy is discarded (rollback). Provenance is always recorded as "pre-authored, human-reviewed change set, applied by deterministic agent", never as agent- or AI-generated code. A deliberately defective SCN-B variant exists solely to demonstrate rollback. (→ FR-ORC-032 to FR-ORC-036) *(CR-004 note, 2026-10-15: the provenance label quoted in this answer is superseded by FR-ORC-034 as amended. Change sets are authored with AI assistance (Claude Code) during development, reviewed and locked by the human owner, and applied (not generated) by the deterministic agent. The answer above is kept unchanged as the clarification record.)*
 - Q: Which stages run in parallel in the default workflow graph, and where do they synchronize before release readiness? → A: Option B. There are two forks and two synchronization points. Fork 1 opens after design approval (ST-07) and has three branches: implementation then testing (ST-08 → ST-09), documentation drafting (ST-10a) and threat/risk review drafting (ST-11a). Sync point 1 (SP-1) waits for all three. Fork 2 runs documentation finalization (ST-10b) in parallel with security validation (ST-11b). Sync point 2 (SP-2) waits for both before release readiness (ST-12). (→ FR-ORC-037 to FR-ORC-039)
 - Q: Within the 2–3 day timebox, which requirements should be proposed as must-have and which as deferrable? → A: Option A (tiered), recorded as a **proposal only**; the final scope cut is made and approved at `/speckit-plan`. (→ CST-008) Settled by PD-010, approved at plan gate (Mani Kumar Vadugu, 2026-10-15); see plan.md §14.1.
 - Q: When an approval gate times out with no decision, or a reviewer rejects, what exact state should the workflow move to? → A: Option A. A timeout puts the run in `SAFE_STOPPED` (resumable), audited as "no decision" and never as approval; resuming re-opens the same gate on the same artifact version and requires an approver-role key. On rejection the reviewer must choose either "reject and rework" (the producing stage is re-executed with the reason, at most PVT-013 rework cycles per gate per run, then safe-stop) or "reject and terminate" (`ABORTED`). (→ FR-GOV-014 to FR-GOV-016, PVT-013)
@@ -97,12 +97,12 @@ Decider for all answers in this session: Mani Kumar Vadugu (human owner).
 | DQ-002 | Must analytics counts be exact under concurrent redirects? | Persistence design, US-1 AC3 testability | A-013: exact, with no lost increments | Human owner | **Resolved** at spec approval gate (Human Gate 3, 2026-10-15): assumption approved as written |
 | DQ-003 | How is expiration evaluated at the boundary, and in which time zone? | Expiration tests | A-014: UTC; expired when resolution time ≥ expiration time | Human owner | **Resolved** at spec approval gate (Human Gate 3, 2026-10-15): assumption approved as written |
 | DQ-004 | Is rate limiting keyed per API key or per network client? | Abuse control, tests | A-015: per API key for creation | Human owner | **Resolved** at spec approval gate (Human Gate 3, 2026-10-15): assumption approved as written |
-| DQ-005 | What is the audit retention period? | Policy set content | A-007 | Human owner | `/speckit-plan` (policy set) |
+| DQ-005 | What is the audit retention period? | Policy set content | A-007 | Human owner | **Resolved** at plan gate (2026-10-15): PD-002b, ≥ 365 days, no automated deletion (policy AUD-001) |
 | DQ-006 | Who may resume a run from a safe-stop not caused by a timeout (e.g., a policy FAIL)? | Governance, authorization tests | A-016: approver role, after the cause is resolved or excepted | Human owner | **Resolved** at spec approval gate (Human Gate 3, 2026-10-15): assumption approved as written |
-| DQ-007 | Which concrete failure types are transient (retryable) and which are permanent? | Retry tests | Classified per stage in the plan (CON VIII) | Agent proposes, human approves | `/speckit-plan` |
-| DQ-008 | Which technology stack (language, persistence, agent framework, runtime)? | Everything downstream | Deferred (CST-002) | Human owner | `/speckit-plan` and ADR gate |
+| DQ-007 | Which concrete failure types are transient (retryable) and which are permanent? | Retry tests | Classified per stage in the plan (CON VIII) | Agent proposes, human approves | **Resolved** at plan gate (2026-10-15): PD-003 (Plan §6.2; ADR-013) |
+| DQ-008 | Which technology stack (language, persistence, agent framework, runtime)? | Everything downstream | Deferred (CST-002) | Human owner | **Resolved** by human selection (2026-10-15): R-01 to R-04; ADR-001 to ADR-004 accepted at Human Gate 4 |
 | DQ-009 | Are PVT-001 to PVT-013 approved, changed, or rejected? | Pass/fail criteria | Proposals only | Human owner | **Resolved** at spec approval gate (Human Gate 3, 2026-10-15): PVT-003 to PVT-013 approved; PVT-001/002 approved as non-gating demonstration targets |
-| DQ-010 | What is the final must-have vs deferrable scope cut? | Schedule, limitations | CST-008 proposal | Human owner | `/speckit-plan` |
+| DQ-010 | What is the final must-have vs deferrable scope cut? | Schedule, limitations | CST-008 proposal | Human owner | **Resolved** at plan gate (2026-10-15): PD-010 (Plan §14.1) |
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -366,9 +366,11 @@ recorded clarification and any policy decision (FR-SHR-023).
 - Extremely long URL, malformed URL, URL with embedded credentials, or non-printable characters:
   rejected with a specific validation reason.
 - Expiration supplied in the past, or malformed: rejected at creation.
-- The orchestration process is interrupted mid-stage: on restart, the run resumes from
-  persisted state; completed idempotent stages are not re-executed; the interrupted stage is
-  retried or marked failed according to its failure classification.
+- The orchestration process is interrupted mid-stage: on restart, the run enters
+  `SAFE_STOPPED` (reason `interrupted`) from persisted state and resumes only by an authorized
+  human action (FR-ORC-019); on resume, completed stages are not re-executed and the interrupted
+  stage is retried or marked failed according to its failure classification (CR-005; Plan §6.3,
+  PD-011, ADR-013).
 - An approval arrives for a stale artifact version (superseded by replanning): it is refused
   and the reviewer is shown the current version.
 - An upstream artifact changes while a downstream parallel branch is mid-execution: the
@@ -456,7 +458,7 @@ recorded clarification and any policy decision (FR-SHR-023).
 | FR-ORC-031 | C | Each required scenario (SCN-A, SCN-B, SCN-C) MUST be executed as a workflow run of the orchestration system and produce recorded state transitions, gate events, approvals, and audit records. | HD-002 |
 | FR-ORC-032 | C | In deterministic mode, ST-08 MUST implement a change by applying a pre-authored change set stored in the repository to an isolated copy of the system under change; a workflow run MUST NOT modify the main working tree. | Clarification 2026-10-15 Q1 |
 | FR-ORC-033 | C | A change set MUST be human-reviewed and approved before use; before applying it, ST-08 MUST verify its integrity against the approved version, and any mismatch MUST produce a mandatory policy `FAIL` and safe-stop. | Clarification 2026-10-15 Q1, CON VI |
-| FR-ORC-034 | C | Change-set artifacts MUST carry the provenance label "pre-authored, human-reviewed change set, applied by deterministic agent" (including disclosure if AI assistance was used during authoring) and MUST NOT be presented as agent-generated or AI-generated at run time. | Clarification 2026-10-15 Q1, CON X |
+| FR-ORC-034 | C | Change-set artifacts MUST carry the fixed provenance label "Authored with AI assistance (Claude Code) during development; reviewed and locked by the human owner (Mani Kumar Vadugu); applied by the deterministic agent, not generated at run time." and MUST NOT be presented as agent-generated or AI-generated at run time. | Clarification 2026-10-15 Q1, CON X, CR-004 |
 | FR-ORC-035 | C | ST-09 MUST execute new and regression tests against the isolated copy; on test failure the isolated copy MUST be discarded (rollback to last known-good), and the rollback MUST be recorded with evidence. | Clarification 2026-10-15 Q1, SCN-B-AC4 |
 | FR-ORC-036 | C | A deliberately defective SCN-B change-set variant MUST exist solely to demonstrate rollback; runs using it MUST be labeled as fault-injection demonstrations. | Clarification 2026-10-15 Q1, CON IX |
 | FR-ORC-037 | C | The default graph MUST contain fork 1 after design approval (ST-07), with three parallel branches: (a) ST-08 Implementation → ST-09 Testing; (b) ST-10a Documentation drafting from the approved design; (c) ST-11a Threat and risk review drafting from the approved design. Synchronization point SP-1 MUST wait for all three branches to reach a successful exit. | Clarification 2026-10-15 Q2 |
@@ -569,8 +571,8 @@ Targets marked PVT are proposals requiring approval (see Proposed Validation Tar
   version on replanning.
 - **Agent**: role, declared permissions, execution mode (deterministic or AI-backed, HD-001).
 - **Change Set**: scenario reference, variant (normal or fault-injection), approved version
-  fingerprint, reviewer and approval timestamp, provenance label (FR-ORC-034), AI-assistance
-  disclosure.
+  fingerprint, reviewer and approval timestamp, provenance label (FR-ORC-034: fixed text that
+  includes the AI-assistance disclosure, CR-004).
 - **API Key / Role Binding**: key identity (non-secret), role (`consumer`, `engineer`,
   `approver`, `release-owner`, `agent`), actor type (human or agent), status (HD-003).
 - **Artifact**: type (normalized requirement, task plan, design, code change, test result,
@@ -809,3 +811,6 @@ source `HD-nnn`) and change only through change control (CON VI).
 | CR-001 | 2026-10-15 | Mani Kumar Vadugu | CST-008 marked settled by PD-010 | wording only, no downstream impact |
 | CR-002 | 2026-10-15 | Mani Kumar Vadugu | Plan/ADR conflict resolutions; FR-GOV-003/015 interpretation recorded in plan §5.3 and ADR-016 | no spec requirement text changed |
 | CR-003 | 2026-10-15 | Mani Kumar Vadugu | Close 8 checklist gaps: SC-002 per-scenario evidence; NFR-SEC-003 redirect-volume accepted risk (BL-13); FR-GOV-017 separation of duties; Glossary; FR-OBS-010 orphan detection; NFR-DOC-001 docs accuracy; CST-009 submission; SCN-A classification rationale and SCN-A-AC6 | clarifications and additions only; no approved requirement removed or weakened; downstream: checklists and gates updated; plan, data-model, graph and tasks to pick up FR-GOV-017, FR-OBS-010, NFR-DOC-001, CST-009, SCN-A-AC6 |
+| CR-003 follow-up | 2026-10-15 | Mani Kumar Vadugu | Glossary definitions replaced with the human owner's text (personal data, fails materially, dependent path); SCN-A-AC6 failure behavior (reroute to ST-05, never greenfield) | wording/clarification only; plan, data model and graph aligned (graph 2.1.0, orchestrator API 2.1.0) |
+| CR-004 | 2026-10-15 | Mani Kumar Vadugu | Provenance: FR-ORC-034 label replaced with the fixed AI-assistance provenance text; Key Entities aligned; Clarify Q1 annotated (history unchanged) | wording of a required label; plan, research, data model, ADR-006 and tasks aligned; no contract version change (label is free text in schemas) |
+| CR-005 | 2026-10-15 | Mani Kumar Vadugu | Edge case for interrupted runs aligned with FR-ORC-019, Plan §6.3, PD-011 and ADR-013 (SAFE_STOPPED, human-authorized resume) | removes an internal spec inconsistency; no requirement weakened |

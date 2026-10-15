@@ -31,8 +31,9 @@ Build two cooperating, locally runnable Python services in one repository:
    and an HTTP API expose it.
 
 The three required scenarios (SCN-A expiration and analytics, SCN-B custom aliases, SCN-C "track
-who clicks links") are **executions of the engine**. Deterministic agents apply **pre-authored,
-human-reviewed change sets** to **isolated copies** of the shortener, run real tests, and promote
+who clicks links") are **executions of the engine**. Deterministic agents apply **change sets
+authored with AI assistance (Claude Code) during development and reviewed and locked by the human
+owner** (CR-004) to **isolated copies** of the shortener, run real tests, and promote
 validated releases to a **local staging instance** after a human release decision. The developer
 working tree is never modified by a run (FR-ORC-032, FR-ORC-043).
 
@@ -265,6 +266,9 @@ transitions). State machines: [data-model.md §2](./data-model.md).
 | `engine/transitions.py` | One DB transaction per transition: state update + audit append + idempotency key (`transition_key` unique) |
 | `engine/gates.py` | Gate lifecycle, role checks, artifact-version binding, timeouts, rework bounds |
 | `engine/retry.py` | Failure classification lookup, retry budget, backoff schedule, timeout enforcement |
+| `engine/criteria.py` | Entry/exit criteria and conditional-skip evaluation with recorded refusal and skip reasons |
+| `engine/fallback.py` | Graph-declared fallbacks; degraded marking; `FALLBACK_USED` |
+| `engine/faults.py` | Fault injector (test configuration and labeled runs only) |
 | `engine/replan.py` | Artifact supersession → stale closure → approval revocation → graph instance v+1 → re-run affected nodes |
 | `engine/recovery.py` | Startup recovery (interrupted runs → `SAFE_STOPPED`), resume, compensation orchestration |
 | `policy/` | Policy-set loader, evaluator, checks, exceptions |
@@ -446,8 +450,7 @@ each change in the same transaction as its audit event:
 
 Provenance on every artifact version (FR-ORC-012): producing node and attempt, actor, agent mode,
 run ID, input artifact versions, timestamp, content hash. Change-set artifacts carry the fixed
-label "pre-authored, human-reviewed change set, applied by deterministic agent" plus AI-assistance
-disclosure (FR-ORC-034).
+label "Authored with AI assistance (Claude Code) during development; reviewed and locked by the human owner (Mani Kumar Vadugu); applied by the deterministic agent, not generated at run time." (FR-ORC-034 as amended by CR-004).
 
 ---
 
@@ -748,8 +751,10 @@ Red (write the test, run it, record the failure reason in the task log) → Gree
 
 A `FaultInjector` capability is available **only** in test configuration and in runs explicitly
 labeled `fault-injection`. Faults: `transient_n(node, n)`, `permanent(node)`, `timeout(node)`,
-`kill_after(node)`, `scanner_unavailable`, `smoke_fail`, `compensation_fail`, `db_locked`. It is
-never enabled by default and every injected fault is audited.
+`kill_after(node)`, `scanner_unavailable`, `smoke_fail`, `compensation_fail`, `db_locked`, and
+`raise_ambiguity(node)`. `raise_ambiguity` labels the run `finding-injection` instead of
+`fault-injection` (analysis finding M1). It is never enabled by default and every injected fault
+is audited.
 
 ### 10.4 Where TDD is not practical (recorded per CON IV)
 
@@ -1046,7 +1051,7 @@ src/
 policy/                     # approved-dependencies.yaml, license-allowlist.yaml (policy set itself: contracts/)
 changesets/                 # scn-a/normal, scn-b/{normal,defective,undeclared-scope}, scn-c/aggregate-daily, approved.lock.yaml
 scenarios/                  # scn-a, scn-b, scn-c: requirement.md, decisions.scripted.yaml, expected.yaml
-tools/                      # check.py, trace/build_matrix.py
+tools/                      # check.py, trace/build_matrix.py, perf/measure.py
 docs/                       # adr/, architecture.md, threat-model.md, testing.md, limitations.md, release-readiness.md, traceability.md, evidence/
 tests/
 ├── shortener/{unit,contract,persistence,integration,concurrency,security}
@@ -1073,6 +1078,12 @@ No constitution violations. Justified complexity (CON VII):
 | Hash-chained audit | Tamper evidence for append-only claims (FR-OBS-004) | Triggers alone do not detect out-of-band file edits |
 | Release snapshots (R0..Rn) | Compensation needs a previous release to re-promote; brownfield chain | Re-building from the working tree would violate FR-ORC-043 and break reproducibility |
 
+### Constitution exceptions (Governance §2)
+
+| ID | Principle / rule | Scope | Reason | Compensating control | Approver | Approved | Review condition |
+|----|------------------|-------|--------|----------------------|----------|----------|------------------|
+| CEX-001 (constitution exception) | Development Workflow: "Every task MUST reference … the test(s) that verify it" | tasks.md human-decision and checkpoint tasks | These tasks are human decisions, not code; no automated test can verify a decision | Verification = a recorded human decision (approver, timestamp, artifact version) in the decision/audit log; T127 traceability check confirms each such decision exists | Mani Kumar Vadugu (human owner) | 2026-10-15 | Re-evaluated at `/speckit-converge` |
+
 ## Architecture Decision Records
 
 19 ADRs in [`docs/adr/`](../../docs/adr/README.md) (all accepted at Human Gate 4, Mani Kumar Vadugu,
@@ -1095,6 +1106,9 @@ consistency.
 |----|------|----------|--------|--------|
 | CR-002 | 2026-10-15 | Mani Kumar Vadugu (Human Gate 4) | Resolve the five ADR-gate conflicts and apply rulings 2 and 4 | See impact analysis below |
 | CR-003 follow-up | 2026-10-15 | Mani Kumar Vadugu | plan aligned with CR-003; glossary defined by human owner | Contracts: workflow graph 2.0.0 → 2.1.0 and orchestrator API 2.0.0 → 2.1.0 (MINOR; Change Record in contracts/README.md) |
+| CR-004 | 2026-10-15 | Mani Kumar Vadugu | Provenance label replaced with the fixed AI-assistance text (§Summary, §4) | Spec FR-ORC-034, research R-06, data model, ADR-006 and tasks aligned; no contract version change |
+| CR-005 | 2026-10-15 | Mani Kumar Vadugu | Spec interruption edge case aligned with §6.3 / PD-011 | No plan change needed |
+| Analysis remediation | 2026-10-15 | Mani Kumar Vadugu | §3.1 modules added (criteria, fallback, faults; tools/perf); §10.3 `raise_ambiguity` → `finding-injection`; CEX-001 recorded under Complexity Tracking | Tasks regenerated with stable IDs (see tasks.md) |
 
 ### CR-002 impact analysis
 

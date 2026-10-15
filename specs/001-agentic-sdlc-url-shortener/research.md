@@ -116,16 +116,17 @@ Node 24.20.0, npm 11.19.0 present; Java, Go, .NET and Docker absent.
 
 ## R-06: Change-set format and application: Accepted via ADRs (Mani Kumar Vadugu, 2026-10-15)
 
-- **Question**: How does ST-08 apply a pre-authored, human-reviewed change in isolation
-  (FR-ORC-032–036)?
+- **Question**: How does ST-08 apply, in isolation, a change set authored with AI assistance
+  (Claude Code) during development and reviewed and locked by the human owner (FR-ORC-032–036,
+  CR-004)?
 - **Options**: (a) unified diff + `manifest.yaml` + `approved.lock.yaml`, applied with
   `git apply --check` then `git apply` inside a copied workspace; (b) full-file overlay
   directories; (c) Python AST transforms.
 - **Assessment**: (a) human-reviewable, precise scope extraction for CHG-002, standard tool;
   (b) simpler application but hides intent and makes scope reviews harder; (c) over-engineered.
 - **Selected**: (a). The manifest declares `scenario`, `variant`, `base_release`,
-  `declared_components`, `contract_version_after`, `migration_class`, `ai_assistance_disclosure`,
-  and the human reviewer. The lock stores the SHA-256 of the manifest+patch bundle. ST-08 verifies
+  `declared_components`, `contract_version_after`, `migration_class`, `ai_assistance_disclosure`
+  (fixed required text equal to the FR-ORC-034 label, CR-004), and the human reviewer. The lock stores the SHA-256 of the manifest+patch bundle. ST-08 verifies
   lock == bundle == gate-bound fingerprint (CHG-001), then compares actually-touched files with
   approved impact components (CHG-002).
 - **Consequences**: `git` CLI is a prerequisite (behind a `PatchApplier` interface); workspaces

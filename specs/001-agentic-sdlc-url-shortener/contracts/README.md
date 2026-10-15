@@ -106,6 +106,6 @@ Copy into the PR description (repository changes) or produce as the `change-reco
 
 | Run | Shortener API | DB | Class |
 |-----|---------------|----|-------|
-| SCN-A | 1.1.0: `expires_at` (optional) on create; `410 link_expired`; `422 invalid_expiration`; `GET /api/v1/links/{code}/analytics` | `0002`: `links.expires_at`, `link_stats` | MINOR / additive |
+| SCN-A | 1.1.0: `expires_at` (optional) on create; `410 link_expired`; `422 invalid_expiration`; `GET /api/v1/links/{code}/analytics`; `/health/ready` detail adds the `analytics_write_failures` counter (ADR-019, Human Gate 4 ruling 2) | `0002`: `links.expires_at`, `link_stats` | MINOR / additive |
 | SCN-B | 1.2.0: `alias` (optional) on create; `409 alias_conflict`; `422 alias_invalid`, `alias_reserved` | `0003`: `links.code_origin` default `generated` | MINOR / additive |
 | SCN-C (option A) | 1.3.0: `daily` object in analytics response | `0004`: `link_daily_stats` | MINOR / additive |

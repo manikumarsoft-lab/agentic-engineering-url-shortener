@@ -12,7 +12,9 @@ plan.md §16.5 (HD-CUT-001).
 
 **Rule**: everything in §1 works and is covered by automated tests (`python -m pytest`, run in CI).
 Everything in §2 is **planned, not implemented**. It is disclosed as a limitation and never
-presented as built. Status as of CR-008 (2026-10-15).
+presented as built. Status as of CR-008 (2026-10-15); corrected 2026-10-16 by the final
+assessment ([docs/reviews/final-assessment.md](../reviews/final-assessment.md)): fork topology,
+provenance label, baseline tag and README status.
 
 ---
 
@@ -38,7 +40,7 @@ presented as built. Status as of CR-008 (2026-10-15).
 | Capability | Requirements |
 |------------|--------------|
 | YAML dependency graph with conditional nodes | FR-ORC-005, FR-ORC-007 |
-| Parallel fork and join (superstep, subprocess-isolated agents) | FR-ORC-006, FR-ORC-037..039 |
+| One parallel fork and its join (superstep, subprocess-isolated agents): after `test`, documentation and threat review run in parallel and `validate` waits for both. The two-fork topology of the spec is **not built** (§2.2) | FR-ORC-006 |
 | SQLite-persisted state, artifacts with provenance, decision lineage | FR-ORC-011, FR-ORC-012, FR-ORC-013 |
 | Human gates: approve, reject (rework ≤ 2 / terminate), escalate, timeout → `SAFE_STOPPED`; clarification gates with options, free text reopens, 2 rounds | FR-GOV-001, FR-GOV-002, FR-GOV-014..016 |
 | Agent key refused and audited | FR-GOV-003, NFR-AUT-001, SC-011 |
@@ -85,8 +87,14 @@ shortener in the commit that contains them (`src/`, `tests/shortener`, the gener
 on SCN-A's output and there is no R0→R1→R2 release chain. Each manifest records the SHA-256 of the
 baseline files it patches. Any later edit to those files makes the patches stop applying
 (`patch_does_not_apply`): re-run the authoring tool and lock the change sets again.
-**No baseline tag exists yet**: the human owner should tag the commit that holds the baseline and
-the locked change sets (for example `shortener-baseline-v1`) before recording evidence.
+**Baseline tag**: the human owner created the annotated tag `shortener-baseline-v1` ("baseline
+for locked change sets") on commit `cf833ac`, which holds the baseline and the locked change
+sets. The runs do not verify the lock against this tag (§2.2).
+
+**Provenance label (shortened)**: the change-set manifests and `PROVENANCE` in
+`src/orchestrator/agents/scenario.py` carry "Authored with AI assistance (Claude Code) during
+development; reviewed and locked by the human owner (Mani Kumar Vadugu)" without the spec's
+closing clause. See §2.2 and CR-010.
 
 ---
 
@@ -109,6 +117,13 @@ the locked change sets (for example `shortener-baseline-v1`) before recording ev
 - Undeclared-scope check (CHG-002, SCN-B-AC5): the check exists in `apply_impl` but no test exercises it, so it is not counted as demonstrated.
 - Additive-change check ST-05a (SCN-A-AC6) and the late-ambiguity variant (SCN-A-AC4).
 - AI-backed agent stub (FR-ORC-027, FR-ORC-030).
+- Two-fork topology (FR-ORC-037, FR-ORC-038): fork 1 after design approval with three branches
+  (implement → test, documentation drafting, threat-review drafting) and SP-1, then fork 2
+  (documentation finalization ∥ security validation) and SP-2. Built instead: one fork after
+  `test` (§1.2). FR-ORC-039 holds for that single fork only. Task T259.
+- Full FR-ORC-034 provenance label: the closing clause "; applied by the deterministic agent, not
+  generated at run time." is missing from the label (§1.5). CR-010 proposes keeping the recorded
+  label for this submission (accepted deviation); task T258.
 
 ### 2.3 Observability, traceability and evidence
 
@@ -119,7 +134,10 @@ the locked change sets (for example `shortener-baseline-v1`) before recording ev
 ### 2.4 Tooling, documentation and release
 
 - Coverage gate (PVT-007).
-- Documents planned in tasks.md: architecture, threat model, testing, limitations, change control, reviewer guide, release-readiness report, automated quickstart test (NFR-DOC-001). The README is still a stub.
+- Documents planned in tasks.md: architecture, threat model, testing, limitations, change control, reviewer guide, release-readiness report, automated quickstart test (NFR-DOC-001). README (setup, architecture, testing, limitations,
+  trade-offs, AI-governance section), `docs/security/threat-model.md`,
+  `docs/traceability-matrix.md` and a rewritten quickstart now exist (2026-10-16); the other
+  documents and the automated quickstart test do not.
 - `orch demo reset`, `orch staging bootstrap|status`.
 - Per-task TDD Evidence Log and per-task ceremony (HD-CUT-002).
 
@@ -131,7 +149,7 @@ the locked change sets (for example `shortener-baseline-v1`) before recording ev
 
 ## 3. Open questions for the human owner
 
-1. **README** (setup, architecture, testing, limitations, trade-offs, AI-governance section; CST-003, CST-009) and the **submission tag** are not built. The final engineering summary is built (§1.2).
+1. ~~**README**~~ — built (setup, architecture, testing, limitations, trade-offs, AI-governance section; CST-003, CST-009). The **submission tag** `assessment-submission-v1.0` is still not created (human, T251). The final engineering summary is built (§1.2).
 2. ~~Expiry and stats placement~~ — resolved by HD-SCN-001: they are baseline features.
 3. **Constitution IV (TDD)**: "without per-task ceremony" drops the recorded red phase per task. Scenario change sets do record red then green; the baseline code was not developed red-first. If CON IV requires that record, a Governance §2 exception is needed.
 4. ~~Release gate~~ — built: `approve-release` (release-owner) opens only after the policy checks pass.

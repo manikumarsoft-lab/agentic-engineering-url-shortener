@@ -1,133 +1,160 @@
 # Quickstart and Validation Guide: Feature 001
 
-**Status**: planned commands. **Nothing below has been executed yet.** The commands describe the
-validation path that implementation must make true. Expected outcomes are acceptance targets,
-not recorded results. Recorded evidence will come only from real runs (CON X).
+**Status**: rewritten 2026-10-16 (final assessment gap G3, NFR-DOC-001) from README §2 and §5.
+Every command below exists in this repository. It replaces the earlier planning draft, whose
+commands (`uv sync`, `orch keys init`, `tools/check.py`, `shortener serve`, `orch staging`,
+`orch trace`, `orch demo reset`) were never built. No automated test runs these commands yet
+(NFR-DOC-001 remains PARTIAL, task T282).
 
-References: [plan.md](./plan.md) · [contracts/](./contracts/README.md) ·
-[data-model.md](./data-model.md)
+Shell: Windows PowerShell, from the repository root. On Linux/macOS replace
+`.venv\Scripts\` with `.venv/bin/`.
+
+References: [README.md](../../README.md) ·
+[recording runbook](../../docs/operations/recording-runbook.md) ·
+[plan.md](./plan.md)
 
 ## 1. Prerequisites
 
-- Python 3.12, `uv` ≥ 0.13, `git` (on PATH)
-- No Docker, no cloud account, no AI API key (NFR-RUN-001, CST-006)
-- Network access is needed only for `uv sync` and the dependency vulnerability scan (SEC-003).
-  Offline, SEC-003 FAILs and requires an approved exception. It never silently passes.
+- Python 3.12 (`requires-python = ">=3.12,<3.13"`) and git on PATH.
+- No Docker, cloud account or AI API key (NFR-RUN-001, CST-006).
+- Network access for `pip install` and for the live dependency audit in `orch release check`.
+  Scenario runs use the hash-pinned advisory snapshot (`policy/advisory-snapshot.json`) and need
+  no network.
 
-## 2. Setup (target: under 30 minutes end to end including scenarios, PVT-009)
+## 2. Setup
 
-```sh
-uv sync                                  # install locked dependencies
-uv run orch keys init                    # writes var/secrets/api-keys.json; prints one key per role ONCE
-#   → copy the printed keys into your shell session, e.g.:
-export ORCH_ENGINEER_KEY=sk_...  ORCH_APPROVER_KEY=sk_...  ORCH_RELEASE_KEY=sk_...  SHORTENER_KEY=sk_...
-uv run python tools/check.py             # lint (ruff), types (mypy --strict), tests, coverage
+```powershell
+py -3.12 -m venv .venv
+.venv\Scripts\python -m pip install --upgrade pip
+.venv\Scripts\python -m pip install -r requirements.lock      # pinned dependencies, incl. pytest and pip-audit
+.venv\Scripts\python -m pip install --no-deps -e .            # the project; installs the `orch` CLI
 ```
 
-Expected: all checks green; coverage of domain, engine, policy and observability ≥ 85% (PVT-007).
+## 3. Run the checks
 
-## 3. Run the shortener baseline (US-1)
-
-```sh
-uv run shortener serve --port 8000       # dev instance, DB var/dev/shortener.db
-curl -s -X POST localhost:8000/api/v1/links -H "X-API-Key: $SHORTENER_KEY" \
-     -H "Content-Type: application/json" -d '{"url":"https://example.org/a"}'
-#   → 201 {code, short_url, url, created_at}
-curl -si localhost:8000/<code>           # → 302 Location: https://example.org/a
-curl -si -X POST ... -d '{"url":"javascript:alert(1)"}'   # → 422 code=scheme_not_allowed
-curl -si localhost:8000/health/ready     # → 200 {"status":"ok"}
+```powershell
+.venv\Scripts\python -m pytest              # full suite: 129 tests (on Windows 1 POSIX-only test is skipped)
+.venv\Scripts\python tools\trace_check.py   # traceability check (built scope only)
+.venv\Scripts\orch release check            # live pip-audit, repository secret scan, traceability; exit 1 on any FAIL
 ```
 
-## 4. Start the orchestrator
+Runtime state goes to `var/` (gitignored). Set `ORCH_HOME` to use another folder.
 
-```sh
-uv run orch serve --port 8200            # control plane; DB var/orchestrator/orchestrator.db
-uv run orch staging bootstrap --ref shortener-baseline-v1   # release-owner key; creates R0 and starts staging :8100
+## 4. Create keys (human, in your own terminal)
+
+Each secret is printed once; only its SHA-256 hash is stored in `var/orchestrator.db`. Keep the
+keys in session variables; never write them to a file in the repository.
+
+```powershell
+$CON = .venv\Scripts\orch keys create --role consumer
+$ENG = .venv\Scripts\orch keys create --role engineer
+$APP = .venv\Scripts\orch keys create --role approver
+$REL = .venv\Scripts\orch keys create --role release-owner
 ```
 
-Expected: `orch staging status` shows `R0 active`, smoke passing.
+## 5. Run the shortener (US-1)
 
-## 5. Execute the scenarios (recorded evidence runs use interactive decisions)
-
-### SCN-A: greenfield (expiration + analytics)
-
-```sh
-uv run orch run submit --scenario scn-a --change-set changesets/scn-a/normal
-uv run orch run watch <run_id>           # live node states; G-CLARIFY shown as SKIPPED with reasons
-uv run orch gate list --run <run_id>     # G-DESIGN open
-uv run orch gate show <gate_id>          # bound artifacts: design v1, task-plan v1, change-set fingerprint
-uv run orch gate decide <gate_id> --approve --rationale "..."          # approver key
-uv run orch gate decide <gate_id> --ready --accept-risk R-1:"..."      # release-owner key at G-RELEASE
+```powershell
+.venv\Scripts\orch serve --port 8000        # binds 127.0.0.1; DB var\shortener.db; keys from var\orchestrator.db
 ```
 
-Expected: terminal `COMPLETED`; staging `R1`; `curl` on staging returns `410` for an expired
-link; `orch evidence export <run_id>` lists EV-001..EV-007.
+In a second terminal:
 
-Variant (finding-injection, labeled): `--variant late-ambiguity` → ST-11a `SUSPENDED`, G-CLARIFY-1
-open while ST-09/ST-10a finish and SP-1 holds; answering it re-runs only the affected nodes.
-
-### SCN-B: brownfield (custom aliases)
-
-```sh
-uv run orch run submit --scenario scn-b --change-set changesets/scn-b/normal
+```powershell
+$r = Invoke-RestMethod -Method Post http://127.0.0.1:8000/api/v1/links `
+       -Headers @{ "X-API-Key" = $CON } -ContentType "application/json" `
+       -Body '{"url":"https://example.org/a"}'
+$r                                                    # 201: code, short_url, destination, created_at, expires_at
+curl.exe -si http://127.0.0.1:8000/$($r.code)         # 302, Location: https://example.org/a
+curl.exe -s  http://127.0.0.1:8000/api/v1/links/$($r.code)/stats -H "X-API-Key: $CON"   # clicks, last_click_at
+curl.exe -s  http://127.0.0.1:8000/health/ready       # {"status":"ready","database":"ok",...}
 ```
 
-Expected: ST-05 impact analysis present (EV-005); G-DESIGN binds the change-set fingerprint;
-G-SECURITY opens (validation component is security-sensitive); regression and new tests pass;
-terminal `COMPLETED`, staging `R2`.
+Negative checks: a `javascript:` URL returns `422 scheme_not_allowed`; an unknown code returns
+`404`; an `expires_at` in the past returns `422 invalid_expiration`; a missing key returns `401`.
 
-Fault-injection variant (labeled): `--change-set changesets/scn-b/defective` → ST-09 fails →
-`ROLLBACK_COMPLETED`, workspace discarded, staging still `R1`, terminal `FAILED`.
+## 6. Lock the change sets (human approver)
+
+Runs refuse change sets that are unlocked or changed after locking. The repository already
+contains a lock (`scenarios/changesets.lock.yaml`) made with the human owner's approver key, so
+the scenarios run without this step. Re-lock only after reviewing a changed change set;
+`orch changeset lock` rewrites the committed lock file with your key ID:
+
+```powershell
+.venv\Scripts\orch changeset lock "scenarios/scn-a/changeset" --key $APP
+.venv\Scripts\orch changeset lock "scenarios/scn-b/changeset" --key $APP
+.venv\Scripts\orch changeset lock "scenarios/scn-b/changeset-defective" --key $APP
+.venv\Scripts\orch changeset lock "scenarios/scn-c/changeset" --key $APP
+```
+
+## 7. Execute the scenarios
+
+Scenario names (`scenarios/registry.yaml`): `scn-a`, `scn-b`, `scn-b-defective`,
+`scn-b-compensate`, `scn-c`, `scn-c-scanner-down`. `orch run submit` prints the run ID and runs
+until a gate or the end. Gate IDs have the form `<run>:<node>`.
+
+### SCN-A: greenfield (link details endpoint)
+
+```powershell
+.venv\Scripts\orch run submit scn-a
+.venv\Scripts\orch gate show "<run>:approve-design"
+.venv\Scripts\orch gate approve "<run>:approve-design"  --key $APP --reason "<rationale>"
+.venv\Scripts\orch gate approve "<run>:approve-release" --key $REL --reason "<rationale>"
+```
+
+Expected: `clarify` SKIPPED with the reason "all five requirement-quality checks passed; no
+clarification required"; run `COMPLETED`.
+
+### SCN-B: brownfield (custom aliases) and its fault-injection variants
+
+```powershell
+.venv\Scripts\orch run submit scn-b              # impact analysis before any change; then the same two gates
+.venv\Scripts\orch run submit scn-b-defective    # regression fails before promotion -> rollback -> FAILED
+.venv\Scripts\orch run submit scn-b-compensate   # smoke check fails after promotion -> compensation
+.venv\Scripts\orch gate approve "<run>:approve-corrective" --key $APP --reason "<rationale>"
+```
 
 ### SCN-C: ambiguous ("track who clicks links")
 
-```sh
-uv run orch run submit --scenario scn-c
-uv run orch gate show <gate_id>          # classified items: missing_information, unclear_term, policy_conflict (PRIV-001)
-uv run orch gate decide <gate_id> --answer Q1=A --answer Q2="lifetime of link" --rationale "..."
+```powershell
+.venv\Scripts\orch run submit scn-c
+.venv\Scripts\orch gate show "<run>:clarify"                                  # classified items and options A, C
+.venv\Scripts\orch gate answer "<run>:clarify" --option A --key $ENG --reason "<rationale>"
+#   option C withdraws the request -> ABORTED; --text "<free text>" reopens the gate (2 rounds max, then SAFE_STOPPED)
 ```
 
-Expected (option A): requirement v2, replanning events, resume at the earliest affected stage,
-change set `scn-c/aggregate-daily` applied, terminal `COMPLETED`, staging `R3`.
-Option B without exception: PRIV-001 `FAIL` → `SAFE_STOPPED`. No answer before the gate timeout
-(demo profile): `SAFE_STOPPED` "no decision". Option C: `ABORTED`.
+Policy exception path (fault injection: dependency scanner unavailable):
 
-## 6. Inspect and verify (US-5)
-
-```sh
-uv run orch run show <run_id>            # workflow-state document (schema-valid)
-uv run orch run timeline <run_id>        # ordered audit events + terminal outcome
-uv run orch audit verify --run <run_id>  # hash chain valid
-uv run orch trace FR-SHR-020             # requirement → decision → task → artifact → test → evidence
-uv run orch metrics                      # success/failure, retries, rollback/compensation, MTTR (labeled demonstration)
+```powershell
+.venv\Scripts\orch run submit scn-c-scanner-down                              # ... -> SAFE_STOPPED policy_fail:SEC-003
+.venv\Scripts\orch exception request <run> SEC-003 --key $ENG --reason "<why>" --control "<compensating control>"   # prints <exception_id>
+.venv\Scripts\orch exception approve <run> <exception_id> --key $APP --reason "<why>"
+.venv\Scripts\orch run resume <run> --key $APP --reason "<why>"
 ```
 
-## 7. Governance negative checks (SC-004, SC-011)
+Other gate decisions: `orch gate reject "<run>:<gate>" --key … --reason …` (terminates; add
+`--rework` to re-run the producing stage, at most 2 times) and `orch gate escalate …` (the next
+decision needs a release-owner key). `orch gate list` shows open gates.
 
-```sh
-uv run orch gate decide <gate_id> --approve --key $ORCH_AGENT_KEY   # → 403 agent_not_permitted; audited
-uv run orch gate decide <gate_id> --approve  # with stale bound version → 409 stale_artifact_version
+## 8. Inspect and verify (US-5)
+
+```powershell
+.venv\Scripts\orch run status <run>
+.venv\Scripts\orch run watch <run>               # step a run and print node state changes
+.venv\Scripts\orch audit show <run>              # ordered audit events
+.venv\Scripts\orch audit verify <run>            # hash chain valid
+.venv\Scripts\orch metrics <run>                 # per-run metrics, labelled "demonstration data"
+.venv\Scripts\orch evidence export <run> --out var\evidence
 ```
 
-## 8. Automated end-to-end and determinism
+Use `--out` for your own runs: without it, `orch evidence export` writes to `evidence\` and
+rewrites the committed `evidence\index.md` from your local database.
 
-```sh
-uv run pytest tests/e2e -m "scenario"    # scripted decisions (labeled test); all three scenarios + variants
-uv run pytest tests/e2e -k determinism   # repeat runs → identical stage sequence, gate events, terminal outcomes
-```
+After an engine crash: `orch run recover <workflow>` marks interrupted runs `SAFE_STOPPED`; resume
+them with `orch run resume` and an approver key.
 
-## 9. Release readiness (repository level)
+## 9. Not available (planned, not implemented)
 
-```sh
-uv run orch release check                # scans, traceability --check, coverage, audit verify
-uv run python tools/trace/build_matrix.py --check   # EV-008 docs/traceability.md
-```
-
-Expected: report written to `docs/release-readiness.md` with every condition and its evidence;
-final sign-off is a human action.
-
-## 10. Reset
-
-```sh
-uv run orch demo reset                   # confirms interactively; only touches var/; rebuilds R0 from the baseline ref
-```
+`orch trace`, audit query filters, aggregate metrics, `orch staging bootstrap|status`,
+`orch demo reset` (delete `var\` instead), an orchestrator HTTP API, and an automated
+repeat-run determinism test. See README "Known gaps (final assessment)".

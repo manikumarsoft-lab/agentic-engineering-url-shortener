@@ -53,9 +53,23 @@ schemathesis, pytest-cov, mypy (strict), ruff, pip-audit, detect-secrets, pip-li
 versions are pinned in `uv.lock` at implementation time and every dependency must appear in
 `policy/approved-dependencies.yaml` (policy DEP-001).
 
+> **As built (CR-009, proposed; awaiting human owner approval)**: dependencies are installed
+> with pip from the pinned `requirements.lock` (no uv, no `uv.lock`); runtime dependencies are
+> FastAPI, Uvicorn, Pydantic v2, Typer, PyYAML and httpx; dev/security tooling is pytest and
+> pip-audit only. SQLAlchemy, Alembic, jsonschema, Hypothesis, schemathesis, pytest-cov, mypy,
+> ruff, detect-secrets, pip-licenses and `policy/approved-dependencies.yaml` are not used.
+> See [ADR-020](../../docs/adr/ADR-020-python-toolchain-as-built.md).
+
 **Storage**: SQLite (WAL mode, `busy_timeout`, `BEGIN IMMEDIATE` writes) behind repository
 interfaces. Each shortener instance (dev, isolated copy, staging) and the orchestrator have
 **separate database files** under `var/` (gitignored).
+
+> **As built (CR-009, proposed; awaiting human owner approval)**: stdlib `sqlite3` without
+> repository interfaces or migrations (`shortener/store.py`, `orchestrator/store.py`). Files
+> under `ORCH_HOME` (default `var/`): `orchestrator.db` (also holds the shared API-key table),
+> `shortener.db`, `staging/shortener.db`, `staging/keys.db`; isolated workspaces
+> `var/work/<run_id>/` hold no database. See
+> [ADR-021](../../docs/adr/ADR-021-sqlite-stdlib-persistence.md).
 
 **Testing**: pytest (unit, integration, state-transition, reliability, security, e2e),
 schemathesis + jsonschema (contract), Hypothesis (property-based validation and codes), an
@@ -186,7 +200,7 @@ human-approved corrective actions.
 | Short-code generation | `domain/codes.py` | CSPRNG base62, length 7, collision retry ≤5 | FR-SHR-005, -006 |
 | URL validation | `domain/validation.py` | Parse, normalize, allow-list, length, credentials, self/private host | FR-SHR-002–004, PD-001 |
 | Redirect resolution | `domain/resolve.py` | Lookup → outcome (`redirect`/`not_found`/`expired`†/`unavailable`) | FR-SHR-007, -015 |
-| Persistence | `persistence/` (repository protocols, SQLAlchemy Core impl, Alembic migrations) | Atomic writes, uniqueness, idempotency records | FR-SHR-005, -013–-015 |
+| Persistence | `persistence/` (repository protocols, SQLAlchemy Core impl, Alembic migrations). *As built (CR-009, proposed): `shortener/store.py`, stdlib `sqlite3`, `CREATE TABLE IF NOT EXISTS`, no repositories or migrations (ADR-021)* | Atomic writes, uniqueness, idempotency records | FR-SHR-005, -013–-015 |
 | Analytics† | `domain/analytics.py` | Atomic counters, fallback on failure | FR-SHR-010–-012 |
 | Expiration† | `domain/expiration.py` | UTC, expired when now ≥ expires_at | FR-SHR-008, -009, A-014 |
 | Health/readiness | `api/health.py` | Liveness vs readiness (DB ping) | FR-SHR-016 |
@@ -840,8 +854,8 @@ gate.
 
 | ID | Decision | Choice | Status |
 |----|----------|--------|--------|
-| R-01 | Language and API stack | Python 3.12, FastAPI, Pydantic v2, uv | **SELECTED (human), 2026-10-15** |
-| R-02 | Persistence | SQLite (WAL) via SQLAlchemy Core + Alembic, behind repositories | **SELECTED (human), 2026-10-15** |
+| R-01 | Language and API stack | Python 3.12, FastAPI, Pydantic v2, uv. *As built (CR-009, proposed): pip + `requirements.lock`, no uv (ADR-020)* | **SELECTED (human), 2026-10-15** |
+| R-02 | Persistence | SQLite (WAL) via SQLAlchemy Core + Alembic, behind repositories. *As built (CR-009, proposed): stdlib `sqlite3`, no SQLAlchemy, Alembic or repositories (ADR-021)* | **SELECTED (human), 2026-10-15** |
 | R-03 | Orchestration engine | In-repo engine from scratch, explicit versioned DAG + persisted state machines | **SELECTED (human), 2026-10-15** |
 | R-04 | Deployment topology | Two services + CLI in one repo | **SELECTED (human), 2026-10-15** |
 | R-05 | Scheduler model | Deterministic superstep scheduler (PD-004) | Approved at plan gate (Mani Kumar Vadugu, 2026-10-15) |
@@ -935,7 +949,7 @@ item may start only after recording "CP-4 met" in the task log.
 
 | # | Slice | Contents | Exit evidence |
 |---|-------|----------|---------------|
-| 1 | Engineering baseline | `pyproject.toml`, uv lock, ruff, mypy strict, pytest config with `req` marker plugin, `.gitignore` (`var/`), `.gitattributes` enforcing LF (`eol=lf`) for `src/`, `tests/`, `changesets/` (incl. `*.diff` patches) and `specs/**/contracts/` (CR-002; the reference workstation has `core.autocrlf=true`), detect-secrets baseline, `make`-equivalent `tools/check.py` (lint, type, test, coverage), GitHub Actions workflow `.github/workflows/ci.yml` running `tools/check.py` (the test suite) on push and pull request (CST-009) | `tools/check.py` green on empty skeleton, locally and in CI |
+| 1 | Engineering baseline | `pyproject.toml`, uv lock, ruff, mypy strict, pytest config with `req` marker plugin, `.gitignore` (`var/`), `.gitattributes` enforcing LF (`eol=lf`) for `src/`, `tests/`, `changesets/` (incl. `*.diff` patches) and `specs/**/contracts/` (CR-002; the reference workstation has `core.autocrlf=true`), detect-secrets baseline, `make`-equivalent `tools/check.py` (lint, type, test, coverage), GitHub Actions workflow `.github/workflows/ci.yml` running `tools/check.py` (the test suite) on push and pull request (CST-009). *As built (CR-009, proposed): `pyproject.toml`, `requirements.lock`, `.gitignore`, `tools/trace_check.py` and `.github/workflows/ci.yml` (pytest, trace check, live pip-audit); no uv lock, ruff, mypy, `req` marker plugin, `.gitattributes`, detect-secrets baseline or `tools/check.py` (ADR-020)* | `tools/check.py` green on empty skeleton, locally and in CI |
 | 2 | Walking skeleton | Shortener: create + redirect happy path through API → domain → SQLite. Orchestrator: create run with a 2-node graph, persisted state, one audit event, CLI `orch run show` | e2e test: run created, audit visible; link redirects |
 | 3 | Core URL behavior | Validation (incl. PD-001), codes, idempotency, rate limit, auth, health/readiness, persistence-failure handling, problem+json, contract drift and schemathesis, concurrency PVT-003; tag `shortener-baseline-v1` (human) | Shortener suites green; contract v1.0.0 drift-free |
 | 4 | Orchestration state model | Graph contract loader, run/node/gate state tables, superstep scheduler, fork/join, conditions, entry/exit criteria, idempotent transitions, artifacts and provenance | State-transition suite green |
@@ -1212,6 +1226,8 @@ consistency.
 | HD-SCN-001 | 2026-10-15 | Mani Kumar Vadugu | Scenario capabilities: SCN-A greenfield = link details endpoint `GET /api/v1/links/{code}` (destination, created_at, expires_at, active; API key required; owner-scoped by later human decision: other keys get 404); SCN-B brownfield = custom aliases (4–10 chars, reserved words blocked, conflict → 409, no behavior change without alias); SCN-C ambiguous = "track who clicks links" (options A daily aggregates / C abort; change set selected from a catalog keyed by option_id). Policy FAIL + exception demonstrated by the labelled fault-injection variant `scn-c-scanner-down` (SEC-003) | Supersedes the §11 scenario capabilities (expiry/analytics now in the baseline per HD-CUT-002). Scenario files in `scenarios/`; change sets authored by `tools/author_changesets.py`, applied only after the human locks them (`orch changeset lock`) |
 | CR-007 | 2026-10-15 | Mani Kumar Vadugu | The shortener OpenAPI contract is generated from the running app and is the single source: `specs/001-agentic-sdlc-url-shortener/contracts/shortener-api.openapi.yaml` regenerated by `python -m shortener.openapi`, version 1.0.0 (hand-written) → 2.0.0 (MAJOR: operations and schemas differ from the hand-written draft); the separate `contracts/` JSON copy is removed | Contract test fails on drift; scenario change sets bump it to 2.1.0 (additive). Hand-written §2.2/§2.3 contract tables describe the earlier draft |
 | CR-008 | 2026-10-15 | Mani Kumar Vadugu | Close remaining gaps and reconcile planning artifacts with what was built: SEC-003 evaluates a real pip-audit snapshot of requirements.lock (hash-pinned in policy 1.2.0) and live pip-audit runs in `orch release check` and CI; SEC-004 regex secret scan; scenario `scn-b-compensate` (post-promotion compensation + G-CORRECTIVE) distinct from `scn-b-defective` (pre-promotion rollback); engineering summary for every outcome; change-set baseline limitation documented; tasks.md status table; workflow-graph.v2.yaml status header; §2.2/§2.3 tables updated; CI workflow; change logs in date order | Executed policy set 1.2.0; change sets regenerated (manifests record baseline hashes; human must lock them); docs/scope/lean-slice.md §1-§2 updated |
+| CR-009 | 2026-10-16 | **Proposed (awaiting human owner approval)** | Align the ADRs with the as-built implementation found by the final assessment ([docs/reviews/final-assessment.md](../../docs/reviews/final-assessment.md)): ADR-020 supersedes ADR-001 in part (pip + `requirements.lock`, no uv, ruff, mypy, Hypothesis, schemathesis or `tools/check.py`); ADR-021 supersedes ADR-002 in part (stdlib `sqlite3`, no SQLAlchemy, Alembic or repository protocols); ADR-022 records as-built amendments to ADR-003..ADR-019. Items where the ADR restates a spec requirement or a Human Gate 4 ruling are **not** amended; they remain code gaps with tasks (T252–T289). **G4**: the release gate (`approve-release`) offers approve / reject_rework / reject_terminate / escalate (reject_terminate → `ABORTED`) instead of the ruling-4 vocabulary ready / not_ready / escalate (not_ready → `FAILED`). Proposed as an **accepted deviation for this submission**, because changing it now would make the recorded evidence inconsistent with the code; aligning it is future work (G4) | Docs only: ADR-020/021/022 (Proposed), status notes on ADR-001/002, ADR index, "As built (CR-009, proposed)" notes in plan.md (Technical Context, §2.1, §12 R-01/R-02, §14.2 slice 1) and research.md (R-01, R-02). Approved text is kept until the human owner approves CR-009. No code, change set or evidence changes |
+| CR-010 | 2026-10-16 | **Proposed (awaiting human owner approval)** | Provenance label (final assessment G1, converge F7): `PROVENANCE` in `src/orchestrator/agents/scenario.py` and every change-set manifest carry the shortened label "Authored with AI assistance (Claude Code) during development; reviewed and locked by the human owner (Mani Kumar Vadugu)", without FR-ORC-034's closing clause "; applied by the deterministic agent, not generated at run time." Proposed decision: keep the as-recorded label for this submission, because changing it would invalidate the human-locked change sets (`scenarios/changesets.lock.yaml`) and the recorded evidence runs. This is an **accepted deviation from a confirmed requirement**: FR-ORC-034 stays PARTIAL and is listed as a known gap. Full wording is future work T258 (re-author, human re-lock, re-record) | No code, change set or evidence changes; docs/scope/lean-slice.md and README "Known gaps" state the deviation |
 
 ### CR-002 impact analysis
 

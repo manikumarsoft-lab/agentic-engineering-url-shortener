@@ -45,12 +45,12 @@ human owner), **Not recorded**. Checkboxes below are left unticked: only the hum
 | T209 | Done | API + generated contract and drift test |
 | T210 | Done | Auth, rate limit, JSON request logs, security tests |
 | T211 | Partial | Persistence-failure and 200-parallel-create tests; PVT-003 (1,000) not run |
-| T212 | Human | Baseline tag not yet created |
+| T212 | Partial (human) | Annotated tag `shortener-baseline-v1` created by the human owner on commit `cf833ac`; CP-1 row not recorded (`docs/scope-control.md` does not exist). Updated 2026-10-16 (final assessment) |
 | T213 | Partial | Change-set store, manifest, lock file (`orch changeset lock`); lock not anchored to an annotated tag |
 | T214 | Done | SCN-A content changed by HD-SCN-001 (link details) |
 | T215 | Done | SCN-B normal + defective; undeclared-scope variant not built |
 | T216 | Done | SCN-C catalog + aggregate-daily change set |
-| T217 | Human | Change sets not yet locked |
+| T217 | Partial (human) | All four change sets locked with the human approver key `63320c4d1c94` (`scenarios/changesets.lock.yaml`, commit `cf833ac`, which the annotated baseline tag points to); runs do not verify the lock against the tag and there is no `orch changeset verify`; CP-2 not recorded. Updated 2026-10-16 |
 | T218 | Done | Node/run states and atomic transitions inside `engine.py` + `store.py` |
 | T219 | Done | Graph loading/validation in code (no meta-schema files); join/skip incl. failure edge |
 | T220 | Done | Artifacts, provenance, decision lineage |
@@ -78,13 +78,13 @@ human owner), **Not recorded**. Checkboxes below are left unticked: only the hum
 | T242 | Partial | Rollback, compensation, one real interruption test; not every boundary (PVT-006) |
 | T243 | Done | Scripted e2e SCN-A, SCN-B, defective, compensate |
 | T244 | Partial | Scripted e2e SCN-C variants; no determinism test |
-| T245 | Human | Recorded SCN-A run |
-| T246 | Human | Recorded SCN-B runs (normal, defective, compensate) |
-| T247 | Human | Recorded SCN-C runs |
-| T248 | Planned, not implemented | Docs other than `docs/scope/lean-slice.md` |
+| T245 | Partial (human) | SCN-A normal run recorded (`run_1491b1c537664814`, COMPLETED, chain valid); late-ambiguity run not possible (not built, T264); CP-3 not recorded. Updated 2026-10-16 |
+| T246 | Partial (human) | SCN-B normal (`run_bc533834c7dc4e5e`), defective (`run_77723ef73ccf4ea7`) and compensate (`run_03a5a6d9a2154bea`) recorded, chains valid; the planned G-DESIGN escalation was not exercised in a recorded run. Updated 2026-10-16 |
+| T247 | Partial (human) | SCN-C option A (`run_fe1eef2844a541f2`), scanner-down exception (`run_5defbd091d494e4c`, engineer key requested, separate approver key approved) and option C (`run_4fae12b6c3f14ca6`) recorded; CP-4 not recorded. Updated 2026-10-16 |
+| T248 | Partial | README (setup, architecture, testing, limitations, trade-offs incl. horizontal scaling, AI governance, known gaps), `docs/security/threat-model.md` and `docs/traceability-matrix.md` exist (2026-10-16); `docs/architecture.md`, `testing.md`, `limitations.md`, `change-control.md` not written (T283) |
 | T249 | Partial | `orch release check` (live pip-audit, secret scan, traceability); no quickstart test or perf measurement |
-| T250 | Partial | Evidence index per export, per-run summaries; no aggregate engineering-summary document |
-| T251 | Human | Fresh-setup timing, sign-off, submission tag |
+| T250 | Partial | Evidence index, per-run summaries and `docs/engineering-summary.md` exist; no `docs/evidence/metrics.md` or docs-vs-behavior review record (T282). Updated 2026-10-16 |
+| T251 | Human | Not done: PVT-009 timing, release sign-off and tag `assessment-submission-v1.0` (no such tag exists, 2026-10-16) |
 
 ## Format and Field Legend
 
@@ -504,3 +504,44 @@ Append one line per red phase: `T### | test id | observed failure (first line) |
 
 | Task | Test | Observed failure | Date |
 |------|------|------------------|------|
+
+## Phase 13: Convergence
+
+- [ ] T252 CRITICAL: Give every workflow node explicit entry criteria, exit criteria and owner; evaluate entry criteria before READY (unmet → BLOCKED with NODE_ENTRY_REFUSED audited) and exit criteria before SUCCEEDED, per Constitution II, FR-ORC-005, FR-ORC-008, US2/AC4 (missing)
+- [ ] T253 CRITICAL: Extend policy/policy-set.yaml and the evaluator to cover audit retention (AUD), approved dependencies (DEP), software licensing (LIC) and change control (CHG-001 integrity, CHG-002 scope, CHG-003 additive migrations) recorded as policy evaluations rather than only agent error codes, per Constitution VI, FR-GOV-005, FR-ORC-033 (partial)
+- [ ] T254 CRITICAL: Record exception scope and expiry-or-review condition, add `orch exception reject`, and expire exceptions (EXPIRED → release readiness FAIL, resume refused), per Constitution VI, FR-GOV-008, FR-GOV-010, SC-008 (partial)
+- [ ] T255 CRITICAL: Write docs/threat-model.md covering open-redirect abuse, enumeration, injection, abuse volume (redirect volume as accepted risk, BL-13), approval spoofing, authentication assumptions, rate limiting and trust boundaries, each with a control or accepted risk, per Constitution V, NFR-SEC-003 (missing)
+- [ ] T256 CRITICAL HUMAN: Decide Constitution IV for the baseline shortener (built without a recorded red phase, lean-slice §3 Q3): record a Governance §2 exception with reason, scope, compensating control and review condition, per Constitution IV (contradicts)
+- [ ] T257 CRITICAL HUMAN: Record the task-plan approval gate (T003) or a Governance §2 exception for implementing under HD-CUT-002 without it, and re-evaluate CEX-001 (its compensating control, a traceability check confirming each human decision exists, is not in tools/trace_check.py), per Constitution Development Workflow, CEX-001 (contradicts)
+- [ ] T258 Restore the full FR-ORC-034 label ("…; applied by the deterministic agent, not generated at run time.") in `PROVENANCE` (src/orchestrator/agents/scenario.py) and every change-set manifest via tools/author_changesets.py; the human owner re-locks the change sets, per FR-ORC-034 (contradicts)
+- [ ] T259 Restructure scenario workflows into fork 1 after approve-design (implement → test ∥ docs drafting ∥ threat-review drafting → SP-1) and fork 2 (docs finalization ∥ security validation → SP-2) before release readiness; today docs and threat-review both wait for test, per FR-ORC-037, FR-ORC-038, FR-ORC-039 (contradicts)
+- [ ] T260 Add staging promotion, post-promotion smoke check and the compensation failure edge after approve-release in scn-a, scn-b and scn-c so a run reaches COMPLETED only after a passing smoke check, per FR-ORC-040, FR-ORC-041 (partial)
+- [ ] T261 Produce an ST-12 release-readiness assessment artifact (ELIGIBLE/FAIL with every blocking reason, requirement coverage, test results, policy outcomes, exceptions, fallbacks/degraded nodes, open risks, docs and traceability status) and bind approve-release to it, per US4/AC1, US4/AC2, FR-GOV-010, FR-ORC-016 (partial)
+- [ ] T262 Refuse and audit (`separation_of_duties_violation`) an exception approval by the key identity that requested it, per FR-GOV-017 (missing)
+- [ ] T263 Implement the ST-05a additive-change check for SCN-A (PASS → greenfield path with result recorded; FAIL → reroute to impact analysis with reason, never greenfield), per SCN-A-AC6 (missing)
+- [ ] T264 Implement the late-ambiguity `finding-injection` variant: only the raising node is SUSPENDED, siblings continue to their sync point, the G-CLARIFY-n answer feeds only the raising node, implement/test attempt counts unchanged, per SCN-A-AC4, FR-ORC-022, FR-ORC-039, plan §16.1 C3 (missing)
+- [ ] T265 Record input artifact versions, producing attempt and agent mode in each artifact's provenance (artifacts table has only produced_by and created_at), per FR-ORC-012, FR-ORC-013 (partial)
+- [ ] T266 Record `agent_mode` on every run; add the AI-backed mode behind the agent interface, disabled by default, whose stub refuses with `agent_mode_unavailable`; evidence export refuses ai_backed runs, per FR-ORC-027, FR-ORC-029, FR-ORC-030, CST-006 (missing)
+- [ ] T267 Add `orch audit query` with filters by run ID, requirement ID, actor and event type, per FR-OBS-005 (missing)
+- [ ] T268 Implement run-level bidirectional traceability (requirement → decision → task → artifact → test → result → docs → evidence and reverse) with `orch trace`, per FR-OBS-008, US5/AC2, SC-007 (missing)
+- [ ] T269 Extend tools/trace_check.py to flag tests without a requirement ID tag and src modules not referenced by any task, and to require every C/D requirement to trace to a test and a doc/evidence item, per FR-OBS-010, SC-007 (partial)
+- [ ] T270 Add aggregate metrics across runs (success rate, retry, rollback and compensation frequency, MTTR, end-to-end and per-stage latency p50/p95), labelled demonstration data, per FR-OBS-006, FR-OBS-007 (partial)
+- [ ] T271 Add a repeat-run determinism test per scenario (same stage executions, attempt counts, committed event order and terminal outcome, timestamps/IDs excepted), per NFR-DET-001, SC-010 (missing)
+- [ ] T272 Add interruption tests at every stage boundary with stub agents plus 3 full E2E interruptions (mid-fork, open gate, promotion), per PVT-006, NFR-RCV-001, HD-CUT-001 #1 (partial)
+- [ ] T273 Raise the concurrency test to 1,000 concurrent creations yielding 1,000 distinct codes with no lost writes (current test: 200), per PVT-003, NFR-SCL-001, SC-009 (partial)
+- [ ] T274 Replace the implicit `RETRY_BUDGET_RESET` on resume with an approver-granted, audited retry-budget extension (nodes, attempts, reason); without a grant keep resume refused, and require resolution evidence for non-timeout causes, per plan §16.3, A-016, FR-ORC-019 (contradicts)
+- [ ] T275 Declare per-agent permissions (artifacts, filesystem scope, capabilities) and enforce them with a permission guard that refuses and audits out-of-permission actions beyond undeclared artifacts, per FR-ORC-025, NFR-AUT-001 (partial)
+- [ ] T276 Add a test and an `undeclared-scope` change-set variant proving CHG-002 blocks a change outside the approved impact analysis, per SCN-B-AC5, FR-ORC-036 (partial)
+- [ ] T277 Make refused audit modification/deletion attempts produce an `AUDIT_TAMPER_REFUSED` audit event (triggers abort but nothing is recorded), per FR-OBS-004 (partial)
+- [ ] T278 Add attempt fencing tokens so artifact writes and transitions from a superseded attempt are refused and audited, per plan §16.3, FR-ORC-028 (missing)
+- [ ] T279 Verify scenarios/changesets.lock.yaml against a human-created annotated git tag (missing/lightweight tag or content difference → CHG-001 FAIL), per plan §16.3, FR-ORC-033 (partial)
+- [ ] T280 Implement tools/perf/measure.py and record PVT-001/PVT-002 p95 latency as demonstration data in docs/evidence/performance.md, per SC-009, NFR-PRF-001, NFR-PRF-002 (missing)
+- [ ] T281 Add a coverage gate (≥ 85 % of domain, orchestration and policy logic) to CI, per PVT-007, NFR-TST-001 (missing)
+- [ ] T282 Add an automated quickstart test executing every documented command against a fresh var/, and record the docs-vs-behavior review, per NFR-DOC-001 (missing)
+- [ ] T283 Write docs/architecture.md, docs/testing.md, docs/limitations.md (BL-01..BL-21, plan §16.4), docs/change-control.md and docs/release-readiness.md, per CST-003, CST-008, plan §16.4, T248 (partial)
+- [ ] T284 Implement the orchestrator HTTP API per contracts/orchestrator-api.openapi.yaml (runs, gates, audit, metrics) with server-derived `decision_source`, or have the human owner record a CR removing it from the plan, per plan §3 / §16.3, T224 (missing)
+- [ ] T285 HUMAN: Record a CR and superseding ADRs for stdlib sqlite3 without Alembic (ADR-002) and pip + requirements.lock instead of uv (ADR-001), per plan Guardrails (contradicts)
+- [ ] T286 Align contracts/workflow-graph.v2.yaml, gate-decision schema, orchestrator API and policy-set contract with the implemented graph, policy 1.2.0 and plan §16 (Change Record per bump), per T201, FR-GOV-009 (partial)
+- [ ] T287 Implement `orch staging bootstrap|status` and `orch demo reset` (interactive confirmation, stays inside var/, never deletes var/orchestrator/orchestrator.db), per plan §16.3, T232 (missing)
+- [ ] T288 Build the run workspace from the tagged baseline (`git archive shortener-baseline-v1`) instead of the working tree, per T231, plan Complexity Tracking (release snapshots) (partial)
+- [ ] T289 Add ruff, mypy --strict and an import-boundary test (shortener and orchestrator share only common/), per T202, Constitution VII (missing)

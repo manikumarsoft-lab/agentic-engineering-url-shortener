@@ -186,9 +186,20 @@ runs will not match §4 exactly unless the code and change sets are unchanged.
   repository remains a manual human action.
 - **Persistence and tooling differ from the ADR text.** The implementation uses stdlib `sqlite3`
   (WAL, `CREATE TABLE IF NOT EXISTS`, append-only triggers) rather than SQLAlchemy Core + Alembic
-  (ADR-002), and pip with `requirements.lock` rather than `uv` (ADR-001).
+  (ADR-002), and pip with `requirements.lock` rather than `uv` (ADR-001). ADR-020 and ADR-021
+  record this as built; both are **proposed** (CR-009) and await the human owner's approval.
 - **TDD record for the baseline.** Scenario change sets record red then green. The baseline
   shortener code was not developed red-first per task (lean-slice §3, open question 3).
+- **Horizontal scaling (NFR-SCL-002): documented, not demonstrated.** The shortener runs as one
+  process on one workstation. Three things stop it from scaling out as built: SQLite allows one
+  writer per database file (writes are serialized with `BEGIN IMMEDIATE`), so several instances
+  on one file contend for the write lock and instances on different files would not share links;
+  the creation rate limiter is an in-memory window per process, so N instances would allow N × 60
+  creations per minute per key; and the shortener reads API keys from the orchestrator's local
+  database file. Everything else is stateless per request (codes come from a CSPRNG, idempotency
+  and stats are in the database), so scaling out would need a shared database with
+  multi-writer support (for example PostgreSQL, backlog BL-09), a shared rate-limit store, and a
+  shared key store. None of this is built or measured.
 
 ## 8. How AI assistance was used and governed
 
@@ -207,3 +218,77 @@ runs will not match §4 exactly unless the code and change sets are unchanged.
   (`integrity_mismatch`). Every decision, with its key id and reason, is in the hash-chained audit
   trail and the run's `decisions.json`. The runbook directs that agents never run the recording
   commands.
+
+## 9. Known gaps (final assessment)
+
+The independent final assessment ([docs/reviews/final-assessment.md](docs/reviews/final-assessment.md),
+2026-10-16; review by the human owner pending) checked 206 spec criteria: **136 MET, 50 PARTIAL,
+20 MISSING** before the documentation changes of 2026-10-16. Every remaining PARTIAL or MISSING
+item is listed below with the task (in `specs/001-agentic-sdlc-url-shortener/tasks.md`, Phase 13)
+or gap ID (G-, in the assessment) that addresses it. "No task yet" means nothing is planned for it.
+
+**Constitution** (converge findings F1–F6, all CRITICAL): no entry/exit criteria or owner per
+stage, Principle II (T252); policy set lacks audit retention, dependency, licensing and
+change-control checks, Principle VI (T253); exceptions lack scope, expiry and rejection,
+Principle VI (T254); threat-model document only drafted 2026-10-16 and not yet reviewed,
+Principle V (T255); baseline not developed red-first and no recorded exception, Principle IV
+(T256, human); task-plan approval never recorded and CEX-001's control not built (T257, human).
+
+### Missing
+
+| Item | Gap | Task |
+|------|-----|------|
+| FR-ORC-008, US2/AC4 | Stage entry criteria are never checked; no refusal is recorded | T252 |
+| FR-ORC-022, SCN-A-AC4 | Late ambiguity does not suspend only the dependent path | T264 |
+| FR-ORC-027, FR-ORC-030 | No AI-backed agent mode or disabled stub | T266 |
+| FR-ORC-038 | No second fork (docs finalization ∥ security validation) and no SP-2 | T259 |
+| FR-GOV-017 | The same key can request and approve an exception | T262 |
+| FR-OBS-008, US5/AC2 | No bidirectional traceability view (`docs/traceability-matrix.md` is a hand-built substitute) | T268 |
+| SCN-A-AC6 | No additive-change check for SCN-A | T263 |
+| NFR-PRF-001, NFR-PRF-002, PVT-001, PVT-002 | Redirect and creation latency not measured | T280 |
+| PVT-009 | Fresh setup and three scenarios not timed | T251 (human) |
+| Edge case: exception expires before release | Exceptions never expire | T254 |
+
+### Partial
+
+| Item | Gap | Task |
+|------|-----|------|
+| FR-SHR-013 | Idempotency records never expire | G7 |
+| FR-SHR-014, A-013 | Exact click counts under concurrent redirects untested | G6 |
+| FR-SHR-015, edge case: outage during creation | Creation during a storage outage untested | G11 |
+| FR-ORC-005 | Stages declare no entry criteria, exit criteria or owner | T252 |
+| FR-ORC-012, SCN-A-AC3 | Artifacts don't record input versions or requirement links | T265 |
+| FR-ORC-016 | Fallback use isn't shown in a readiness assessment | T261 |
+| FR-ORC-019 | Resume silently resets the retry budget; resolution evidence only for policy failures | T274 |
+| FR-ORC-025 | No declared per-agent permissions or permission guard | T275 |
+| FR-ORC-029 | Runs don't record the agent mode | T266 |
+| FR-ORC-033, edge case: integrity mismatch | Integrity mismatch safe-stops but isn't a recorded policy FAIL; lock not tied to the git tag | T253, T279 |
+| FR-ORC-034 | Provenance label lacks "; applied by the deterministic agent, not generated at run time." (CR-010 proposes keeping it for this submission) | T258 |
+| FR-ORC-036 | `orch run submit … --fact` can inject a fault without the `fault-injection` label; no `undeclared-scope` variant | G2, T276 |
+| FR-ORC-037, FR-ORC-039 | One fork after `test` instead of three branches after design approval | T259 |
+| FR-ORC-040, FR-ORC-041 | SCN-A, SCN-B and SCN-C complete without staging promotion or smoke check | T260 |
+| Release gate (Human Gate 4 ruling 4) | `approve-release` offers approve/reject/escalate, not ready/not_ready/escalate (CR-009 proposes an accepted deviation) | G4 (future work) |
+| FR-GOV-005 | Policy set covers PRIV, SEC and REL only | T253 |
+| FR-GOV-008 | Exceptions lack scope, expiry or review condition; no rejection | T254 |
+| FR-GOV-009, NFR-MNT-001 | ADRs disagree with the code; CR-009 (ADR-020/021/022) awaits approval | CR-009 (human) |
+| FR-GOV-010, US4/AC1, US4/AC2, SC-008 | No release-readiness assessment with blocking reasons; no expired-exception case | T261, T254 |
+| FR-OBS-004 | Refused audit modifications are not themselves audited | T277 |
+| FR-OBS-005 | Audit can be listed by run only | T267 |
+| FR-OBS-006 | Metrics are per run only | T270 |
+| FR-OBS-010, SC-007, EV-008 | Trace check doesn't flag untagged tests or unreferenced modules; the matrix is hand-built | T269, T268 |
+| SCN-A-AC2 | No data/schema impact recorded | No task yet |
+| SCN-B-AC5 | Undeclared-scope check exists but is untested | T276 |
+| SC-002 | Not every scenario acceptance criterion is met (SCN-A-AC4, AC6) | T263, T264 |
+| NFR-SEC-003 | Threat model drafted 2026-10-16, review pending; stats readable by any key holder (TB-5) needs a decision | T255, G10 (human) |
+| NFR-SCL-001, PVT-003 | Concurrency tested with 200 creations, not 1,000 | T273 |
+| NFR-RCV-001, PVT-006 | One real interruption test, not every stage boundary | T272 |
+| NFR-TST-001, PVT-007 | No coverage measurement or gate | T281 |
+| NFR-DET-001, SC-010 | No repeat-run determinism test | T271 |
+| NFR-DOC-001, CST-003 | Quickstart rewritten 2026-10-16 but not executed by a test | T282 |
+| SC-009 | PVT-001/002 not measured, PVT-003 partial, PVT-009 not recorded | T280, T273, T251 |
+| CST-009 | Tag `assessment-submission-v1.0` not created | G5, T251 (human) |
+| Edge case: isolated copy cannot be created | Workspace is created at submit, so a failure is not a stage failure | No task yet |
+| Edge case: compensation fails | Run safe-stops but staging isn't marked degraded | No task yet |
+
+NFR-SCL-002 (horizontal scaling) is now documented in §7, as the spec allows. It is not
+demonstrated.

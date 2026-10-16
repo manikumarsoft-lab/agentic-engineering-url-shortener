@@ -1,0 +1,386 @@
+[
+  {
+    "action": "RUN_CREATED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "labels": [
+        "demonstration"
+      ],
+      "policy_version": "1.2.0",
+      "workflow": "scn-c",
+      "workflow_version": "1.0.0"
+    },
+    "hash": "fbc9f750a28816fc497902461a784f2452c615c1497942ed7b655c3c720bab23",
+    "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_4fae12b6c3f14ca6",
+    "seq": 1,
+    "target": null,
+    "ts": 1792162026.3598156
+  },
+  {
+    "action": "WORKSPACE_CREATED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "33646e79486611120adb73c650b291fd6dbd1200772670ed99d092ff396d1c9c",
+    "prev_hash": "fbc9f750a28816fc497902461a784f2452c615c1497942ed7b655c3c720bab23",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_4fae12b6c3f14ca6",
+    "seq": 2,
+    "target": "C:\\Users\\manik\\Documents\\agentic-engineering-url-shortener\\var\\work\\run_4fae12b6c3f14ca6",
+    "ts": 1792162026.3872118
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "6f279c5bd211c4723734990ecb0f9a3c36dcda56bba65eb4206916bf78d9bca5",
+    "prev_hash": "33646e79486611120adb73c650b291fd6dbd1200772670ed99d092ff396d1c9c",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_4fae12b6c3f14ca6",
+    "seq": 3,
+    "target": "intake",
+    "ts": 1792162026.3892553
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "intake"
+      ]
+    },
+    "hash": "4271fc3f6aa1e7805f790c293353f52b16f162f302dad3f5e40c76370186d5dc",
+    "prev_hash": "6f279c5bd211c4723734990ecb0f9a3c36dcda56bba65eb4206916bf78d9bca5",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_4fae12b6c3f14ca6",
+    "seq": 4,
+    "target": null,
+    "ts": 1792162026.391158
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "bea740eea084eec8d0cf424afd71fbf0f5794e6c70a280f1cc5fab8c0a33b055",
+    "prev_hash": "4271fc3f6aa1e7805f790c293353f52b16f162f302dad3f5e40c76370186d5dc",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_4fae12b6c3f14ca6",
+    "seq": 5,
+    "target": "intake",
+    "ts": 1792162026.391158
+  },
+  {
+    "action": "ARTIFACT_VERSION_CREATED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "produced_by": "intake",
+      "version": 1
+    },
+    "hash": "18fc37cd7c8540cd52c4c5d43f87a32a2c0a738b2ea99a219c70cb645c83403b",
+    "prev_hash": "bea740eea084eec8d0cf424afd71fbf0f5794e6c70a280f1cc5fab8c0a33b055",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_4fae12b6c3f14ca6",
+    "seq": 6,
+    "target": "requirement",
+    "ts": 1792162026.497836
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "cbb85dcd0f58d3dd8bd66338548bc15754c6cb471c8c17b20426fb0f2db80da0",
+    "prev_hash": "18fc37cd7c8540cd52c4c5d43f87a32a2c0a738b2ea99a219c70cb645c83403b",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_4fae12b6c3f14ca6",
+    "seq": 7,
+    "target": "intake",
+    "ts": 1792162026.497836
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "0b602930195291d4f585b74e5995daafd620e2a6927844c3d93415144a77054e",
+    "prev_hash": "cbb85dcd0f58d3dd8bd66338548bc15754c6cb471c8c17b20426fb0f2db80da0",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_4fae12b6c3f14ca6",
+    "seq": 8,
+    "target": "normalize",
+    "ts": 1792162026.4998457
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "normalize"
+      ]
+    },
+    "hash": "9ce527dd465dbed484257e115d932753eb029fe4a3c5b417f1d14b47f4724e83",
+    "prev_hash": "0b602930195291d4f585b74e5995daafd620e2a6927844c3d93415144a77054e",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_4fae12b6c3f14ca6",
+    "seq": 9,
+    "target": null,
+    "ts": 1792162026.501587
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "9626b7c1f184ac59e51bbd30ec1047756e83b062071e4861b183886177742e39",
+    "prev_hash": "9ce527dd465dbed484257e115d932753eb029fe4a3c5b417f1d14b47f4724e83",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_4fae12b6c3f14ca6",
+    "seq": 10,
+    "target": "normalize",
+    "ts": 1792162026.501587
+  },
+  {
+    "action": "ARTIFACT_VERSION_CREATED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "produced_by": "normalize",
+      "version": 1
+    },
+    "hash": "926f809ce3a2db1893b7d61dd63897239d24140431944def166fdc88e7322dd8",
+    "prev_hash": "9626b7c1f184ac59e51bbd30ec1047756e83b062071e4861b183886177742e39",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_4fae12b6c3f14ca6",
+    "seq": 11,
+    "target": "normalized-requirement",
+    "ts": 1792162026.610091
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "98f4bf3bc22a91351600ed922e3aab6f0562ae5a83709fb16b113f44f2206e22",
+    "prev_hash": "926f809ce3a2db1893b7d61dd63897239d24140431944def166fdc88e7322dd8",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_4fae12b6c3f14ca6",
+    "seq": 12,
+    "target": "normalize",
+    "ts": 1792162026.610091
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "b9275c13ee75125ae2946c145077933bacff73c5804de9344a5dd83296e9c0ce",
+    "prev_hash": "98f4bf3bc22a91351600ed922e3aab6f0562ae5a83709fb16b113f44f2206e22",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_4fae12b6c3f14ca6",
+    "seq": 13,
+    "target": "quality",
+    "ts": 1792162026.6120667
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "quality"
+      ]
+    },
+    "hash": "0e58acd2e378af3c9bea712b7e0eb203085b669f6128ddc449b09c8603e0d86f",
+    "prev_hash": "b9275c13ee75125ae2946c145077933bacff73c5804de9344a5dd83296e9c0ce",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_4fae12b6c3f14ca6",
+    "seq": 14,
+    "target": null,
+    "ts": 1792162026.6136222
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "b8a491b45b1c8acc4de986ca8d8b4a602c79c9cc0c2b57b2ce150ae773e6ffa7",
+    "prev_hash": "0e58acd2e378af3c9bea712b7e0eb203085b669f6128ddc449b09c8603e0d86f",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_4fae12b6c3f14ca6",
+    "seq": 15,
+    "target": "quality",
+    "ts": 1792162026.6136222
+  },
+  {
+    "action": "ARTIFACT_VERSION_CREATED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "produced_by": "quality",
+      "version": 1
+    },
+    "hash": "1ab8cf6f5b75a4d0065949ff201fc551b3757da19cb820023872668104a77a45",
+    "prev_hash": "b8a491b45b1c8acc4de986ca8d8b4a602c79c9cc0c2b57b2ce150ae773e6ffa7",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_4fae12b6c3f14ca6",
+    "seq": 16,
+    "target": "quality-report",
+    "ts": 1792162026.718829
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "50afce1532d42b4a8d49d7571d257e95a00c0dbef53df86fc9297ba8f63b3903",
+    "prev_hash": "1ab8cf6f5b75a4d0065949ff201fc551b3757da19cb820023872668104a77a45",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_4fae12b6c3f14ca6",
+    "seq": 17,
+    "target": "quality",
+    "ts": 1792162026.718829
+  },
+  {
+    "action": "GATE_OPENED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "bound": {
+        "quality-report": 1
+      },
+      "deadline": 1792248426.7209296,
+      "kind": "clarify",
+      "options": {
+        "A": {
+          "label": "Daily aggregate click counts per link (UTC), no personal data (recommended)"
+        },
+        "C": {
+          "action": "abort",
+          "label": "Withdraw the request"
+        }
+      },
+      "roles": [
+        "engineer",
+        "approver"
+      ]
+    },
+    "hash": "0575346c3d701971335abc119bf6bbe1958604dd6910a6c108ffd33fb3c134de",
+    "prev_hash": "50afce1532d42b4a8d49d7571d257e95a00c0dbef53df86fc9297ba8f63b3903",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_4fae12b6c3f14ca6",
+    "seq": 18,
+    "target": "clarify",
+    "ts": 1792162026.721473
+  },
+  {
+    "action": "RUN_AWAITING_APPROVAL",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "2a367fe199d286d79af9e82bdf1bcffac5e84a834d4e48eb5cbbd37e4fb9a047",
+    "prev_hash": "0575346c3d701971335abc119bf6bbe1958604dd6910a6c108ffd33fb3c134de",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_4fae12b6c3f14ca6",
+    "seq": 19,
+    "target": null,
+    "ts": 1792162026.7231119
+  },
+  {
+    "action": "CLARIFICATION_ANSWERED",
+    "actor_id": "95b4677fbabf",
+    "actor_type": "human",
+    "data": {
+      "artifact": {
+        "clarification": 1
+      },
+      "bound": {
+        "quality-report": 1
+      },
+      "choice": "answer",
+      "decision_id": "dec_a0283e766e7c45fe",
+      "label": "Withdraw the request",
+      "option_id": "C",
+      "role": "engineer"
+    },
+    "hash": "66a4792e30a5544cb916c811082319c4e651c1cfbf85f024386eda26ab6ddc78",
+    "prev_hash": "2a367fe199d286d79af9e82bdf1bcffac5e84a834d4e48eb5cbbd37e4fb9a047",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_4fae12b6c3f14ca6",
+    "seq": 20,
+    "target": "clarify",
+    "ts": 1792162058.9934862
+  },
+  {
+    "action": "RUN_ABORTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "e5b9c9ab1fe208513051a3afc0aea327c5d6e06b6ec4379fdc6a54e02f185756",
+    "prev_hash": "66a4792e30a5544cb916c811082319c4e651c1cfbf85f024386eda26ab6ddc78",
+    "reason": "clarification option C: Withdraw the request",
+    "result": "ok",
+    "run_id": "run_4fae12b6c3f14ca6",
+    "seq": 21,
+    "target": null,
+    "ts": 1792162058.9934862
+  },
+  {
+    "action": "SUMMARY_PRODUCED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "version": 1
+    },
+    "hash": "f2b91d55bf0cb9e00a419df7a756938774f84a2621990c522f6ef07292630b36",
+    "prev_hash": "e5b9c9ab1fe208513051a3afc0aea327c5d6e06b6ec4379fdc6a54e02f185756",
+    "reason": "terminated by a human at clarify (engineer key 95b4677fbabf): clarification option C: Withdraw the request",
+    "result": "ABORTED",
+    "run_id": "run_4fae12b6c3f14ca6",
+    "seq": 22,
+    "target": "engineering-summary",
+    "ts": 1792162058.994958
+  }
+]

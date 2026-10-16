@@ -1,0 +1,69 @@
+{
+  "artifacts": {
+    "change-application": 1,
+    "design": 1,
+    "impact-analysis": 1,
+    "normalized-requirement": 1,
+    "quality-report": 1,
+    "requirement": 1,
+    "task-plan": 1,
+    "test-red": 1
+  },
+  "assumptions": [
+    "change sets apply to the baseline they were authored against (docs/scope/lean-slice.md)"
+  ],
+  "decisions": [
+    {
+      "choice": "approve",
+      "key_id": "63320c4d1c94",
+      "node_id": "approve-design",
+      "reason": "Design and impact analysis identical to SCN-B; approved to apply in isolated workspace (fault-injection run).",
+      "role": "approver"
+    }
+  ],
+  "labels": [
+    "demonstration",
+    "fault-injection"
+  ],
+  "limitations": [
+    "metrics are demonstration data from a single workstation",
+    "planned-but-not-implemented scope: docs/scope/lean-slice.md section 2"
+  ],
+  "outcome": "FAILED",
+  "plan_and_rationale": {
+    "approach": "FAULT-INJECTION DEMONSTRATION (FR-ORC-036): aliases as in the normal change set, plus a defect that removes collision retry for generated codes.",
+    "impact_analysis": true,
+    "requirement": "SCN-B: Custom aliases",
+    "tasks": 12
+  },
+  "reason": "rolled_back:tests_failed",
+  "recovery": {
+    "compensations": 0,
+    "mechanisms": [
+      "rollback"
+    ],
+    "rollbacks": 1
+  },
+  "risks": [],
+  "run_id": "run_77723ef73ccf4ea7",
+  "trade_offs": [
+    "deterministic rule-based agents apply human-locked change sets instead of generating code at run time",
+    "scenario runs evaluate SEC-003 against a pinned pip-audit snapshot (no network); the live audit runs in `orch release check`",
+    "releases are local (snapshot or local staging); merging into the repository stays a manual human action"
+  ],
+  "validation_results": {
+    "green": {
+      "errors": null,
+      "failures": null,
+      "tests": null
+    },
+    "policy": {},
+    "red": {
+      "errors": 0,
+      "failures": 13,
+      "tests": 14
+    }
+  },
+  "why": "test failed (tests_failed: tests.shortener.test_api::test_code_collisions_retry_then_give_up_after_five); ROLLBACK before promotion: the isolated workspace was discarded, nothing was promoted, the last known-good release is unchanged",
+  "workflow": "scn-b"
+}

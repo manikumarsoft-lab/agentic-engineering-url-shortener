@@ -1,0 +1,50 @@
+[
+  {
+    "content": {
+      "change_set": "scenarios/scn-a/changeset",
+      "command": "python -m pytest tests/shortener/test_link_details.py",
+      "errors": 0,
+      "exit_code": 1,
+      "failed_tests": [
+        "tests.shortener.test_link_details::test_details_of_an_active_link",
+        "tests.shortener.test_link_details::test_expired_link_details_stay_readable_and_inactive",
+        "tests.shortener.test_link_details::test_details_require_a_human_api_key"
+      ],
+      "failures": 3,
+      "lock": {
+        "locked_at": "2026-10-16T14:15:54.073357+00:00",
+        "locked_by": "63320c4d1c94"
+      },
+      "phase": "red",
+      "skipped": 0,
+      "tests": 4,
+      "touched_files": [
+        "tests/shortener/test_link_details.py"
+      ]
+    },
+    "created_at": 1792160576.890574,
+    "name": "test-red",
+    "produced_by": "tdd-red",
+    "version": 1
+  },
+  {
+    "content": {
+      "change_set": "scenarios/scn-a/changeset",
+      "command": "python -m pytest tests/shortener",
+      "errors": 0,
+      "exit_code": 0,
+      "failed_tests": [],
+      "failures": 0,
+      "new_tests": [
+        "tests/shortener/test_link_details.py"
+      ],
+      "phase": "green",
+      "skipped": 0,
+      "tests": 64
+    },
+    "created_at": 1792160597.8643847,
+    "name": "test-results",
+    "produced_by": "test",
+    "version": 1
+  }
+]

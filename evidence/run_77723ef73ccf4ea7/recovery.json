@@ -1,0 +1,52 @@
+{
+  "compensation_events": [],
+  "episodes": [
+    {
+      "cause": "tests_failed",
+      "detected_at": 1792161220.9314337,
+      "episode": "ep_3b35fd2c0d83",
+      "meaning": "pre-promotion: the isolated workspace was discarded; nothing was promoted, so the last known-good release never changed",
+      "mechanism": "rollback",
+      "node": "test",
+      "recovered_at": 1792161220.943142
+    }
+  ],
+  "meaning": {
+    "compensation": "post-promotion: the change was live on staging; the previous release was re-promoted and verified, and effects that cannot be rolled back are corrected only after human approval",
+    "rollback": "pre-promotion: the isolated workspace was discarded; nothing was promoted, so the last known-good release never changed"
+  },
+  "rollback_events": [
+    {
+      "action": "ROLLBACK_STARTED",
+      "actor_id": null,
+      "actor_type": "system",
+      "data": {
+        "workspace": "C:\\Users\\manik\\Documents\\agentic-engineering-url-shortener\\var\\work\\run_77723ef73ccf4ea7"
+      },
+      "hash": "a6fa8c04d2029c8de269ec36e27d2987d28cfc99be44fb1405fd5b36bc4274c2",
+      "prev_hash": "d3a50effb8b5a67be861b9e36197e9999d920f2fb91681ed8a57631fda243f5b",
+      "reason": "tests_failed",
+      "result": "ok",
+      "run_id": "run_77723ef73ccf4ea7",
+      "seq": 52,
+      "target": "test",
+      "ts": 1792161220.9333363
+    },
+    {
+      "action": "ROLLBACK_COMPLETED",
+      "actor_id": null,
+      "actor_type": "system",
+      "data": {
+        "workspace_discarded": true
+      },
+      "hash": "a13d39840dd689a398fa58c3d491fd4d8a29bf36256594031fae9506ddccb91a",
+      "prev_hash": "a6fa8c04d2029c8de269ec36e27d2987d28cfc99be44fb1405fd5b36bc4274c2",
+      "reason": null,
+      "result": "ok",
+      "run_id": "run_77723ef73ccf4ea7",
+      "seq": 53,
+      "target": "test",
+      "ts": 1792161220.943142
+    }
+  ]
+}

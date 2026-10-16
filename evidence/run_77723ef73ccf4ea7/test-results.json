@@ -1,0 +1,60 @@
+[
+  {
+    "content": {
+      "change_set": "scenarios/scn-b/changeset-defective",
+      "command": "python -m pytest tests/shortener/test_aliases.py",
+      "errors": 0,
+      "exit_code": 1,
+      "failed_tests": [
+        "tests.shortener.test_aliases::test_alias_becomes_the_short_code",
+        "tests.shortener.test_aliases::test_alias_length_and_characters[abc-422]",
+        "tests.shortener.test_aliases::test_alias_length_and_characters[abcd-201]",
+        "tests.shortener.test_aliases::test_alias_length_and_characters[abcdefg-201]",
+        "tests.shortener.test_aliases::test_alias_length_and_characters[abcdefghij-201]",
+        "tests.shortener.test_aliases::test_alias_length_and_characters[abcdefghijk-422]",
+        "tests.shortener.test_aliases::test_alias_length_and_characters[has-dash-422]",
+        "tests.shortener.test_aliases::test_alias_length_and_characters[spa ce1-422]",
+        "tests.shortener.test_aliases::test_reserved_aliases_are_rejected[admin]",
+        "tests.shortener.test_aliases::test_reserved_aliases_are_rejected[Health]",
+        "tests.shortener.test_aliases::test_reserved_aliases_are_rejected[OPENAPI]",
+        "tests.shortener.test_aliases::test_reserved_aliases_are_rejected[static]",
+        "tests.shortener.test_aliases::test_alias_conflict_is_409_and_keeps_the_existing_mapping"
+      ],
+      "failures": 13,
+      "lock": {
+        "locked_at": "2026-10-16T14:15:54.436531+00:00",
+        "locked_by": "63320c4d1c94"
+      },
+      "phase": "red",
+      "skipped": 0,
+      "tests": 14,
+      "touched_files": [
+        "tests/shortener/test_aliases.py"
+      ]
+    },
+    "created_at": 1792161200.1553068,
+    "name": "test-red",
+    "produced_by": "tdd-red",
+    "version": 1
+  },
+  {
+    "attempt": 1,
+    "classification": "permanent",
+    "command": "python -m pytest tests/shortener",
+    "errors": 0,
+    "exit_code": 1,
+    "failed_tests": [
+      "tests.shortener.test_api::test_code_collisions_retry_then_give_up_after_five"
+    ],
+    "failures": 1,
+    "message": "1 failed, 0 errors",
+    "name": "failed-attempt",
+    "new_tests": [
+      "tests/shortener/test_aliases.py"
+    ],
+    "node": "test",
+    "phase": "green",
+    "skipped": 0,
+    "tests": 74
+  }
+]

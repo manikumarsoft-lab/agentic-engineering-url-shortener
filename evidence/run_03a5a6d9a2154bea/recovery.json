@@ -1,0 +1,67 @@
+{
+  "compensation_events": [
+    {
+      "action": "COMPENSATION_STARTED",
+      "actor_id": null,
+      "actor_type": "system",
+      "data": {},
+      "hash": "948043e1e3edf4b8d0e4bc98a32d46783d70e81edbf9e1cac384b347a0cd54e6",
+      "prev_hash": "5d15a4c5119626f25443382f530403dea46ee63ba2ff927a71f4445fd8ac50b7",
+      "reason": "smoke_failed",
+      "result": "ok",
+      "run_id": "run_03a5a6d9a2154bea",
+      "seq": 83,
+      "target": "promote",
+      "ts": 1792161415.7698627
+    },
+    {
+      "action": "COMPENSATION_COMPLETED",
+      "actor_id": null,
+      "actor_type": "system",
+      "data": {
+        "agent": "restore_previous_release",
+        "phase": "post-promotion"
+      },
+      "hash": "a9657820d5e5b3e9270719a5114e15af0b76b93fe5584052c23710bfcc50fc32",
+      "prev_hash": "b38224954b2d408962824fd46649537176f2e84e517b7b3c972d5fa08772dfe1",
+      "reason": null,
+      "result": "ok",
+      "run_id": "run_03a5a6d9a2154bea",
+      "seq": 85,
+      "target": "promote",
+      "ts": 1792161416.5964794
+    },
+    {
+      "action": "COMPENSATION_PATH",
+      "actor_id": null,
+      "actor_type": "system",
+      "data": {
+        "next": "approve-corrective"
+      },
+      "hash": "3519f78bc86bea50441697ab6f22dade41284453ddf6626ac4eccc4ceda1b752",
+      "prev_hash": "14f9fd5e1d6132266218f0855c710a24d8b2dce64915ee57edc27d3d9c9990c8",
+      "reason": null,
+      "result": "ok",
+      "run_id": "run_03a5a6d9a2154bea",
+      "seq": 87,
+      "target": "smoke",
+      "ts": 1792161416.5980232
+    }
+  ],
+  "episodes": [
+    {
+      "cause": "smoke_failed",
+      "detected_at": 1792161415.7684538,
+      "episode": "ep_c92c3e87a1a1",
+      "meaning": "post-promotion: the change was live on staging; the previous release was re-promoted and verified, and effects that cannot be rolled back are corrected only after human approval",
+      "mechanism": "compensation",
+      "node": "smoke",
+      "recovered_at": 1792161416.5980232
+    }
+  ],
+  "meaning": {
+    "compensation": "post-promotion: the change was live on staging; the previous release was re-promoted and verified, and effects that cannot be rolled back are corrected only after human approval",
+    "rollback": "pre-promotion: the isolated workspace was discarded; nothing was promoted, so the last known-good release never changed"
+  },
+  "rollback_events": []
+}

@@ -1,0 +1,98 @@
+{
+  "decisions": [
+    {
+      "bound": "{\"design\": 1, \"impact-analysis\": 1, \"task-plan\": 1}",
+      "choice": "approve",
+      "created_at": 1792161364.7665184,
+      "decision_id": "dec_4617b6e52ebc470b",
+      "key_id": "63320c4d1c94",
+      "node_id": "approve-design",
+      "reason": "Design and impact analysis reviewed; approved to apply in isolated workspace (post-promotion fault demonstration).",
+      "role": "approver",
+      "run_id": "run_03a5a6d9a2154bea",
+      "status": "ACTIVE"
+    },
+    {
+      "bound": "{\"test-results\": 1, \"threat-review\": 1, \"docs\": 1}",
+      "choice": "approve",
+      "created_at": 1792161414.7099106,
+      "decision_id": "dec_2da11119e0964723",
+      "key_id": "2788b911e283",
+      "node_id": "approve-release",
+      "reason": "Tests passed with 0 failures and no open high threats; release approved.",
+      "role": "release-owner",
+      "run_id": "run_03a5a6d9a2154bea",
+      "status": "ACTIVE"
+    },
+    {
+      "bound": "{\"compensation-record\": 1}",
+      "choice": "approve",
+      "created_at": 1792161433.119261,
+      "decision_id": "dec_db02b529c4fb4697",
+      "key_id": "63320c4d1c94",
+      "node_id": "approve-corrective",
+      "reason": "Post-promotion smoke check failed; staging was restored to the previous version. Corrective action approved.",
+      "role": "approver",
+      "run_id": "run_03a5a6d9a2154bea",
+      "status": "ACTIVE"
+    }
+  ],
+  "exceptions": [],
+  "policy_evaluations": [
+    {
+      "check_id": "PRIV-001",
+      "created_at": 1792161388.6480305,
+      "exception_id": null,
+      "mandatory": 1,
+      "node_id": "validate",
+      "outcome": "PASS",
+      "policy_version": "1.2.0",
+      "reason": "captures_personal_data == False; no personal-data markers in added code",
+      "run_id": "run_03a5a6d9a2154bea"
+    },
+    {
+      "check_id": "SEC-002",
+      "created_at": 1792161388.6480305,
+      "exception_id": null,
+      "mandatory": 1,
+      "node_id": "validate",
+      "outcome": "PASS",
+      "policy_version": "1.2.0",
+      "reason": "open_high_threats == 0; 2 threats reviewed",
+      "run_id": "run_03a5a6d9a2154bea"
+    },
+    {
+      "check_id": "SEC-003",
+      "created_at": 1792161388.6480305,
+      "exception_id": null,
+      "mandatory": 1,
+      "node_id": "validate",
+      "outcome": "PASS",
+      "policy_version": "1.2.0",
+      "reason": "dependency_scan_ok == True; pip-audit 2.10.1 snapshot of 2026-10-15T22:41:35.058490+00:00: 49 pinned dependencies, 0 known vulnerabilities",
+      "run_id": "run_03a5a6d9a2154bea"
+    },
+    {
+      "check_id": "SEC-004",
+      "created_at": 1792161388.6480305,
+      "exception_id": null,
+      "mandatory": 1,
+      "node_id": "validate",
+      "outcome": "PASS",
+      "policy_version": "1.2.0",
+      "reason": "secret_scan_clean == True; 42 files scanned, no findings",
+      "run_id": "run_03a5a6d9a2154bea"
+    },
+    {
+      "check_id": "REL-001",
+      "created_at": 1792161388.6480305,
+      "exception_id": null,
+      "mandatory": 1,
+      "node_id": "validate",
+      "outcome": "PASS",
+      "policy_version": "1.2.0",
+      "reason": "tests_passed == True; 74 tests, 0 failures, 0 errors",
+      "run_id": "run_03a5a6d9a2154bea"
+    }
+  ]
+}

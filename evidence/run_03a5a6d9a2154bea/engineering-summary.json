@@ -1,0 +1,98 @@
+{
+  "artifacts": {
+    "change-application": 1,
+    "compensation-record": 1,
+    "corrective-action": 1,
+    "design": 1,
+    "docs": 1,
+    "impact-analysis": 1,
+    "normalized-requirement": 1,
+    "quality-report": 1,
+    "release": 1,
+    "requirement": 1,
+    "task-plan": 1,
+    "test-red": 1,
+    "test-results": 1,
+    "threat-review": 1
+  },
+  "assumptions": [
+    "change sets apply to the baseline they were authored against (docs/scope/lean-slice.md)"
+  ],
+  "decisions": [
+    {
+      "choice": "approve",
+      "key_id": "63320c4d1c94",
+      "node_id": "approve-design",
+      "reason": "Design and impact analysis reviewed; approved to apply in isolated workspace (post-promotion fault demonstration).",
+      "role": "approver"
+    },
+    {
+      "choice": "approve",
+      "key_id": "2788b911e283",
+      "node_id": "approve-release",
+      "reason": "Tests passed with 0 failures and no open high threats; release approved.",
+      "role": "release-owner"
+    },
+    {
+      "choice": "approve",
+      "key_id": "63320c4d1c94",
+      "node_id": "approve-corrective",
+      "reason": "Post-promotion smoke check failed; staging was restored to the previous version. Corrective action approved.",
+      "role": "approver"
+    }
+  ],
+  "labels": [
+    "demonstration",
+    "fault-injection"
+  ],
+  "limitations": [
+    "metrics are demonstration data from a single workstation",
+    "planned-but-not-implemented scope: docs/scope/lean-slice.md section 2"
+  ],
+  "outcome": "FAILED",
+  "plan_and_rationale": {
+    "approach": "Add an optional custom alias to POST /api/v1/links (4-10 letters/digits, reserved words blocked, conflicts return 409 and never overwrite).",
+    "impact_analysis": true,
+    "requirement": "SCN-B: Custom aliases",
+    "tasks": 12
+  },
+  "reason": "compensated:smoke_failed",
+  "recovery": {
+    "compensations": 1,
+    "mechanisms": [
+      "compensation"
+    ],
+    "rollbacks": 0
+  },
+  "risks": [
+    "TH-0 Denial of service (low, accepted)",
+    "TH-2 Spoofing (medium, mitigated)"
+  ],
+  "run_id": "run_03a5a6d9a2154bea",
+  "trade_offs": [
+    "deterministic rule-based agents apply human-locked change sets instead of generating code at run time",
+    "scenario runs evaluate SEC-003 against a pinned pip-audit snapshot (no network); the live audit runs in `orch release check`",
+    "releases are local (snapshot or local staging); merging into the repository stays a manual human action"
+  ],
+  "validation_results": {
+    "green": {
+      "errors": 0,
+      "failures": 0,
+      "tests": 74
+    },
+    "policy": {
+      "PRIV-001": "PASS",
+      "REL-001": "PASS",
+      "SEC-002": "PASS",
+      "SEC-003": "PASS",
+      "SEC-004": "PASS"
+    },
+    "red": {
+      "errors": 0,
+      "failures": 13,
+      "tests": 14
+    }
+  },
+  "why": "smoke failed (smoke_failed); COMPENSATION after promotion: the previous release was restored and verified; corrective action approved by approver key 63320c4d1c94",
+  "workflow": "scn-b-compensate"
+}

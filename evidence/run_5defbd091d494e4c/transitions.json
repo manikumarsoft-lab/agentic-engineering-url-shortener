@@ -1,0 +1,1521 @@
+[
+  {
+    "action": "RUN_CREATED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "labels": [
+        "demonstration",
+        "fault-injection"
+      ],
+      "policy_version": "1.2.0",
+      "workflow": "scn-c",
+      "workflow_version": "1.0.0"
+    },
+    "hash": "3746f65e2c353d4dbb0d6e2fc3ad2830b68dd07196b578dceeea89b5f770b3d1",
+    "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 1,
+    "target": null,
+    "ts": 1792161877.2731981
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "0e094cfdcb2e4e311f04f8c7cd895195316a2a50fa8fe96fcefeda16bc2de563",
+    "prev_hash": "fb56bcde45699008b1e63c0e172353494ee3c374cbf6b26c0333103cc1f46dce",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 3,
+    "target": "intake",
+    "ts": 1792161877.3054001
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "intake"
+      ]
+    },
+    "hash": "af8a6f3752bb3dcf7b1f474570ef7733987a19fd30c7c33c0d2f4a1cf8dbd933",
+    "prev_hash": "0e094cfdcb2e4e311f04f8c7cd895195316a2a50fa8fe96fcefeda16bc2de563",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 4,
+    "target": null,
+    "ts": 1792161877.3064482
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "b2357f4ac3fd1a59b7ca0793e62a7a92c7d5d7c00168e5c947437aa7be6421a6",
+    "prev_hash": "af8a6f3752bb3dcf7b1f474570ef7733987a19fd30c7c33c0d2f4a1cf8dbd933",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 5,
+    "target": "intake",
+    "ts": 1792161877.3074088
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "fd96b0e25c9f409f105e010663c123342b7405e2627a153434f9cbded67aa531",
+    "prev_hash": "1ea17595f9731383c14d0aa577dafba34b81ea8701a66bf14bee6d65f814893e",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 7,
+    "target": "intake",
+    "ts": 1792161877.412117
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "3f1e38033c41e61b57e4a340b9a50a8a1bd46f4809382108c2a339fcd2f2dad6",
+    "prev_hash": "fd96b0e25c9f409f105e010663c123342b7405e2627a153434f9cbded67aa531",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 8,
+    "target": "normalize",
+    "ts": 1792161877.4131472
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "normalize"
+      ]
+    },
+    "hash": "fbe23655d430ae5e4dbcc463e9a56087e08b1ce7cab4ac61ac9d7a43af350b18",
+    "prev_hash": "3f1e38033c41e61b57e4a340b9a50a8a1bd46f4809382108c2a339fcd2f2dad6",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 9,
+    "target": null,
+    "ts": 1792161877.415155
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "c63e63412041a6881838edcefb861b2cbc2b2b92e27600596f5d12d9f02c5e3b",
+    "prev_hash": "fbe23655d430ae5e4dbcc463e9a56087e08b1ce7cab4ac61ac9d7a43af350b18",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 10,
+    "target": "normalize",
+    "ts": 1792161877.415155
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "eb652efe00005b49e665d7397f1081f0041a44153c4f6d765b246a4e1cce3070",
+    "prev_hash": "992e78d3aea9553676911dd3b7b50910887576367f45952530f63d369805fdd4",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 12,
+    "target": "normalize",
+    "ts": 1792161877.5271015
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "25c1a0dd4fc50056bc1c6d87d830863385325df69d159f99623ed8e419dd34f0",
+    "prev_hash": "eb652efe00005b49e665d7397f1081f0041a44153c4f6d765b246a4e1cce3070",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 13,
+    "target": "quality",
+    "ts": 1792161877.5281005
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "quality"
+      ]
+    },
+    "hash": "1d91b3a44af41065a9968b118031127e4ca9f6491d1c4b36e1d895413b31e9c2",
+    "prev_hash": "25c1a0dd4fc50056bc1c6d87d830863385325df69d159f99623ed8e419dd34f0",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 14,
+    "target": null,
+    "ts": 1792161877.5301092
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "6a3c26bdd405b0a83cf08f543f3d5a7adae24ca5ac03257f3e84405595a964f4",
+    "prev_hash": "1d91b3a44af41065a9968b118031127e4ca9f6491d1c4b36e1d895413b31e9c2",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 15,
+    "target": "quality",
+    "ts": 1792161877.5301092
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "71c20238062d71d45fc7ab3f8a0579df85529011e084ba8f6866e899a2104ef5",
+    "prev_hash": "abfb479e884255c738cccefb81bc1d202609a7bbbddbbd1f73017413ecfb50c8",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 17,
+    "target": "quality",
+    "ts": 1792161877.6369903
+  },
+  {
+    "action": "GATE_OPENED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "bound": {
+        "quality-report": 1
+      },
+      "deadline": 1792248277.6386871,
+      "kind": "clarify",
+      "options": {
+        "A": {
+          "label": "Daily aggregate click counts per link (UTC), no personal data (recommended)"
+        },
+        "C": {
+          "action": "abort",
+          "label": "Withdraw the request"
+        }
+      },
+      "roles": [
+        "engineer",
+        "approver"
+      ]
+    },
+    "hash": "f845bd0f5ccca44dfd38e3787b038bbe135e937fad7fbd0c2c2aa8ebf9497eb2",
+    "prev_hash": "71c20238062d71d45fc7ab3f8a0579df85529011e084ba8f6866e899a2104ef5",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 18,
+    "target": "clarify",
+    "ts": 1792161877.6386871
+  },
+  {
+    "action": "RUN_AWAITING_APPROVAL",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "d25462d9e7047b60170ccb0a57c2ccd9dba26a6632ac4c862908f4fcde6437c0",
+    "prev_hash": "f845bd0f5ccca44dfd38e3787b038bbe135e937fad7fbd0c2c2aa8ebf9497eb2",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 19,
+    "target": null,
+    "ts": 1792161877.6404107
+  },
+  {
+    "action": "CLARIFICATION_ANSWERED",
+    "actor_id": "95b4677fbabf",
+    "actor_type": "human",
+    "data": {
+      "artifact": {
+        "clarification": 1
+      },
+      "bound": {
+        "quality-report": 1
+      },
+      "choice": "answer",
+      "decision_id": "dec_d6daee1df0044efa",
+      "label": "Daily aggregate click counts per link (UTC), no personal data (recommended)",
+      "option_id": "A",
+      "role": "engineer"
+    },
+    "hash": "67feb474f96a67c105b4e7c9b4e308421e331b16f66b4ede284f2a9cb2cd0fbb",
+    "prev_hash": "d25462d9e7047b60170ccb0a57c2ccd9dba26a6632ac4c862908f4fcde6437c0",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 20,
+    "target": "clarify",
+    "ts": 1792161930.5624366
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "ec7da1308780f1e3f7173eb478533996bbf326d7ef08a215b636d10b14fbfbad",
+    "prev_hash": "67feb474f96a67c105b4e7c9b4e308421e331b16f66b4ede284f2a9cb2cd0fbb",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 21,
+    "target": "select",
+    "ts": 1792161930.5675805
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "select"
+      ]
+    },
+    "hash": "2a9d339ab295b04ef8453e32f41aec5801032a4c337ce5471443df0b0b6f7a2a",
+    "prev_hash": "ec7da1308780f1e3f7173eb478533996bbf326d7ef08a215b636d10b14fbfbad",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 22,
+    "target": null,
+    "ts": 1792161930.5692058
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "880d8657320e91752ea9c24a84101fe11fbcbb349b3db7d0f07155e7e6e34266",
+    "prev_hash": "2a9d339ab295b04ef8453e32f41aec5801032a4c337ce5471443df0b0b6f7a2a",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 23,
+    "target": "select",
+    "ts": 1792161930.5692058
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "e49ee3de8f97f9ef6196d55d9289f2e84ceffcecadc1d4228b21407063f5ce03",
+    "prev_hash": "ab7ce799882f6ae4d2bcca886002daf163f4d2a9f732c036c55b150c4e2559d7",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 26,
+    "target": "select",
+    "ts": 1792161930.680583
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "370805fc8550cc66bc214c6863ab6b7fadc009662b3f7323da677936d984a016",
+    "prev_hash": "e49ee3de8f97f9ef6196d55d9289f2e84ceffcecadc1d4228b21407063f5ce03",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 27,
+    "target": "requality",
+    "ts": 1792161930.6822722
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "requality"
+      ]
+    },
+    "hash": "2ca349fc40ad2e3eba27f11fc88a4d78e1a5fae4b705a8354e5957cd63ee1f61",
+    "prev_hash": "370805fc8550cc66bc214c6863ab6b7fadc009662b3f7323da677936d984a016",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 28,
+    "target": null,
+    "ts": 1792161930.6839206
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "afa00730d37ad8f60c77cf32176c9e3752033389659c210c860f7e2f59b0082f",
+    "prev_hash": "2ca349fc40ad2e3eba27f11fc88a4d78e1a5fae4b705a8354e5957cd63ee1f61",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 29,
+    "target": "requality",
+    "ts": 1792161930.6839206
+  },
+  {
+    "action": "POLICY_EVALUATED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "mandatory": true,
+      "node": "requality",
+      "policy_version": "1.2.0"
+    },
+    "hash": "16e8c7a30ad73b721131c1b0f912d2658f10ec105cefcefeca89cbc5e4c8ab1c",
+    "prev_hash": "afa00730d37ad8f60c77cf32176c9e3752033389659c210c860f7e2f59b0082f",
+    "reason": "captures_personal_data == False",
+    "result": "PASS",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 30,
+    "target": "PRIV-001",
+    "ts": 1792161930.792564
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "4acf2895a51a7e6f13acbcf4727897affbe117559870d97c8ec0b7769107f5f0",
+    "prev_hash": "6ae7fb4ae17611da1f37acf3e40bc192b8a3a75dfd5adcca543c267e423af44c",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 32,
+    "target": "requality",
+    "ts": 1792161930.7936184
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "f1bdd51d2c624a14e8bff9d39896dcd50f8ec062a9258fa0cac3e08c8baed6d7",
+    "prev_hash": "4acf2895a51a7e6f13acbcf4727897affbe117559870d97c8ec0b7769107f5f0",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 33,
+    "target": "decompose",
+    "ts": 1792161930.7973924
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "decompose"
+      ]
+    },
+    "hash": "ba68904b886bd13228edc4cf6bd550716b509040ed1b8d68a51d0381a82197af",
+    "prev_hash": "f1bdd51d2c624a14e8bff9d39896dcd50f8ec062a9258fa0cac3e08c8baed6d7",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 34,
+    "target": null,
+    "ts": 1792161930.7996233
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "6b3caebeeebc4c08847e701ac820b820b9a85412ddc27e402b56403f2873c4c9",
+    "prev_hash": "ba68904b886bd13228edc4cf6bd550716b509040ed1b8d68a51d0381a82197af",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 35,
+    "target": "decompose",
+    "ts": 1792161930.7996233
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "85d29f48e8aaa93e922f7a54a4cde372afe8d718bd4e46475d94a99038e35dfb",
+    "prev_hash": "71cd527eea6d4970c9b7081dfd8c999784ff569285b98f1ba46fca727550c020",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 37,
+    "target": "decompose",
+    "ts": 1792161930.9095204
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "e7fce99d3ba89aefc981ebd790d0d085b4d60a0b9746de8b533c9ab9f97931a2",
+    "prev_hash": "85d29f48e8aaa93e922f7a54a4cde372afe8d718bd4e46475d94a99038e35dfb",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 38,
+    "target": "design",
+    "ts": 1792161930.9118972
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "design"
+      ]
+    },
+    "hash": "fc5cfcbe42fd793f891b1b743ad1ce036d656d3c6dc7beca6fe862b6a8cd3caf",
+    "prev_hash": "e7fce99d3ba89aefc981ebd790d0d085b4d60a0b9746de8b533c9ab9f97931a2",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 39,
+    "target": null,
+    "ts": 1792161930.9135416
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "3ce7f4b1d0af40cc4df56ddf5f772d6082b740a692511c25798a38f374ab4cb8",
+    "prev_hash": "fc5cfcbe42fd793f891b1b743ad1ce036d656d3c6dc7beca6fe862b6a8cd3caf",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 40,
+    "target": "design",
+    "ts": 1792161930.9135416
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "93421f2e6e843d1549d5f5d0935aae55b351f16d83576e270ee65fc398cbb3d8",
+    "prev_hash": "3fd27b17b128e339e938712d625c6c5c65b15748dbd831af0b1ffcffe1f14555",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 42,
+    "target": "design",
+    "ts": 1792161931.0221581
+  },
+  {
+    "action": "GATE_OPENED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "bound": {
+        "change-set-selection": 1,
+        "design": 1,
+        "task-plan": 1
+      },
+      "deadline": 1792248331.0247355,
+      "kind": "approval",
+      "options": {},
+      "roles": [
+        "approver"
+      ]
+    },
+    "hash": "c78383b19a6feb48bfc1dfdfd81c7e34fdf70d5fb66562ab57238c4974546fde",
+    "prev_hash": "93421f2e6e843d1549d5f5d0935aae55b351f16d83576e270ee65fc398cbb3d8",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 43,
+    "target": "approve-design",
+    "ts": 1792161931.0247355
+  },
+  {
+    "action": "RUN_AWAITING_APPROVAL",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "3dc8a354da43d9c9bdedb3b59baeee9b29d1d41f9ec5e430cc83548d6990cc9b",
+    "prev_hash": "c78383b19a6feb48bfc1dfdfd81c7e34fdf70d5fb66562ab57238c4974546fde",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 44,
+    "target": null,
+    "ts": 1792161931.0258098
+  },
+  {
+    "action": "GATE_APPROVED",
+    "actor_id": "63320c4d1c94",
+    "actor_type": "human",
+    "data": {
+      "bound": {
+        "change-set-selection": 1,
+        "design": 1,
+        "task-plan": 1
+      },
+      "choice": "approve",
+      "decision_id": "dec_0a53d9dd4bc944f5",
+      "role": "approver"
+    },
+    "hash": "d0142594b08bd8f2f0a5a45b3608e0b81e6a88fdb95bc21ba503b9a8958d9161",
+    "prev_hash": "3dc8a354da43d9c9bdedb3b59baeee9b29d1d41f9ec5e430cc83548d6990cc9b",
+    "reason": "Design follows clarified option A; approved to apply in isolated workspace.",
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 45,
+    "target": "approve-design",
+    "ts": 1792161938.3696816
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "6b532c0eb7ca54fc9d9247b99635b77a489efeaea25390c47a14ed906ef23342",
+    "prev_hash": "d0142594b08bd8f2f0a5a45b3608e0b81e6a88fdb95bc21ba503b9a8958d9161",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 46,
+    "target": "tdd-red",
+    "ts": 1792161938.3748744
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "tdd-red"
+      ]
+    },
+    "hash": "9dcf395daac4dd2a28597148e2de3c83116960c4d3281eca6def64b12a5a23d9",
+    "prev_hash": "6b532c0eb7ca54fc9d9247b99635b77a489efeaea25390c47a14ed906ef23342",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 47,
+    "target": null,
+    "ts": 1792161938.377897
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "26ad143b1a48450ca82b42197395aaf81cb236bb1c8dc6774ea413f53d8f6d2a",
+    "prev_hash": "9dcf395daac4dd2a28597148e2de3c83116960c4d3281eca6def64b12a5a23d9",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 48,
+    "target": "tdd-red",
+    "ts": 1792161938.3780496
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "d360baba58bb34d6b07a6efd5d1416d443da677caefab36c281a4c4c2dcd6c88",
+    "prev_hash": "08d34d7641b1acdee373223e4a944830e4c6fac9af9e71bec6920a5b2f51c808",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 50,
+    "target": "tdd-red",
+    "ts": 1792161939.7357733
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "e9d214338934e852c406c4b6cd9058c5be0bc63abe08cc65911ab399b6fbe58c",
+    "prev_hash": "d360baba58bb34d6b07a6efd5d1416d443da677caefab36c281a4c4c2dcd6c88",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 51,
+    "target": "implement",
+    "ts": 1792161939.7383344
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "implement"
+      ]
+    },
+    "hash": "703b39e8a560fb284c7d23a6460a34338acff0bbafc7f1d662b29d91e4585c25",
+    "prev_hash": "e9d214338934e852c406c4b6cd9058c5be0bc63abe08cc65911ab399b6fbe58c",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 52,
+    "target": null,
+    "ts": 1792161939.740589
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "c4183c2af11345c92c2dd4c2070f96964a80b880da403c450f322bb33969717b",
+    "prev_hash": "703b39e8a560fb284c7d23a6460a34338acff0bbafc7f1d662b29d91e4585c25",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 53,
+    "target": "implement",
+    "ts": 1792161939.740589
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "fdc0f951c3cf30f9de72e35a15b0764de9a0cc4b6c8f86a6595a19732482d674",
+    "prev_hash": "4c18d819ccd1299ea49b5b8fa9645bef3eae956abefbfc2e60e01a246c01299a",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 55,
+    "target": "implement",
+    "ts": 1792161939.9177773
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "fea4b87fc68375cf98c1992fca69bd38c8e70d95e8a9a43770c7aaf0d8c915cf",
+    "prev_hash": "fdc0f951c3cf30f9de72e35a15b0764de9a0cc4b6c8f86a6595a19732482d674",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 56,
+    "target": "test",
+    "ts": 1792161939.919776
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "test"
+      ]
+    },
+    "hash": "2a9d8364fb24f4cd7e42139538eb9641ca30bccde0b9b75c8cb285223226bb2e",
+    "prev_hash": "fea4b87fc68375cf98c1992fca69bd38c8e70d95e8a9a43770c7aaf0d8c915cf",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 57,
+    "target": null,
+    "ts": 1792161939.9208202
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "2a074724142a501a5d51303b063171ad81b6af5fe19790d177fed74c504c7856",
+    "prev_hash": "2a9d8364fb24f4cd7e42139538eb9641ca30bccde0b9b75c8cb285223226bb2e",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 58,
+    "target": "test",
+    "ts": 1792161939.9217331
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "24a6497c9405288c76cbf2a453f6d51cb3a38798617cfdf5ade9fa7c962c013f",
+    "prev_hash": "fc9112105f0bbe5009375fdb8beebf3fb5244c836ab53e2ee884cfc160433341",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 60,
+    "target": "test",
+    "ts": 1792161960.0179033
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "b54e27e4a8f640fbbd0ec2f1b3c3df01a9b625d67c6f18a2c294e0f4c470e30d",
+    "prev_hash": "24a6497c9405288c76cbf2a453f6d51cb3a38798617cfdf5ade9fa7c962c013f",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 61,
+    "target": "docs",
+    "ts": 1792161960.020901
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "9094d82bc5fd4fcce1b634c22f26d436e678e76a58d134ad0206997eae95b26a",
+    "prev_hash": "b54e27e4a8f640fbbd0ec2f1b3c3df01a9b625d67c6f18a2c294e0f4c470e30d",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 62,
+    "target": "threat-review",
+    "ts": 1792161960.0219324
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "docs",
+        "threat-review"
+      ]
+    },
+    "hash": "70c73b46e9a7051f97e3330430de2fb1ede200e9ce0864c5ff68f0711461ce24",
+    "prev_hash": "9094d82bc5fd4fcce1b634c22f26d436e678e76a58d134ad0206997eae95b26a",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 63,
+    "target": null,
+    "ts": 1792161960.0232034
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "5bd732e4858f0a504b67d42103b41b2120ceb3356b7b89ec7c8974ceabf3ead9",
+    "prev_hash": "70c73b46e9a7051f97e3330430de2fb1ede200e9ce0864c5ff68f0711461ce24",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 64,
+    "target": "docs",
+    "ts": 1792161960.0246284
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "4a1abb33fe29c86889e52fc6a3f8cb564cd37b918d969438ae18fd4795148245",
+    "prev_hash": "5bd732e4858f0a504b67d42103b41b2120ceb3356b7b89ec7c8974ceabf3ead9",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 65,
+    "target": "threat-review",
+    "ts": 1792161960.0246284
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "256fb301debb64f389e64af9c53a421027e272e4642852dadc4a4791c33c6db1",
+    "prev_hash": "6ddbac85ca71c80c0660ad583a6c76deecc6f1dc1fdc8db3bde7980a82655252",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 67,
+    "target": "docs",
+    "ts": 1792161960.1988895
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "fdafc8001febf68dbdf3744467f4376a8e5ee6ffae8203ee8086bfe89fa74222",
+    "prev_hash": "24b6b550308ff50c746f31b71c0b25ffa38d6035b397cbf6378efe2492a581a2",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 69,
+    "target": "threat-review",
+    "ts": 1792161960.2002254
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "ed5662f5e82c25c9fa6f678ee14fb4f94d6ab760ae33a623b46c8551948f3b71",
+    "prev_hash": "fdafc8001febf68dbdf3744467f4376a8e5ee6ffae8203ee8086bfe89fa74222",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 70,
+    "target": "validate",
+    "ts": 1792161960.201417
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "validate"
+      ]
+    },
+    "hash": "0c920ee047919c22225621a1cd1c40e263352d38fd3ea0cdb911d2bc49e66598",
+    "prev_hash": "ed5662f5e82c25c9fa6f678ee14fb4f94d6ab760ae33a623b46c8551948f3b71",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 71,
+    "target": null,
+    "ts": 1792161960.2025197
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "cce16171ad75d7cc52915c787b6645a281aba6c53b47f62c7ec467dbc2322b5a",
+    "prev_hash": "0c920ee047919c22225621a1cd1c40e263352d38fd3ea0cdb911d2bc49e66598",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 72,
+    "target": "validate",
+    "ts": 1792161960.2025197
+  },
+  {
+    "action": "POLICY_EVALUATED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "mandatory": true,
+      "node": "validate",
+      "policy_version": "1.2.0"
+    },
+    "hash": "3e322e6463cd4bab64e5cdd450ef7ebd95bcf661c88bea11650f53d8e84c1004",
+    "prev_hash": "cce16171ad75d7cc52915c787b6645a281aba6c53b47f62c7ec467dbc2322b5a",
+    "reason": "captures_personal_data == False; no personal-data markers in added code",
+    "result": "PASS",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 73,
+    "target": "PRIV-001",
+    "ts": 1792161960.3286662
+  },
+  {
+    "action": "POLICY_EVALUATED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "mandatory": true,
+      "node": "validate",
+      "policy_version": "1.2.0"
+    },
+    "hash": "80c0eaa8ee3606d6f68d5d834f2de9c410aefd1b38005c1982ecc549059ca3e6",
+    "prev_hash": "3e322e6463cd4bab64e5cdd450ef7ebd95bcf661c88bea11650f53d8e84c1004",
+    "reason": "open_high_threats == 0; 1 threats reviewed",
+    "result": "PASS",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 74,
+    "target": "SEC-002",
+    "ts": 1792161960.3296664
+  },
+  {
+    "action": "POLICY_EVALUATED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "mandatory": true,
+      "node": "validate",
+      "policy_version": "1.2.0"
+    },
+    "hash": "5da8add246d559b3779c840048b1d4f822b9d7fa61c93386b118bed57c5cb316",
+    "prev_hash": "80c0eaa8ee3606d6f68d5d834f2de9c410aefd1b38005c1982ecc549059ca3e6",
+    "reason": "dependency_scan_ok = False, expected True; dependency scanner unavailable (injected fault): no evidence, never PASS",
+    "result": "FAIL",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 75,
+    "target": "SEC-003",
+    "ts": 1792161960.3296664
+  },
+  {
+    "action": "POLICY_EVALUATED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "mandatory": true,
+      "node": "validate",
+      "policy_version": "1.2.0"
+    },
+    "hash": "6c6530d0f00b758a416096f08c595da245c22be8191fe2075a398f3eb62a70ae",
+    "prev_hash": "5da8add246d559b3779c840048b1d4f822b9d7fa61c93386b118bed57c5cb316",
+    "reason": "secret_scan_clean == True; 42 files scanned, no findings",
+    "result": "PASS",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 76,
+    "target": "SEC-004",
+    "ts": 1792161960.3296664
+  },
+  {
+    "action": "POLICY_EVALUATED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "mandatory": true,
+      "node": "validate",
+      "policy_version": "1.2.0"
+    },
+    "hash": "66b25152e02cfcf37cb8b88707b8f05dbdc774bea341a95a4d030b6442a19c05",
+    "prev_hash": "6c6530d0f00b758a416096f08c595da245c22be8191fe2075a398f3eb62a70ae",
+    "reason": "tests_passed == True; 63 tests, 0 failures, 0 errors",
+    "result": "PASS",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 77,
+    "target": "REL-001",
+    "ts": 1792161960.3296664
+  },
+  {
+    "action": "NODE_ATTEMPT_FAILED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "classification": "permanent"
+    },
+    "hash": "d3db8f885098e40252f599cebff3da5973fecc93956855aec19a5f07509acf6a",
+    "prev_hash": "66b25152e02cfcf37cb8b88707b8f05dbdc774bea341a95a4d030b6442a19c05",
+    "reason": "policy_fail:SEC-003",
+    "result": "failed",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 78,
+    "target": "validate",
+    "ts": 1792161960.3317604
+  },
+  {
+    "action": "FAILURE_DETECTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "episode": "ep_fb22d2a5e89f"
+    },
+    "hash": "0821150fadb26a07e0ba4967fbc435246837d558afcb64946a54ecd2d8418f5f",
+    "prev_hash": "d3db8f885098e40252f599cebff3da5973fecc93956855aec19a5f07509acf6a",
+    "reason": "policy_fail:SEC-003",
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 79,
+    "target": "validate",
+    "ts": 1792161960.3317604
+  },
+  {
+    "action": "RUN_SAFE_STOPPED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "68e34c3b58a15f0e1aae9ec276f603a3d11573168b0156fb63ccd29ec61d8e2d",
+    "prev_hash": "0821150fadb26a07e0ba4967fbc435246837d558afcb64946a54ecd2d8418f5f",
+    "reason": "policy_fail:SEC-003",
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 80,
+    "target": "validate",
+    "ts": 1792161960.3317604
+  },
+  {
+    "action": "SUMMARY_PRODUCED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "version": 1
+    },
+    "hash": "10ddc57b4a241c4a44c1961e9375d75fcd00377c0ff68be7c13d8a330069e781",
+    "prev_hash": "68e34c3b58a15f0e1aae9ec276f603a3d11573168b0156fb63ccd29ec61d8e2d",
+    "reason": "safe-stopped (policy_fail:SEC-003); mandatory policy SEC-003 failed; release is blocked until a human-approved exception exists, then an approver resumes",
+    "result": "SAFE_STOPPED",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 81,
+    "target": "engineering-summary",
+    "ts": 1792161960.33289
+  },
+  {
+    "action": "EXCEPTION_REQUESTED",
+    "actor_id": "95b4677fbabf",
+    "actor_type": "human",
+    "data": {
+      "compensating_control": "Manual review of dependency manifest; rescan within 24 hours when scanner is restored.",
+      "exception_id": "exc_925ccbd0c2414f6b"
+    },
+    "hash": "f6ab276192fa4f6398074e5253f9764f7af90225721e0ee2d29d97e6b60f6ec3",
+    "prev_hash": "10ddc57b4a241c4a44c1961e9375d75fcd00377c0ff68be7c13d8a330069e781",
+    "reason": "Dependency scanner unavailable; change adds no new dependencies.",
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 82,
+    "target": "SEC-003",
+    "ts": 1792161973.6856713
+  },
+  {
+    "action": "EXCEPTION_APPROVED",
+    "actor_id": "63320c4d1c94",
+    "actor_type": "human",
+    "data": {
+      "exception_id": "exc_925ccbd0c2414f6b"
+    },
+    "hash": "50cd880a2ad735a0e574ec049b03b021aa8549afb5b58de58dbc6fa5b1337b96",
+    "prev_hash": "f6ab276192fa4f6398074e5253f9764f7af90225721e0ee2d29d97e6b60f6ec3",
+    "reason": "",
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 83,
+    "target": "SEC-003",
+    "ts": 1792161987.9451675
+  },
+  {
+    "action": "RETRY_BUDGET_RESET",
+    "actor_id": "63320c4d1c94",
+    "actor_type": "human",
+    "data": {},
+    "hash": "7c09f68b5ef764bdf4bb6a70a18af48d5e0fcf18d2949ef980b3442a319018b3",
+    "prev_hash": "50cd880a2ad735a0e574ec049b03b021aa8549afb5b58de58dbc6fa5b1337b96",
+    "reason": "Time-boxed exception EXC approved with compensating control; resuming.",
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 84,
+    "target": "validate",
+    "ts": 1792161995.5133905
+  },
+  {
+    "action": "RUN_RESUMED",
+    "actor_id": "63320c4d1c94",
+    "actor_type": "human",
+    "data": {
+      "cause": "policy_fail:SEC-003"
+    },
+    "hash": "e5efdc36e2e67b329bf81ccbf0b79dc75453a840b93ad9df7e58c163b5604c70",
+    "prev_hash": "7c09f68b5ef764bdf4bb6a70a18af48d5e0fcf18d2949ef980b3442a319018b3",
+    "reason": "Time-boxed exception EXC approved with compensating control; resuming.",
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 85,
+    "target": null,
+    "ts": 1792161995.5133905
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "validate"
+      ]
+    },
+    "hash": "19bd2f0daefb9b990f707e9322195acee8fba04383fcd7868b8a55b5612bc884",
+    "prev_hash": "e5efdc36e2e67b329bf81ccbf0b79dc75453a840b93ad9df7e58c163b5604c70",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 86,
+    "target": null,
+    "ts": 1792161995.5183773
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "2044b127bf4a51b1d01ab95fbf93f57eca28035f0689f4310b17ba9e50889241",
+    "prev_hash": "19bd2f0daefb9b990f707e9322195acee8fba04383fcd7868b8a55b5612bc884",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 87,
+    "target": "validate",
+    "ts": 1792161995.5183773
+  },
+  {
+    "action": "POLICY_EVALUATED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "mandatory": true,
+      "node": "validate",
+      "policy_version": "1.2.0"
+    },
+    "hash": "96cd5b4a9ca88148422d758fb918fb060daf3bd777f0819c33ef8f2542ae1a21",
+    "prev_hash": "2044b127bf4a51b1d01ab95fbf93f57eca28035f0689f4310b17ba9e50889241",
+    "reason": "captures_personal_data == False; no personal-data markers in added code",
+    "result": "PASS",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 88,
+    "target": "PRIV-001",
+    "ts": 1792161995.641084
+  },
+  {
+    "action": "POLICY_EVALUATED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "mandatory": true,
+      "node": "validate",
+      "policy_version": "1.2.0"
+    },
+    "hash": "a0e326a47356c73ab87fea6fe0c16d58d88742ef542f9c9a0110ab0c3551701a",
+    "prev_hash": "96cd5b4a9ca88148422d758fb918fb060daf3bd777f0819c33ef8f2542ae1a21",
+    "reason": "open_high_threats == 0; 1 threats reviewed",
+    "result": "PASS",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 89,
+    "target": "SEC-002",
+    "ts": 1792161995.641084
+  },
+  {
+    "action": "POLICY_EVALUATED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "mandatory": true,
+      "node": "validate",
+      "policy_version": "1.2.0"
+    },
+    "hash": "27906b586d4b87e0a7574449ddaa14f0be917f1781f684aebffbb187515fa972",
+    "prev_hash": "a0e326a47356c73ab87fea6fe0c16d58d88742ef542f9c9a0110ab0c3551701a",
+    "reason": "dependency_scan_ok = False, expected True; dependency scanner unavailable (injected fault): no evidence, never PASS; approved exception exc_925ccbd0c2414f6b",
+    "result": "EXCEPTION-REQUESTED",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 90,
+    "target": "SEC-003",
+    "ts": 1792161995.641084
+  },
+  {
+    "action": "POLICY_EVALUATED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "mandatory": true,
+      "node": "validate",
+      "policy_version": "1.2.0"
+    },
+    "hash": "f73e5a5f8e8d3cb4e801769eb140adb562bfb8538c019663df257567d0bae1be",
+    "prev_hash": "27906b586d4b87e0a7574449ddaa14f0be917f1781f684aebffbb187515fa972",
+    "reason": "secret_scan_clean == True; 42 files scanned, no findings",
+    "result": "PASS",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 91,
+    "target": "SEC-004",
+    "ts": 1792161995.641084
+  },
+  {
+    "action": "POLICY_EVALUATED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "mandatory": true,
+      "node": "validate",
+      "policy_version": "1.2.0"
+    },
+    "hash": "7d27ff0cbf47004b1d664f6f7da9c7d537e85dd53a6a98662adf3338ff4b853f",
+    "prev_hash": "f73e5a5f8e8d3cb4e801769eb140adb562bfb8538c019663df257567d0bae1be",
+    "reason": "tests_passed == True; 63 tests, 0 failures, 0 errors",
+    "result": "PASS",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 92,
+    "target": "REL-001",
+    "ts": 1792161995.641084
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "5578b2b7ac73a51a789727541c4eca8cb493d69963fac04e50bd77432915e984",
+    "prev_hash": "7d27ff0cbf47004b1d664f6f7da9c7d537e85dd53a6a98662adf3338ff4b853f",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 93,
+    "target": "validate",
+    "ts": 1792161995.6421936
+  },
+  {
+    "action": "RECOVERY_COMPLETED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "episode": "ep_fb22d2a5e89f",
+      "mechanism": "human_resume"
+    },
+    "hash": "444c053fc59ebecb469de23e2de1f248cb11cfaa1cce325432e34fdddb385b53",
+    "prev_hash": "5578b2b7ac73a51a789727541c4eca8cb493d69963fac04e50bd77432915e984",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 94,
+    "target": "validate",
+    "ts": 1792161995.6421936
+  },
+  {
+    "action": "GATE_OPENED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "bound": {
+        "docs": 1,
+        "test-results": 1,
+        "threat-review": 1
+      },
+      "deadline": 1792248395.6440244,
+      "kind": "approval",
+      "options": {},
+      "roles": [
+        "release-owner"
+      ]
+    },
+    "hash": "9a253987b5ecb58aaf451987aebfcad5a375c14fc6c9a3a5d1cf95dc3ea170a8",
+    "prev_hash": "444c053fc59ebecb469de23e2de1f248cb11cfaa1cce325432e34fdddb385b53",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 95,
+    "target": "approve-release",
+    "ts": 1792161995.6440244
+  },
+  {
+    "action": "RUN_AWAITING_APPROVAL",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "72f5a66dc98222d5d5f5a12bedcf6d890ecb930562295298f830db6ee7407d92",
+    "prev_hash": "9a253987b5ecb58aaf451987aebfcad5a375c14fc6c9a3a5d1cf95dc3ea170a8",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 96,
+    "target": null,
+    "ts": 1792161995.6460268
+  },
+  {
+    "action": "GATE_APPROVED",
+    "actor_id": "2788b911e283",
+    "actor_type": "human",
+    "data": {
+      "bound": {
+        "docs": 1,
+        "test-results": 1,
+        "threat-review": 1
+      },
+      "choice": "approve",
+      "decision_id": "dec_1bae6a4e93aa41f5",
+      "role": "release-owner"
+    },
+    "hash": "e1280566c68fcfea1fb5183cc50e0cd892ec112e38c546f5884b9aeb692f9ee4",
+    "prev_hash": "72f5a66dc98222d5d5f5a12bedcf6d890ecb930562295298f830db6ee7407d92",
+    "reason": "Tests passed; SEC-003 covered by approved exception with compensating control. Release approved.",
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 97,
+    "target": "approve-release",
+    "ts": 1792162008.3149428
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "518be62a41020d84e883f1c9c1ede825aaff8c8aad9078aabd9f06ae994a07e4",
+    "prev_hash": "e1280566c68fcfea1fb5183cc50e0cd892ec112e38c546f5884b9aeb692f9ee4",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 98,
+    "target": "release",
+    "ts": 1792162008.3206108
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "release"
+      ]
+    },
+    "hash": "458b6ff6bd4d802b7872c3a86b09c386179336e3b56e0076eb97f91029ea4754",
+    "prev_hash": "518be62a41020d84e883f1c9c1ede825aaff8c8aad9078aabd9f06ae994a07e4",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 99,
+    "target": null,
+    "ts": 1792162008.3228166
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "f949e407358b4f44877ba63b66b8857570d56cc915291b4b48ee939a72662af0",
+    "prev_hash": "458b6ff6bd4d802b7872c3a86b09c386179336e3b56e0076eb97f91029ea4754",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 100,
+    "target": "release",
+    "ts": 1792162008.3228166
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "d3b1245aaebb24663aa90ae571786330c53c1766878ff46745f610065c508bce",
+    "prev_hash": "7f3d11a0d7f4753e3676a566652fabad9b8263c431560291008aad52c56ecffd",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 102,
+    "target": "release",
+    "ts": 1792162008.4667654
+  },
+  {
+    "action": "RUN_COMPLETED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "ee78358bb6113ee0289e6a1fdcd5c853249ba1c1665e5e10757192046edac370",
+    "prev_hash": "d3b1245aaebb24663aa90ae571786330c53c1766878ff46745f610065c508bce",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 103,
+    "target": null,
+    "ts": 1792162008.4691136
+  },
+  {
+    "action": "SUMMARY_PRODUCED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "version": 2
+    },
+    "hash": "ff4e23db2a667dc2935268a77b6dbac42917fdcaf24de2e8cb9f420265454a3a",
+    "prev_hash": "ee78358bb6113ee0289e6a1fdcd5c853249ba1c1665e5e10757192046edac370",
+    "reason": "all stages succeeded and every gate was decided by a human (approve-design by approver key 63320c4d1c94; approve-release by release-owner key 2788b911e283)",
+    "result": "COMPLETED",
+    "run_id": "run_5defbd091d494e4c",
+    "seq": 104,
+    "target": "engineering-summary",
+    "ts": 1792162008.4701226
+  }
+]

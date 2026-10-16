@@ -1,0 +1,31 @@
+{
+  "compensations": 0,
+  "end_to_end_s": 78.29753279685974,
+  "label": "demonstration data",
+  "mttr_s": 0.011708259582519531,
+  "node_latency_s": {
+    "approve-design": 0.0,
+    "approve-release": 0.0,
+    "clarify": 0.0,
+    "decompose": 0.10787463188171387,
+    "design": 0.1027226448059082,
+    "docs": 0.0,
+    "impact": 0.1071157455444336,
+    "implement": 0.1598069667816162,
+    "intake": 0.09829401969909668,
+    "normalize": 0.09598731994628906,
+    "quality": 0.09848880767822266,
+    "release": 0.0,
+    "tdd-red": 1.7816362380981445,
+    "test": 20.58698058128357,
+    "threat-review": 0.0,
+    "validate": 0.0
+  },
+  "recovered": 1,
+  "retries": 0,
+  "rollbacks": 1,
+  "run_id": "run_77723ef73ccf4ea7",
+  "state": "FAILED",
+  "success": false,
+  "unrecovered": 0
+}

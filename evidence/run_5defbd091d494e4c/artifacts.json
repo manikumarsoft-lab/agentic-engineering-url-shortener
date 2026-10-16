@@ -1,0 +1,655 @@
+[
+  {
+    "content": {
+      "sha256": "38d75380bf1ec07e95f8f50aeb91210b40b5700142d23c59d9f90cfc84e20f8a",
+      "source": "scenarios/scn-c/requirement.md",
+      "text": "We need to track who clicks links.\n"
+    },
+    "created_at": 1792161877.4110684,
+    "name": "requirement",
+    "produced_by": "intake",
+    "version": 1
+  },
+  {
+    "content": {
+      "acceptance_criteria": [],
+      "change_kind": "unknown",
+      "constraints": [],
+      "intent": "We need to track who clicks links.",
+      "source": "scenarios/scn-c/requirement.md",
+      "title": ""
+    },
+    "created_at": 1792161877.5261018,
+    "name": "normalized-requirement",
+    "produced_by": "normalize",
+    "version": 1
+  },
+  {
+    "content": {
+      "checks": [
+        {
+          "check": "completeness",
+          "rationale": "no acceptance criteria and no stated purpose",
+          "result": "FAIL"
+        },
+        {
+          "check": "consistency",
+          "rationale": "no duplicated or contradicting criteria",
+          "result": "PASS"
+        },
+        {
+          "check": "testability",
+          "rationale": "criteria without an observable outcome: none written",
+          "result": "FAIL"
+        },
+        {
+          "check": "policy_conformance",
+          "rationale": "requests visitor personal data (track who, who clicks), conflicting with FR-SHR-012",
+          "result": "FAIL"
+        },
+        {
+          "check": "architecture_boundary",
+          "rationale": "within approved scope",
+          "result": "PASS"
+        }
+      ],
+      "clarification_required": true,
+      "items": [
+        {
+          "affected_text": "We need to track who clicks links.",
+          "check": "completeness",
+          "classification": "missing_information",
+          "detail": "no acceptance criteria and no stated purpose"
+        },
+        {
+          "affected_text": "We need to track who clicks links.",
+          "check": "testability",
+          "classification": "missing_information",
+          "detail": "criteria without an observable outcome: none written"
+        },
+        {
+          "affected_text": "We need to track who clicks links.",
+          "check": "policy_conformance",
+          "classification": "policy_conflict",
+          "detail": "requests visitor personal data (track who, who clicks), conflicting with FR-SHR-012"
+        },
+        {
+          "affected_text": "We need to track who clicks links.",
+          "check": "terminology",
+          "classification": "unclear_term",
+          "detail": "the term 'who' has no testable meaning"
+        },
+        {
+          "affected_text": "We need to track who clicks links.",
+          "check": "terminology",
+          "classification": "unclear_term",
+          "detail": "the term 'track' has no testable meaning"
+        }
+      ],
+      "material_failures": 5,
+      "reason": "5 material finding(s): clarification required"
+    },
+    "created_at": 1792161877.6359804,
+    "name": "quality-report",
+    "produced_by": "quality",
+    "version": 1
+  },
+  {
+    "content": {
+      "decided_by": "95b4677fbabf",
+      "label": "Daily aggregate click counts per link (UTC), no personal data (recommended)",
+      "option_id": "A"
+    },
+    "created_at": 1792161930.5624366,
+    "name": "clarification",
+    "produced_by": "human:95b4677fbabf",
+    "version": 1
+  },
+  {
+    "content": {
+      "change_set": "scenarios/scn-c/changeset",
+      "option_id": "A"
+    },
+    "created_at": 1792161930.6795847,
+    "name": "change-set-selection",
+    "produced_by": "select",
+    "version": 1
+  },
+  {
+    "content": {
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "rq_id": "RQ-001",
+          "text": "GET /api/v1/links/{code}/stats/daily with a valid API key returns 200 with the redirect count per UTC day."
+        },
+        {
+          "id": "AC2",
+          "rq_id": "RQ-002",
+          "text": "Each successful redirect increments exactly one daily bucket, so the endpoint returns exact counts."
+        },
+        {
+          "id": "AC3",
+          "rq_id": "RQ-003",
+          "text": "A request without a valid API key returns 401; an unknown code returns 404."
+        },
+        {
+          "id": "AC4",
+          "rq_id": "RQ-004",
+          "text": "The daily table stores only the code, the UTC day and the count; existing stats responses are unchanged."
+        }
+      ],
+      "change_kind": "new_capability",
+      "clarified_by_option": "A",
+      "constraints": [
+        "No personal data is stored or returned (FR-SHR-012)."
+      ],
+      "intent": "Show link creators how many redirects each of their links received per UTC day, without storing any data about the people following the links.",
+      "source": "scenarios/scn-c/requirement-option-a.md",
+      "title": "SCN-C option A: Daily aggregate click counts"
+    },
+    "created_at": 1792161930.6795847,
+    "name": "normalized-requirement",
+    "produced_by": "select",
+    "version": 2
+  },
+  {
+    "content": {
+      "checks": [
+        {
+          "check": "completeness",
+          "rationale": "intent and acceptance criteria present",
+          "result": "PASS"
+        },
+        {
+          "check": "consistency",
+          "rationale": "no duplicated or contradicting criteria",
+          "result": "PASS"
+        },
+        {
+          "check": "testability",
+          "rationale": "every criterion has an observable outcome",
+          "result": "PASS"
+        },
+        {
+          "check": "policy_conformance",
+          "rationale": "no personal-data capture requested (PRIV-001)",
+          "result": "PASS"
+        },
+        {
+          "check": "architecture_boundary",
+          "rationale": "within approved scope",
+          "result": "PASS"
+        }
+      ],
+      "clarification_required": false,
+      "items": [],
+      "material_failures": 0,
+      "reason": "all five requirement-quality checks passed; no clarification required"
+    },
+    "created_at": 1792161930.792564,
+    "name": "quality-report",
+    "produced_by": "requality",
+    "version": 2
+  },
+  {
+    "content": {
+      "ordering": [
+        "T1",
+        "T2",
+        "T3",
+        "T4",
+        "T5",
+        "T6",
+        "T7",
+        "T8",
+        "T9",
+        "T10"
+      ],
+      "tasks": [
+        {
+          "acceptance": "GET /api/v1/links/{code}/stats/daily with a valid API key returns 200 with the redirect count per UTC day.",
+          "depends_on": [],
+          "id": "T1",
+          "requirement": "RQ-001",
+          "title": "Write a failing test for AC1"
+        },
+        {
+          "acceptance": "GET /api/v1/links/{code}/stats/daily with a valid API key returns 200 with the redirect count per UTC day.",
+          "depends_on": [
+            "T1"
+          ],
+          "id": "T2",
+          "requirement": "RQ-001",
+          "title": "Implement AC1"
+        },
+        {
+          "acceptance": "Each successful redirect increments exactly one daily bucket, so the endpoint returns exact counts.",
+          "depends_on": [],
+          "id": "T3",
+          "requirement": "RQ-002",
+          "title": "Write a failing test for AC2"
+        },
+        {
+          "acceptance": "Each successful redirect increments exactly one daily bucket, so the endpoint returns exact counts.",
+          "depends_on": [
+            "T3"
+          ],
+          "id": "T4",
+          "requirement": "RQ-002",
+          "title": "Implement AC2"
+        },
+        {
+          "acceptance": "A request without a valid API key returns 401; an unknown code returns 404.",
+          "depends_on": [],
+          "id": "T5",
+          "requirement": "RQ-003",
+          "title": "Write a failing test for AC3"
+        },
+        {
+          "acceptance": "A request without a valid API key returns 401; an unknown code returns 404.",
+          "depends_on": [
+            "T5"
+          ],
+          "id": "T6",
+          "requirement": "RQ-003",
+          "title": "Implement AC3"
+        },
+        {
+          "acceptance": "The daily table stores only the code, the UTC day and the count; existing stats responses are unchanged.",
+          "depends_on": [],
+          "id": "T7",
+          "requirement": "RQ-004",
+          "title": "Write a failing test for AC4"
+        },
+        {
+          "acceptance": "The daily table stores only the code, the UTC day and the count; existing stats responses are unchanged.",
+          "depends_on": [
+            "T7"
+          ],
+          "id": "T8",
+          "requirement": "RQ-004",
+          "title": "Implement AC4"
+        },
+        {
+          "depends_on": [
+            "T2",
+            "T4",
+            "T6",
+            "T8"
+          ],
+          "id": "T9",
+          "title": "Regenerate the OpenAPI contract"
+        },
+        {
+          "depends_on": [
+            "T9"
+          ],
+          "id": "T10",
+          "title": "Update documentation"
+        }
+      ]
+    },
+    "created_at": 1792161930.9079158,
+    "name": "task-plan",
+    "produced_by": "decompose",
+    "version": 1
+  },
+  {
+    "content": {
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "rq_id": "RQ-001",
+          "text": "GET /api/v1/links/{code}/stats/daily with a valid API key returns 200 with the redirect count per UTC day."
+        },
+        {
+          "id": "AC2",
+          "rq_id": "RQ-002",
+          "text": "Each successful redirect increments exactly one daily bucket, so the endpoint returns exact counts."
+        },
+        {
+          "id": "AC3",
+          "rq_id": "RQ-003",
+          "text": "A request without a valid API key returns 401; an unknown code returns 404."
+        },
+        {
+          "id": "AC4",
+          "rq_id": "RQ-004",
+          "text": "The daily table stores only the code, the UTC day and the count; existing stats responses are unchanged."
+        }
+      ],
+      "approach": "Add daily aggregate click counts per link (UTC day) at GET /api/v1/links/{code}/stats/daily; no visitor personal data.",
+      "change_set": "scenarios/scn-c/changeset",
+      "components": [
+        "specs/001-agentic-sdlc-url-shortener/contracts/shortener-api.openapi.yaml",
+        "src/shortener/app.py",
+        "src/shortener/store.py",
+        "tests/shortener/test_daily_stats.py"
+      ],
+      "contract_version_after": "2.1.0",
+      "impact_analysis_used": false,
+      "provenance": "Authored with AI assistance (Claude Code) during development; reviewed and locked by the human owner (Mani Kumar Vadugu)",
+      "regression_suite": "tests/shortener",
+      "tasks": 10,
+      "test_plan": [
+        "tests/shortener/test_daily_stats.py"
+      ],
+      "title": "SCN-C option A: Daily aggregate click counts"
+    },
+    "created_at": 1792161931.0216563,
+    "name": "design",
+    "produced_by": "design",
+    "version": 1
+  },
+  {
+    "content": {
+      "change_set": "scenarios/scn-c/changeset",
+      "command": "python -m pytest tests/shortener/test_daily_stats.py",
+      "errors": 0,
+      "exit_code": 1,
+      "failed_tests": [
+        "tests.shortener.test_daily_stats::test_clicks_are_counted_per_utc_day",
+        "tests.shortener.test_daily_stats::test_daily_counts_store_no_personal_data",
+        "tests.shortener.test_daily_stats::test_daily_stats_need_a_key_and_a_known_code"
+      ],
+      "failures": 3,
+      "lock": {
+        "locked_at": "2026-10-16T14:15:54.624746+00:00",
+        "locked_by": "63320c4d1c94"
+      },
+      "phase": "red",
+      "skipped": 0,
+      "tests": 3,
+      "touched_files": [
+        "tests/shortener/test_daily_stats.py"
+      ]
+    },
+    "created_at": 1792161939.734772,
+    "name": "test-red",
+    "produced_by": "tdd-red",
+    "version": 1
+  },
+  {
+    "content": {
+      "change_set": "scenarios/scn-c/changeset",
+      "lock": {
+        "locked_at": "2026-10-16T14:15:54.624746+00:00",
+        "locked_by": "63320c4d1c94"
+      },
+      "patch_sha256": {
+        "impl": "63e89245f4629b8db2bba93e9a0366470adf277aac17eda19dba29496dc28d00",
+        "tests": "84a8e0ffdfe96cedb85c088c6d1f0d66bbda9efb525311d5ae8ab2936c5ff00f"
+      },
+      "provenance": "Authored with AI assistance (Claude Code) during development; reviewed and locked by the human owner (Mani Kumar Vadugu)",
+      "scope_check": "not applicable (no impact analysis in this workflow)",
+      "touched_files": [
+        "specs/001-agentic-sdlc-url-shortener/contracts/shortener-api.openapi.yaml",
+        "src/shortener/app.py",
+        "src/shortener/store.py"
+      ]
+    },
+    "created_at": 1792161939.9167228,
+    "name": "change-application",
+    "produced_by": "implement",
+    "version": 1
+  },
+  {
+    "content": {
+      "change_set": "scenarios/scn-c/changeset",
+      "command": "python -m pytest tests/shortener",
+      "errors": 0,
+      "exit_code": 0,
+      "failed_tests": [],
+      "failures": 0,
+      "new_tests": [
+        "tests/shortener/test_daily_stats.py"
+      ],
+      "phase": "green",
+      "skipped": 0,
+      "tests": 63
+    },
+    "created_at": 1792161960.0158973,
+    "name": "test-results",
+    "produced_by": "test",
+    "version": 1
+  },
+  {
+    "content": {
+      "contract_version": "2.1.0",
+      "path": "docs/changes/run_5defbd091d494e4c.md"
+    },
+    "created_at": 1792161960.1525486,
+    "name": "docs",
+    "produced_by": "docs",
+    "version": 1
+  },
+  {
+    "content": {
+      "new_operations": [
+        "GET /api/v1/links/{code}/stats/daily"
+      ],
+      "open_high_threats": 0,
+      "threats": [
+        {
+          "category": "Denial of service",
+          "detail": "abuse volume on new operations: creation is rate limited; reads are an accepted risk",
+          "id": "TH-0",
+          "severity": "low",
+          "status": "accepted"
+        }
+      ]
+    },
+    "created_at": 1792161960.1978874,
+    "name": "threat-review",
+    "produced_by": "threat-review",
+    "version": 1
+  },
+  {
+    "content": {
+      "artifacts": {
+        "change-application": 1,
+        "change-set-selection": 1,
+        "clarification": 1,
+        "design": 1,
+        "docs": 1,
+        "normalized-requirement": 2,
+        "quality-report": 2,
+        "requirement": 1,
+        "task-plan": 1,
+        "test-red": 1,
+        "test-results": 1,
+        "threat-review": 1
+      },
+      "assumptions": [
+        "change sets apply to the baseline they were authored against (docs/scope/lean-slice.md)"
+      ],
+      "decisions": [
+        {
+          "choice": "answer",
+          "key_id": "95b4677fbabf",
+          "node_id": "clarify",
+          "reason": "Chose daily aggregate click counts per link: no personal data.",
+          "role": "engineer"
+        },
+        {
+          "choice": "approve",
+          "key_id": "63320c4d1c94",
+          "node_id": "approve-design",
+          "reason": "Design follows clarified option A; approved to apply in isolated workspace.",
+          "role": "approver"
+        }
+      ],
+      "labels": [
+        "demonstration",
+        "fault-injection"
+      ],
+      "limitations": [
+        "metrics are demonstration data from a single workstation",
+        "planned-but-not-implemented scope: docs/scope/lean-slice.md section 2"
+      ],
+      "outcome": "SAFE_STOPPED",
+      "plan_and_rationale": {
+        "approach": "Add daily aggregate click counts per link (UTC day) at GET /api/v1/links/{code}/stats/daily; no visitor personal data.",
+        "impact_analysis": false,
+        "requirement": "SCN-C option A: Daily aggregate click counts",
+        "tasks": 10
+      },
+      "reason": "policy_fail:SEC-003",
+      "recovery": {
+        "compensations": 0,
+        "mechanisms": [],
+        "rollbacks": 0
+      },
+      "risks": [
+        "TH-0 Denial of service (low, accepted)"
+      ],
+      "run_id": "run_5defbd091d494e4c",
+      "trade_offs": [
+        "deterministic rule-based agents apply human-locked change sets instead of generating code at run time",
+        "scenario runs evaluate SEC-003 against a pinned pip-audit snapshot (no network); the live audit runs in `orch release check`",
+        "releases are local (snapshot or local staging); merging into the repository stays a manual human action"
+      ],
+      "validation_results": {
+        "green": {
+          "errors": 0,
+          "failures": 0,
+          "tests": 63
+        },
+        "policy": {
+          "PRIV-001": "PASS",
+          "REL-001": "PASS",
+          "SEC-002": "PASS",
+          "SEC-003": "FAIL",
+          "SEC-004": "PASS"
+        },
+        "red": {
+          "errors": 0,
+          "failures": 3,
+          "tests": 3
+        }
+      },
+      "why": "safe-stopped (policy_fail:SEC-003); mandatory policy SEC-003 failed; release is blocked until a human-approved exception exists, then an approver resumes",
+      "workflow": "scn-c"
+    },
+    "created_at": 1792161960.33289,
+    "name": "engineering-summary",
+    "produced_by": "system",
+    "version": 1
+  },
+  {
+    "content": {
+      "contract_version": "2.1.0",
+      "note": "local release snapshot; merging into the repository is a human action",
+      "path": "C:\\Users\\manik\\Documents\\agentic-engineering-url-shortener\\var\\releases\\run_5defbd091d494e4c",
+      "release_id": "rel_5defbd091d494e4c",
+      "sources_sha256": "70b0a2292098b14dc3c715a380c16202c163a2d183cc03782e79c854ec38070d"
+    },
+    "created_at": 1792162008.4667654,
+    "name": "release",
+    "produced_by": "release",
+    "version": 1
+  },
+  {
+    "content": {
+      "artifacts": {
+        "change-application": 1,
+        "change-set-selection": 1,
+        "clarification": 1,
+        "design": 1,
+        "docs": 1,
+        "normalized-requirement": 2,
+        "quality-report": 2,
+        "release": 1,
+        "requirement": 1,
+        "task-plan": 1,
+        "test-red": 1,
+        "test-results": 1,
+        "threat-review": 1
+      },
+      "assumptions": [
+        "change sets apply to the baseline they were authored against (docs/scope/lean-slice.md)"
+      ],
+      "decisions": [
+        {
+          "choice": "answer",
+          "key_id": "95b4677fbabf",
+          "node_id": "clarify",
+          "reason": "Chose daily aggregate click counts per link: no personal data.",
+          "role": "engineer"
+        },
+        {
+          "choice": "approve",
+          "key_id": "63320c4d1c94",
+          "node_id": "approve-design",
+          "reason": "Design follows clarified option A; approved to apply in isolated workspace.",
+          "role": "approver"
+        },
+        {
+          "choice": "approve",
+          "key_id": "2788b911e283",
+          "node_id": "approve-release",
+          "reason": "Tests passed; SEC-003 covered by approved exception with compensating control. Release approved.",
+          "role": "release-owner"
+        }
+      ],
+      "labels": [
+        "demonstration",
+        "fault-injection"
+      ],
+      "limitations": [
+        "metrics are demonstration data from a single workstation",
+        "planned-but-not-implemented scope: docs/scope/lean-slice.md section 2"
+      ],
+      "outcome": "COMPLETED",
+      "plan_and_rationale": {
+        "approach": "Add daily aggregate click counts per link (UTC day) at GET /api/v1/links/{code}/stats/daily; no visitor personal data.",
+        "impact_analysis": false,
+        "requirement": "SCN-C option A: Daily aggregate click counts",
+        "tasks": 10
+      },
+      "reason": null,
+      "recovery": {
+        "compensations": 0,
+        "mechanisms": [
+          "human_resume"
+        ],
+        "rollbacks": 0
+      },
+      "risks": [
+        "TH-0 Denial of service (low, accepted)"
+      ],
+      "run_id": "run_5defbd091d494e4c",
+      "trade_offs": [
+        "deterministic rule-based agents apply human-locked change sets instead of generating code at run time",
+        "scenario runs evaluate SEC-003 against a pinned pip-audit snapshot (no network); the live audit runs in `orch release check`",
+        "releases are local (snapshot or local staging); merging into the repository stays a manual human action"
+      ],
+      "validation_results": {
+        "green": {
+          "errors": 0,
+          "failures": 0,
+          "tests": 63
+        },
+        "policy": {
+          "PRIV-001": "PASS",
+          "REL-001": "PASS",
+          "SEC-002": "PASS",
+          "SEC-003": "EXCEPTION-REQUESTED",
+          "SEC-004": "PASS"
+        },
+        "red": {
+          "errors": 0,
+          "failures": 3,
+          "tests": 3
+        }
+      },
+      "why": "all stages succeeded and every gate was decided by a human (approve-design by approver key 63320c4d1c94; approve-release by release-owner key 2788b911e283)",
+      "workflow": "scn-c"
+    },
+    "created_at": 1792162008.4701226,
+    "name": "engineering-summary",
+    "produced_by": "system",
+    "version": 2
+  }
+]

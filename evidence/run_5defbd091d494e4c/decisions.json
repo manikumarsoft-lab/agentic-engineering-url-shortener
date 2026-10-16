@@ -1,0 +1,188 @@
+{
+  "decisions": [
+    {
+      "bound": "{\"quality-report\": 1}",
+      "choice": "answer",
+      "created_at": 1792161930.5624366,
+      "decision_id": "dec_d6daee1df0044efa",
+      "key_id": "95b4677fbabf",
+      "node_id": "clarify",
+      "reason": "Chose daily aggregate click counts per link: no personal data.",
+      "role": "engineer",
+      "run_id": "run_5defbd091d494e4c",
+      "status": "ACTIVE"
+    },
+    {
+      "bound": "{\"design\": 1, \"task-plan\": 1, \"change-set-selection\": 1}",
+      "choice": "approve",
+      "created_at": 1792161938.3696816,
+      "decision_id": "dec_0a53d9dd4bc944f5",
+      "key_id": "63320c4d1c94",
+      "node_id": "approve-design",
+      "reason": "Design follows clarified option A; approved to apply in isolated workspace.",
+      "role": "approver",
+      "run_id": "run_5defbd091d494e4c",
+      "status": "ACTIVE"
+    },
+    {
+      "bound": "{\"test-results\": 1, \"threat-review\": 1, \"docs\": 1}",
+      "choice": "approve",
+      "created_at": 1792162008.3149428,
+      "decision_id": "dec_1bae6a4e93aa41f5",
+      "key_id": "2788b911e283",
+      "node_id": "approve-release",
+      "reason": "Tests passed; SEC-003 covered by approved exception with compensating control. Release approved.",
+      "role": "release-owner",
+      "run_id": "run_5defbd091d494e4c",
+      "status": "ACTIVE"
+    }
+  ],
+  "exceptions": [
+    {
+      "check_id": "SEC-003",
+      "compensating_control": "Manual review of dependency manifest; rescan within 24 hours when scanner is restored.",
+      "created_at": 1792161973.6856713,
+      "decided_at": 1792161987.9451675,
+      "decided_by": "63320c4d1c94",
+      "exception_id": "exc_925ccbd0c2414f6b",
+      "reason": "Dependency scanner unavailable; change adds no new dependencies.",
+      "requested_by": "95b4677fbabf",
+      "run_id": "run_5defbd091d494e4c",
+      "status": "APPROVED"
+    }
+  ],
+  "policy_evaluations": [
+    {
+      "check_id": "PRIV-001",
+      "created_at": 1792161930.792564,
+      "exception_id": null,
+      "mandatory": 1,
+      "node_id": "requality",
+      "outcome": "PASS",
+      "policy_version": "1.2.0",
+      "reason": "captures_personal_data == False",
+      "run_id": "run_5defbd091d494e4c"
+    },
+    {
+      "check_id": "PRIV-001",
+      "created_at": 1792161960.3286662,
+      "exception_id": null,
+      "mandatory": 1,
+      "node_id": "validate",
+      "outcome": "PASS",
+      "policy_version": "1.2.0",
+      "reason": "captures_personal_data == False; no personal-data markers in added code",
+      "run_id": "run_5defbd091d494e4c"
+    },
+    {
+      "check_id": "SEC-002",
+      "created_at": 1792161960.3286662,
+      "exception_id": null,
+      "mandatory": 1,
+      "node_id": "validate",
+      "outcome": "PASS",
+      "policy_version": "1.2.0",
+      "reason": "open_high_threats == 0; 1 threats reviewed",
+      "run_id": "run_5defbd091d494e4c"
+    },
+    {
+      "check_id": "SEC-003",
+      "created_at": 1792161960.3296664,
+      "exception_id": null,
+      "mandatory": 1,
+      "node_id": "validate",
+      "outcome": "FAIL",
+      "policy_version": "1.2.0",
+      "reason": "dependency_scan_ok = False, expected True; dependency scanner unavailable (injected fault): no evidence, never PASS",
+      "run_id": "run_5defbd091d494e4c"
+    },
+    {
+      "check_id": "SEC-004",
+      "created_at": 1792161960.3296664,
+      "exception_id": null,
+      "mandatory": 1,
+      "node_id": "validate",
+      "outcome": "PASS",
+      "policy_version": "1.2.0",
+      "reason": "secret_scan_clean == True; 42 files scanned, no findings",
+      "run_id": "run_5defbd091d494e4c"
+    },
+    {
+      "check_id": "REL-001",
+      "created_at": 1792161960.3296664,
+      "exception_id": null,
+      "mandatory": 1,
+      "node_id": "validate",
+      "outcome": "PASS",
+      "policy_version": "1.2.0",
+      "reason": "tests_passed == True; 63 tests, 0 failures, 0 errors",
+      "run_id": "run_5defbd091d494e4c"
+    },
+    {
+      "check_id": "SEC-003",
+      "created_at": 1792161973.6856713,
+      "exception_id": "exc_925ccbd0c2414f6b",
+      "mandatory": 1,
+      "node_id": null,
+      "outcome": "EXCEPTION-REQUESTED",
+      "policy_version": "1.2.0",
+      "reason": "Dependency scanner unavailable; change adds no new dependencies.",
+      "run_id": "run_5defbd091d494e4c"
+    },
+    {
+      "check_id": "PRIV-001",
+      "created_at": 1792161995.641084,
+      "exception_id": null,
+      "mandatory": 1,
+      "node_id": "validate",
+      "outcome": "PASS",
+      "policy_version": "1.2.0",
+      "reason": "captures_personal_data == False; no personal-data markers in added code",
+      "run_id": "run_5defbd091d494e4c"
+    },
+    {
+      "check_id": "SEC-002",
+      "created_at": 1792161995.641084,
+      "exception_id": null,
+      "mandatory": 1,
+      "node_id": "validate",
+      "outcome": "PASS",
+      "policy_version": "1.2.0",
+      "reason": "open_high_threats == 0; 1 threats reviewed",
+      "run_id": "run_5defbd091d494e4c"
+    },
+    {
+      "check_id": "SEC-003",
+      "created_at": 1792161995.641084,
+      "exception_id": "exc_925ccbd0c2414f6b",
+      "mandatory": 1,
+      "node_id": "validate",
+      "outcome": "EXCEPTION-REQUESTED",
+      "policy_version": "1.2.0",
+      "reason": "dependency_scan_ok = False, expected True; dependency scanner unavailable (injected fault): no evidence, never PASS; approved exception exc_925ccbd0c2414f6b",
+      "run_id": "run_5defbd091d494e4c"
+    },
+    {
+      "check_id": "SEC-004",
+      "created_at": 1792161995.641084,
+      "exception_id": null,
+      "mandatory": 1,
+      "node_id": "validate",
+      "outcome": "PASS",
+      "policy_version": "1.2.0",
+      "reason": "secret_scan_clean == True; 42 files scanned, no findings",
+      "run_id": "run_5defbd091d494e4c"
+    },
+    {
+      "check_id": "REL-001",
+      "created_at": 1792161995.641084,
+      "exception_id": null,
+      "mandatory": 1,
+      "node_id": "validate",
+      "outcome": "PASS",
+      "policy_version": "1.2.0",
+      "reason": "tests_passed == True; 63 tests, 0 failures, 0 errors",
+      "run_id": "run_5defbd091d494e4c"
+    }
+  ]
+}

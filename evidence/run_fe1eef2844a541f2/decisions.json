@@ -1,0 +1,109 @@
+{
+  "decisions": [
+    {
+      "bound": "{\"quality-report\": 1}",
+      "choice": "answer",
+      "created_at": 1792161708.6207318,
+      "decision_id": "dec_19e77777fc9449ff",
+      "key_id": "95b4677fbabf",
+      "node_id": "clarify",
+      "reason": "Chose daily aggregate click counts per link: meets the need without collecting personal data about who clicks.",
+      "role": "engineer",
+      "run_id": "run_fe1eef2844a541f2",
+      "status": "ACTIVE"
+    },
+    {
+      "bound": "{\"design\": 1, \"task-plan\": 1, \"change-set-selection\": 1}",
+      "choice": "approve",
+      "created_at": 1792161729.6362617,
+      "decision_id": "dec_5d11a8ba55394013",
+      "key_id": "63320c4d1c94",
+      "node_id": "approve-design",
+      "reason": "Design follows clarified option A (aggregate counts only, no personal data); approved to apply in isolated workspace.",
+      "role": "approver",
+      "run_id": "run_fe1eef2844a541f2",
+      "status": "ACTIVE"
+    },
+    {
+      "bound": "{\"test-results\": 1, \"threat-review\": 1, \"docs\": 1}",
+      "choice": "approve",
+      "created_at": 1792161772.2003977,
+      "decision_id": "dec_6fee29358ee9494b",
+      "key_id": "2788b911e283",
+      "node_id": "approve-release",
+      "reason": "Tests passed with 0 failures, no open high threats, privacy policy checks passed. Release approved.",
+      "role": "release-owner",
+      "run_id": "run_fe1eef2844a541f2",
+      "status": "ACTIVE"
+    }
+  ],
+  "exceptions": [],
+  "policy_evaluations": [
+    {
+      "check_id": "PRIV-001",
+      "created_at": 1792161708.8567884,
+      "exception_id": null,
+      "mandatory": 1,
+      "node_id": "requality",
+      "outcome": "PASS",
+      "policy_version": "1.2.0",
+      "reason": "captures_personal_data == False",
+      "run_id": "run_fe1eef2844a541f2"
+    },
+    {
+      "check_id": "PRIV-001",
+      "created_at": 1792161753.0387685,
+      "exception_id": null,
+      "mandatory": 1,
+      "node_id": "validate",
+      "outcome": "PASS",
+      "policy_version": "1.2.0",
+      "reason": "captures_personal_data == False; no personal-data markers in added code",
+      "run_id": "run_fe1eef2844a541f2"
+    },
+    {
+      "check_id": "SEC-002",
+      "created_at": 1792161753.0387685,
+      "exception_id": null,
+      "mandatory": 1,
+      "node_id": "validate",
+      "outcome": "PASS",
+      "policy_version": "1.2.0",
+      "reason": "open_high_threats == 0; 1 threats reviewed",
+      "run_id": "run_fe1eef2844a541f2"
+    },
+    {
+      "check_id": "SEC-003",
+      "created_at": 1792161753.0387685,
+      "exception_id": null,
+      "mandatory": 1,
+      "node_id": "validate",
+      "outcome": "PASS",
+      "policy_version": "1.2.0",
+      "reason": "dependency_scan_ok == True; pip-audit 2.10.1 snapshot of 2026-10-15T22:41:35.058490+00:00: 49 pinned dependencies, 0 known vulnerabilities",
+      "run_id": "run_fe1eef2844a541f2"
+    },
+    {
+      "check_id": "SEC-004",
+      "created_at": 1792161753.0397842,
+      "exception_id": null,
+      "mandatory": 1,
+      "node_id": "validate",
+      "outcome": "PASS",
+      "policy_version": "1.2.0",
+      "reason": "secret_scan_clean == True; 42 files scanned, no findings",
+      "run_id": "run_fe1eef2844a541f2"
+    },
+    {
+      "check_id": "REL-001",
+      "created_at": 1792161753.0397842,
+      "exception_id": null,
+      "mandatory": 1,
+      "node_id": "validate",
+      "outcome": "PASS",
+      "policy_version": "1.2.0",
+      "reason": "tests_passed == True; 63 tests, 0 failures, 0 errors",
+      "run_id": "run_fe1eef2844a541f2"
+    }
+  ]
+}

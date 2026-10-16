@@ -1,0 +1,800 @@
+[
+  {
+    "action": "RUN_CREATED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "labels": [
+        "demonstration",
+        "fault-injection"
+      ],
+      "policy_version": "1.2.0",
+      "workflow": "scn-b",
+      "workflow_version": "1.0.0"
+    },
+    "hash": "79af2b806d955fa0ce57b043741c32754736cd9ab3e1d7586ff73a19ebb13c6b",
+    "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 1,
+    "target": null,
+    "ts": 1792161142.6456091
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "4e54aa02ff35a8892e3b13c4936c4be6d1a308c215579eed131ecdb9dd2be2d3",
+    "prev_hash": "154526bc8855a6eb5aa01d37d193eb2f2394a95feb3143a130a0cef57bceb3a9",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 3,
+    "target": "intake",
+    "ts": 1792161142.6787477
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "intake"
+      ]
+    },
+    "hash": "63de63209b66d4672db09a713d0e0353090a9fa6843adc5c6c5a6bfc604dea79",
+    "prev_hash": "4e54aa02ff35a8892e3b13c4936c4be6d1a308c215579eed131ecdb9dd2be2d3",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 4,
+    "target": null,
+    "ts": 1792161142.680157
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "aa1154b5c16ead90e196ae2238f1b8857cd179f9a1ccb201bf1ed0c3bfcb86fd",
+    "prev_hash": "63de63209b66d4672db09a713d0e0353090a9fa6843adc5c6c5a6bfc604dea79",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 5,
+    "target": "intake",
+    "ts": 1792161142.680157
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "296ef6ae9d7f4c9336b4efc308a1765c64faf5d72b332763a13356e53c678fc8",
+    "prev_hash": "c59346ff8e78384f9928f1d101471ee3966463dd08dd4aeabc6f2e16151c37d7",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 7,
+    "target": "intake",
+    "ts": 1792161142.7874072
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "33633c629e5acd082c2d0aeb6981331b568e8524d42d8a3c424edd526a0ead24",
+    "prev_hash": "296ef6ae9d7f4c9336b4efc308a1765c64faf5d72b332763a13356e53c678fc8",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 8,
+    "target": "normalize",
+    "ts": 1792161142.7897902
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "normalize"
+      ]
+    },
+    "hash": "ed6b454b244faae2a9f61a133f1199980a550dc473605d33e2e20b3c8f51a290",
+    "prev_hash": "33633c629e5acd082c2d0aeb6981331b568e8524d42d8a3c424edd526a0ead24",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 9,
+    "target": null,
+    "ts": 1792161142.7912295
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "dbef2b136addd9e4255d4c663c2e10a1ce0e3a842400f5d4a9ccba65b6520545",
+    "prev_hash": "ed6b454b244faae2a9f61a133f1199980a550dc473605d33e2e20b3c8f51a290",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 10,
+    "target": "normalize",
+    "ts": 1792161142.7912295
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "b105da04d5d5e8e44af1179b333f21b24218633ae0024284f9b48ab2b20cd2aa",
+    "prev_hash": "03aad5803bf58f3e125d074984d6396baa89630536a3b9dbabf1a388d31298d8",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 12,
+    "target": "normalize",
+    "ts": 1792161142.8962958
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "e73fd766cf73e139386e9185bed92c96ab636fd935b0590d6984164ce006d70f",
+    "prev_hash": "b105da04d5d5e8e44af1179b333f21b24218633ae0024284f9b48ab2b20cd2aa",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 13,
+    "target": "quality",
+    "ts": 1792161142.8986244
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "quality"
+      ]
+    },
+    "hash": "618b65b4b9f19aacf0eb4da74bbaa78808564c7dd9de7961489914e1613e6543",
+    "prev_hash": "e73fd766cf73e139386e9185bed92c96ab636fd935b0590d6984164ce006d70f",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 14,
+    "target": null,
+    "ts": 1792161142.9002419
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "94bbe5e4adfa689c2b16e731d2ba5ed198058c8ddb993584e2bdf192cfca550e",
+    "prev_hash": "618b65b4b9f19aacf0eb4da74bbaa78808564c7dd9de7961489914e1613e6543",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 15,
+    "target": "quality",
+    "ts": 1792161142.9002419
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "bde08e225b5f9f335dcf8bdf26905fb43ddcf6e771537826578ff3806b96fe59",
+    "prev_hash": "796968a18e80a7c55078a2a36a27bfb918f63627d81ef803c2fd95c13fd83cee",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 17,
+    "target": "quality",
+    "ts": 1792161143.0090082
+  },
+  {
+    "action": "NODE_SKIPPED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "condition": {
+        "equals": true,
+        "fact": "clarification_needed"
+      }
+    },
+    "hash": "e396e1f61f7c11bf6bfb7cf76fd805679237ba127e80826a8f5f9cf6dcc7a6ac",
+    "prev_hash": "bde08e225b5f9f335dcf8bdf26905fb43ddcf6e771537826578ff3806b96fe59",
+    "reason": "all five requirement-quality checks passed; no clarification required",
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 18,
+    "target": "clarify",
+    "ts": 1792161143.011165
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "0326c16af2f8d07d135a6cc3f8c84d4f58079cbc297ba77882a7400cdee21abb",
+    "prev_hash": "e396e1f61f7c11bf6bfb7cf76fd805679237ba127e80826a8f5f9cf6dcc7a6ac",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 19,
+    "target": "impact",
+    "ts": 1792161143.0126855
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "impact"
+      ]
+    },
+    "hash": "a7ec87afd94ab983893ff543ff7d299cc33d2b70e8b89e0b85956a8bb0ab124e",
+    "prev_hash": "0326c16af2f8d07d135a6cc3f8c84d4f58079cbc297ba77882a7400cdee21abb",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 20,
+    "target": null,
+    "ts": 1792161143.0136774
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "64ca163400c43b9618f89aaebe0a9ccf399e241070e43d1ee5fc9d45d2dc58d3",
+    "prev_hash": "a7ec87afd94ab983893ff543ff7d299cc33d2b70e8b89e0b85956a8bb0ab124e",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 21,
+    "target": "impact",
+    "ts": 1792161143.014677
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "2ecb4d823f5da0701a702a3098fba29478ec2fb4299b32bef4fbb3f744144820",
+    "prev_hash": "1f1cd53f11a0ec06cbe3817a82576dbe53f9efd25d9f1fd59fb6385c030bdf88",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 23,
+    "target": "impact",
+    "ts": 1792161143.1306934
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "e23ce5fb394ffc746b20f50a93839fb01f3c1ef13ed92f8eeda4530b7d3d77ff",
+    "prev_hash": "2ecb4d823f5da0701a702a3098fba29478ec2fb4299b32bef4fbb3f744144820",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 24,
+    "target": "decompose",
+    "ts": 1792161143.133174
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "decompose"
+      ]
+    },
+    "hash": "84f204ad925298b232723b6e6795de82d8a032b52c10b24c7bbbb7228b1d9091",
+    "prev_hash": "e23ce5fb394ffc746b20f50a93839fb01f3c1ef13ed92f8eeda4530b7d3d77ff",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 25,
+    "target": null,
+    "ts": 1792161143.1347408
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "2d7c13e2da5096e48f40a1ddba03c6024caa91a7ff3f48621653301911641153",
+    "prev_hash": "84f204ad925298b232723b6e6795de82d8a032b52c10b24c7bbbb7228b1d9091",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 26,
+    "target": "decompose",
+    "ts": 1792161143.1347408
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "3fca8dd3cb1d03dfe273b7c9cecdc360b1a3b177aa6026e85294e351d6bd35c4",
+    "prev_hash": "05cb193761427551c696d043b52e664ce66a0ae02553575e480e001ecdd49282",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 28,
+    "target": "decompose",
+    "ts": 1792161143.2516682
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "ee7dd1b4365e2ef1d902c3f84387f4976b21082179ff9c5c943e276a0908dcc2",
+    "prev_hash": "3fca8dd3cb1d03dfe273b7c9cecdc360b1a3b177aa6026e85294e351d6bd35c4",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 29,
+    "target": "design",
+    "ts": 1792161143.2528665
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "design"
+      ]
+    },
+    "hash": "d652447f2914edf295bb13ff9ec105657104a779089df7fb4d7d445e10daced9",
+    "prev_hash": "ee7dd1b4365e2ef1d902c3f84387f4976b21082179ff9c5c943e276a0908dcc2",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 30,
+    "target": null,
+    "ts": 1792161143.2538838
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "c61ab6bb3336c096ab2880b4ad10894c7607dbe6dfa8c11769de6ac1ec3be59d",
+    "prev_hash": "d652447f2914edf295bb13ff9ec105657104a779089df7fb4d7d445e10daced9",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 31,
+    "target": "design",
+    "ts": 1792161143.2538838
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "36953a9a4c134d3bae6337403706ac9a7670dcc3688b5511024ce84ca5035e57",
+    "prev_hash": "0e2f557aa76d497f76629dcee7c4962e5b387c21842b6b5bb11fe466c3fb19ec",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 33,
+    "target": "design",
+    "ts": 1792161143.365488
+  },
+  {
+    "action": "GATE_OPENED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "bound": {
+        "design": 1,
+        "impact-analysis": 1,
+        "task-plan": 1
+      },
+      "deadline": 1792247543.3665626,
+      "kind": "approval",
+      "options": {},
+      "roles": [
+        "approver"
+      ]
+    },
+    "hash": "28881edefe2bafe0c30a5392d213a117fc2ba650e4f8bdddd0a90101bdf34841",
+    "prev_hash": "36953a9a4c134d3bae6337403706ac9a7670dcc3688b5511024ce84ca5035e57",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 34,
+    "target": "approve-design",
+    "ts": 1792161143.3674967
+  },
+  {
+    "action": "RUN_AWAITING_APPROVAL",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "d0d96abe871a5f979b316cf63569c4a6d120683eb30e1de8ac200567352e8303",
+    "prev_hash": "28881edefe2bafe0c30a5392d213a117fc2ba650e4f8bdddd0a90101bdf34841",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 35,
+    "target": null,
+    "ts": 1792161143.368651
+  },
+  {
+    "action": "GATE_APPROVED",
+    "actor_id": "63320c4d1c94",
+    "actor_type": "human",
+    "data": {
+      "bound": {
+        "design": 1,
+        "impact-analysis": 1,
+        "task-plan": 1
+      },
+      "choice": "approve",
+      "decision_id": "dec_5cd9a1d7f8d647fb",
+      "role": "approver"
+    },
+    "hash": "05f0a691cc4ac6da390c8e3e65498ece23c6d6723b766144c08eda7db0c534f5",
+    "prev_hash": "d0d96abe871a5f979b316cf63569c4a6d120683eb30e1de8ac200567352e8303",
+    "reason": "Design and impact analysis identical to SCN-B; approved to apply in isolated workspace (fault-injection run).",
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 36,
+    "target": "approve-design",
+    "ts": 1792161198.3601794
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "b66db2dcbf59f2f7ee3fc9456099c425d1d67bb0b9e0a1e15f84ad47dc467c6f",
+    "prev_hash": "05f0a691cc4ac6da390c8e3e65498ece23c6d6723b766144c08eda7db0c534f5",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 37,
+    "target": "tdd-red",
+    "ts": 1792161198.3653011
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "tdd-red"
+      ]
+    },
+    "hash": "ad7f868163cba31e70ba99fbaf23a3fc3f2f01e71e78443489ed33d0038f541e",
+    "prev_hash": "b66db2dcbf59f2f7ee3fc9456099c425d1d67bb0b9e0a1e15f84ad47dc467c6f",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 38,
+    "target": null,
+    "ts": 1792161198.3667357
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "7a0a40b2df09491b4a49608c4614fbb00f1f0b97d36064881b0c024715121c41",
+    "prev_hash": "ad7f868163cba31e70ba99fbaf23a3fc3f2f01e71e78443489ed33d0038f541e",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 39,
+    "target": "tdd-red",
+    "ts": 1792161198.3667357
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "11fb53706adc0c72fcb3000b58b7a180eeeb914f9ef1bfffff64376f21ae6414",
+    "prev_hash": "f00a402158329f857c4aba55e878b3d63fc1a09015e33b257e31a7025c403bbb",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 41,
+    "target": "tdd-red",
+    "ts": 1792161200.1563048
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "9769723d8d7118dd48fb3e24660fe41d3cbac7ede2217e7dc674634ca5998c68",
+    "prev_hash": "11fb53706adc0c72fcb3000b58b7a180eeeb914f9ef1bfffff64376f21ae6414",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 42,
+    "target": "implement",
+    "ts": 1792161200.160476
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "implement"
+      ]
+    },
+    "hash": "a95893f0f10b2d8a009b58711cad5aba25c82e1de9be711751d98e0e382d3c3c",
+    "prev_hash": "9769723d8d7118dd48fb3e24660fe41d3cbac7ede2217e7dc674634ca5998c68",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 43,
+    "target": null,
+    "ts": 1792161200.1620247
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "9a64e2ce31c71712c92e0cb9e8348ab0821874c21469a3b92e3b3770e8795417",
+    "prev_hash": "a95893f0f10b2d8a009b58711cad5aba25c82e1de9be711751d98e0e382d3c3c",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 44,
+    "target": "implement",
+    "ts": 1792161200.1620247
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "03856ead8a6fccb9d56f1e2624395565f3781af82fa5be25a92642ad2ac260d3",
+    "prev_hash": "16fb29d0872137e0fd4a53f421a72c9501d69b410515e58b5fc0ed2d5227f52b",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 46,
+    "target": "implement",
+    "ts": 1792161200.3307595
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "809fc58cc8224db257032aed43f40ba0c26e0caac3a6457fa01a5d807d1a1a33",
+    "prev_hash": "03856ead8a6fccb9d56f1e2624395565f3781af82fa5be25a92642ad2ac260d3",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 47,
+    "target": "test",
+    "ts": 1792161200.3330872
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "test"
+      ]
+    },
+    "hash": "f44cc01976af68d02cba2088e5a24b8a08dcbbf570e5b660291ac8bdfa47f143",
+    "prev_hash": "809fc58cc8224db257032aed43f40ba0c26e0caac3a6457fa01a5d807d1a1a33",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 48,
+    "target": null,
+    "ts": 1792161200.335091
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "978532a92026aa8f67850350dd39d2526a0f6efdec79f139bcdeba9846b4f90d",
+    "prev_hash": "f44cc01976af68d02cba2088e5a24b8a08dcbbf570e5b660291ac8bdfa47f143",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 49,
+    "target": "test",
+    "ts": 1792161200.335091
+  },
+  {
+    "action": "NODE_ATTEMPT_FAILED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "classification": "permanent",
+      "command": "python -m pytest tests/shortener",
+      "errors": 0,
+      "exit_code": 1,
+      "failed_tests": [
+        "tests.shortener.test_api::test_code_collisions_retry_then_give_up_after_five"
+      ],
+      "failures": 1,
+      "message": "1 failed, 0 errors",
+      "new_tests": [
+        "tests/shortener/test_aliases.py"
+      ],
+      "phase": "green",
+      "skipped": 0,
+      "tests": 74
+    },
+    "hash": "27e6d22858a95f9fcd3ed9eb1d1c51713f021fcf2e71d216250ea74c6296f2a0",
+    "prev_hash": "978532a92026aa8f67850350dd39d2526a0f6efdec79f139bcdeba9846b4f90d",
+    "reason": "tests_failed",
+    "result": "failed",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 50,
+    "target": "test",
+    "ts": 1792161220.9314337
+  },
+  {
+    "action": "FAILURE_DETECTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "episode": "ep_3b35fd2c0d83"
+    },
+    "hash": "d3a50effb8b5a67be861b9e36197e9999d920f2fb91681ed8a57631fda243f5b",
+    "prev_hash": "27e6d22858a95f9fcd3ed9eb1d1c51713f021fcf2e71d216250ea74c6296f2a0",
+    "reason": "tests_failed",
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 51,
+    "target": "test",
+    "ts": 1792161220.9314337
+  },
+  {
+    "action": "ROLLBACK_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "workspace": "C:\\Users\\manik\\Documents\\agentic-engineering-url-shortener\\var\\work\\run_77723ef73ccf4ea7"
+    },
+    "hash": "a6fa8c04d2029c8de269ec36e27d2987d28cfc99be44fb1405fd5b36bc4274c2",
+    "prev_hash": "d3a50effb8b5a67be861b9e36197e9999d920f2fb91681ed8a57631fda243f5b",
+    "reason": "tests_failed",
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 52,
+    "target": "test",
+    "ts": 1792161220.9333363
+  },
+  {
+    "action": "ROLLBACK_COMPLETED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "workspace_discarded": true
+    },
+    "hash": "a13d39840dd689a398fa58c3d491fd4d8a29bf36256594031fae9506ddccb91a",
+    "prev_hash": "a6fa8c04d2029c8de269ec36e27d2987d28cfc99be44fb1405fd5b36bc4274c2",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 53,
+    "target": "test",
+    "ts": 1792161220.943142
+  },
+  {
+    "action": "RECOVERY_COMPLETED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "episode": "ep_3b35fd2c0d83",
+      "mechanism": "rollback"
+    },
+    "hash": "4100712a3d8c49edd38540e111bb77bf2f11a5e330f88ebfa328cbdc237309f0",
+    "prev_hash": "a13d39840dd689a398fa58c3d491fd4d8a29bf36256594031fae9506ddccb91a",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 54,
+    "target": "test",
+    "ts": 1792161220.943142
+  },
+  {
+    "action": "RUN_FAILED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "d1dcae1b02742da28db7a65ea2b750ae529d637c04680f35bc67e69444b22958",
+    "prev_hash": "4100712a3d8c49edd38540e111bb77bf2f11a5e330f88ebfa328cbdc237309f0",
+    "reason": "rolled_back:tests_failed",
+    "result": "ok",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 55,
+    "target": null,
+    "ts": 1792161220.943142
+  },
+  {
+    "action": "SUMMARY_PRODUCED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "version": 1
+    },
+    "hash": "05c33c863de7ad8bb0c0f469b02b420b94ad4b22aa9cfe8c00c844db49bcac3f",
+    "prev_hash": "d1dcae1b02742da28db7a65ea2b750ae529d637c04680f35bc67e69444b22958",
+    "reason": "test failed (tests_failed: tests.shortener.test_api::test_code_collisions_retry_then_give_up_after_five); ROLLBACK before promotion: the isolated workspace was discarded, nothing was promoted, the last known-good release is unchanged",
+    "result": "FAILED",
+    "run_id": "run_77723ef73ccf4ea7",
+    "seq": 56,
+    "target": "engineering-summary",
+    "ts": 1792161220.944142
+  }
+]

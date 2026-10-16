@@ -1,0 +1,9 @@
+{
+  "compensation_events": [],
+  "episodes": [],
+  "meaning": {
+    "compensation": "post-promotion: the change was live on staging; the previous release was re-promoted and verified, and effects that cannot be rolled back are corrected only after human approval",
+    "rollback": "pre-promotion: the isolated workspace was discarded; nothing was promoted, so the last known-good release never changed"
+  },
+  "rollback_events": []
+}

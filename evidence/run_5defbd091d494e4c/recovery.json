@@ -1,0 +1,19 @@
+{
+  "compensation_events": [],
+  "episodes": [
+    {
+      "cause": "policy_fail:SEC-003",
+      "detected_at": 1792161960.3317604,
+      "episode": "ep_fb22d2a5e89f",
+      "meaning": "",
+      "mechanism": "human_resume",
+      "node": "validate",
+      "recovered_at": 1792161995.6421936
+    }
+  ],
+  "meaning": {
+    "compensation": "post-promotion: the change was live on staging; the previous release was re-promoted and verified, and effects that cannot be rolled back are corrected only after human approval",
+    "rollback": "pre-promotion: the isolated workspace was discarded; nothing was promoted, so the last known-good release never changed"
+  },
+  "rollback_events": []
+}

@@ -1,0 +1,50 @@
+[
+  {
+    "content": {
+      "change_set": "scenarios/scn-c/changeset",
+      "command": "python -m pytest tests/shortener/test_daily_stats.py",
+      "errors": 0,
+      "exit_code": 1,
+      "failed_tests": [
+        "tests.shortener.test_daily_stats::test_clicks_are_counted_per_utc_day",
+        "tests.shortener.test_daily_stats::test_daily_counts_store_no_personal_data",
+        "tests.shortener.test_daily_stats::test_daily_stats_need_a_key_and_a_known_code"
+      ],
+      "failures": 3,
+      "lock": {
+        "locked_at": "2026-10-16T14:15:54.624746+00:00",
+        "locked_by": "63320c4d1c94"
+      },
+      "phase": "red",
+      "skipped": 0,
+      "tests": 3,
+      "touched_files": [
+        "tests/shortener/test_daily_stats.py"
+      ]
+    },
+    "created_at": 1792161731.0511243,
+    "name": "test-red",
+    "produced_by": "tdd-red",
+    "version": 1
+  },
+  {
+    "content": {
+      "change_set": "scenarios/scn-c/changeset",
+      "command": "python -m pytest tests/shortener",
+      "errors": 0,
+      "exit_code": 0,
+      "failed_tests": [],
+      "failures": 0,
+      "new_tests": [
+        "tests/shortener/test_daily_stats.py"
+      ],
+      "phase": "green",
+      "skipped": 0,
+      "tests": 63
+    },
+    "created_at": 1792161752.7101786,
+    "name": "test-results",
+    "produced_by": "test",
+    "version": 1
+  }
+]

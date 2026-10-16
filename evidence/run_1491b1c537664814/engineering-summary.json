@@ -1,0 +1,85 @@
+{
+  "artifacts": {
+    "change-application": 1,
+    "design": 1,
+    "docs": 1,
+    "normalized-requirement": 1,
+    "quality-report": 1,
+    "release": 1,
+    "requirement": 1,
+    "task-plan": 1,
+    "test-red": 1,
+    "test-results": 1,
+    "threat-review": 1
+  },
+  "assumptions": [
+    "change sets apply to the baseline they were authored against (docs/scope/lean-slice.md)"
+  ],
+  "decisions": [
+    {
+      "choice": "approve",
+      "key_id": "63320c4d1c94",
+      "node_id": "approve-design",
+      "reason": "Design reviewed: 4 testable acceptance criteria incl. negative auth cases, test-first task plan, additive endpoint with no change to existing behavior. Approved to apply in isolated workspace.",
+      "role": "approver"
+    },
+    {
+      "choice": "approve",
+      "key_id": "2788b911e283",
+      "node_id": "approve-release",
+      "reason": "Tests red then green (64 passed, 0 failed), threat review has no open high threats, all policy checks passed, docs updated. Release approved.",
+      "role": "release-owner"
+    }
+  ],
+  "labels": [
+    "demonstration"
+  ],
+  "limitations": [
+    "metrics are demonstration data from a single workstation",
+    "planned-but-not-implemented scope: docs/scope/lean-slice.md section 2"
+  ],
+  "outcome": "COMPLETED",
+  "plan_and_rationale": {
+    "approach": "Add GET /api/v1/links/{code}: link details (destination, created_at, expires_at, active) for the creating API key; other keys get 404.",
+    "impact_analysis": false,
+    "requirement": "SCN-A: Link details endpoint",
+    "tasks": 10
+  },
+  "reason": null,
+  "recovery": {
+    "compensations": 0,
+    "mechanisms": [],
+    "rollbacks": 0
+  },
+  "risks": [
+    "TH-0 Denial of service (low, accepted)",
+    "TH-1 Information disclosure (high, mitigated)"
+  ],
+  "run_id": "run_1491b1c537664814",
+  "trade_offs": [
+    "deterministic rule-based agents apply human-locked change sets instead of generating code at run time",
+    "scenario runs evaluate SEC-003 against a pinned pip-audit snapshot (no network); the live audit runs in `orch release check`",
+    "releases are local (snapshot or local staging); merging into the repository stays a manual human action"
+  ],
+  "validation_results": {
+    "green": {
+      "errors": 0,
+      "failures": 0,
+      "tests": 64
+    },
+    "policy": {
+      "PRIV-001": "PASS",
+      "REL-001": "PASS",
+      "SEC-002": "PASS",
+      "SEC-003": "PASS",
+      "SEC-004": "PASS"
+    },
+    "red": {
+      "errors": 0,
+      "failures": 3,
+      "tests": 4
+    }
+  },
+  "why": "all stages succeeded and every gate was decided by a human (approve-design by approver key 63320c4d1c94; approve-release by release-owner key 2788b911e283)",
+  "workflow": "scn-a"
+}

@@ -1,0 +1,18 @@
+{
+  "decisions": [
+    {
+      "bound": "{\"quality-report\": 1}",
+      "choice": "answer",
+      "created_at": 1792162058.9934862,
+      "decision_id": "dec_a0283e766e7c45fe",
+      "key_id": "95b4677fbabf",
+      "node_id": "clarify",
+      "reason": "Requester withdrew the request after the privacy conflict was explained.",
+      "role": "engineer",
+      "run_id": "run_4fae12b6c3f14ca6",
+      "status": "ACTIVE"
+    }
+  ],
+  "exceptions": [],
+  "policy_evaluations": []
+}

@@ -1,0 +1,627 @@
+[
+  {
+    "content": {
+      "sha256": "58ecf34d407a180396d066671836af557951b24414d426feb11835b8662efd2b",
+      "source": "scenarios/scn-b/requirement.md",
+      "text": "# SCN-B: Custom aliases\nchange_kind: modification\n\n## Intent\nLet link creators choose a custom alias as the short code in the existing POST /api/v1/links creation flow (HD-SCN-001).\n\n## Acceptance criteria\n- AC1: POST /api/v1/links with alias \"promo2026\" returns 201 and the alias as the code; resolving it redirects to the destination.\n- AC2: An alias shorter than 4 or longer than 10 characters, or with characters other than letters and digits, returns 422 alias_invalid.\n- AC3: A reserved alias (api, health, docs, openapi, redoc, static, admin; case-insensitive) returns 422 alias_reserved.\n- AC4: An alias already in use returns 409 alias_conflict and the existing mapping is unchanged.\n- AC5: A request without an alias is unchanged: it returns 201 with a random 7-character code.\n\n## Constraints\n- Requests without an alias behave exactly as before (regression suite passes unchanged).\n- No personal data is stored or returned.\n"
+    },
+    "created_at": 1792161314.2003314,
+    "name": "requirement",
+    "produced_by": "intake",
+    "version": 1
+  },
+  {
+    "content": {
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "rq_id": "RQ-001",
+          "text": "POST /api/v1/links with alias \"promo2026\" returns 201 and the alias as the code; resolving it redirects to the destination."
+        },
+        {
+          "id": "AC2",
+          "rq_id": "RQ-002",
+          "text": "An alias shorter than 4 or longer than 10 characters, or with characters other than letters and digits, returns 422 alias_invalid."
+        },
+        {
+          "id": "AC3",
+          "rq_id": "RQ-003",
+          "text": "A reserved alias (api, health, docs, openapi, redoc, static, admin; case-insensitive) returns 422 alias_reserved."
+        },
+        {
+          "id": "AC4",
+          "rq_id": "RQ-004",
+          "text": "An alias already in use returns 409 alias_conflict and the existing mapping is unchanged."
+        },
+        {
+          "id": "AC5",
+          "rq_id": "RQ-005",
+          "text": "A request without an alias is unchanged: it returns 201 with a random 7-character code."
+        }
+      ],
+      "change_kind": "modification",
+      "constraints": [
+        "Requests without an alias behave exactly as before (regression suite passes unchanged).",
+        "No personal data is stored or returned."
+      ],
+      "intent": "Let link creators choose a custom alias as the short code in the existing POST /api/v1/links creation flow (HD-SCN-001).",
+      "source": "scenarios/scn-b/requirement.md",
+      "title": "SCN-B: Custom aliases"
+    },
+    "created_at": 1792161314.3079689,
+    "name": "normalized-requirement",
+    "produced_by": "normalize",
+    "version": 1
+  },
+  {
+    "content": {
+      "checks": [
+        {
+          "check": "completeness",
+          "rationale": "intent and acceptance criteria present",
+          "result": "PASS"
+        },
+        {
+          "check": "consistency",
+          "rationale": "no duplicated or contradicting criteria",
+          "result": "PASS"
+        },
+        {
+          "check": "testability",
+          "rationale": "every criterion has an observable outcome",
+          "result": "PASS"
+        },
+        {
+          "check": "policy_conformance",
+          "rationale": "no personal-data capture requested (PRIV-001)",
+          "result": "PASS"
+        },
+        {
+          "check": "architecture_boundary",
+          "rationale": "within approved scope",
+          "result": "PASS"
+        }
+      ],
+      "clarification_required": false,
+      "items": [],
+      "material_failures": 0,
+      "reason": "all five requirement-quality checks passed; no clarification required"
+    },
+    "created_at": 1792161314.4258556,
+    "name": "quality-report",
+    "produced_by": "quality",
+    "version": 1
+  },
+  {
+    "content": {
+      "components": [
+        {
+          "file": "src/shortener/app.py",
+          "module": "shortener.app",
+          "reason": "defines the interface"
+        },
+        {
+          "file": "src/shortener/codes.py",
+          "module": "shortener.codes",
+          "reason": "imported by or imports the entry module"
+        },
+        {
+          "file": "src/shortener/config.py",
+          "module": "shortener.config",
+          "reason": "imported by or imports the entry module"
+        },
+        {
+          "file": "src/shortener/openapi.py",
+          "module": "shortener.openapi",
+          "reason": "imported by or imports the entry module"
+        },
+        {
+          "file": "src/shortener/store.py",
+          "module": "shortener.store",
+          "reason": "imported by or imports the entry module"
+        },
+        {
+          "file": "src/shortener/validation.py",
+          "module": "shortener.validation",
+          "reason": "imported by or imports the entry module"
+        }
+      ],
+      "data_flows": [
+        "POST /api/v1/links -> shortener.codes -> shortener.config -> shortener.store -> shortener.validation"
+      ],
+      "files": [
+        "src/shortener/app.py",
+        "src/shortener/codes.py",
+        "src/shortener/config.py",
+        "src/shortener/openapi.py",
+        "src/shortener/store.py",
+        "src/shortener/validation.py"
+      ],
+      "inputs_used": [
+        "normalized-requirement",
+        "baseline source in the isolated workspace"
+      ],
+      "interfaces": [
+        "POST /api/v1/links"
+      ],
+      "method": "requirement text + baseline import graph (AST); change set not consulted",
+      "regression_risks": [
+        "public contract: additive minor version only; existing responses unchanged",
+        "generated-code path must stay unchanged (random 7-character codes)",
+        "configuration defaults must not change",
+        "uniqueness, idempotency and transaction semantics of link creation",
+        "URL validation rules must not change"
+      ],
+      "requirement_links": [
+        "RQ-001",
+        "RQ-002",
+        "RQ-003",
+        "RQ-004",
+        "RQ-005"
+      ],
+      "rollout_rollback": "applied only to an isolated workspace; rollback = discard the workspace; contract change must be additive (minor version)",
+      "tests": [
+        "tests/shortener/test_api.py",
+        "tests/shortener/test_concurrency_serve.py",
+        "tests/shortener/test_contract.py",
+        "tests/shortener/test_logging.py",
+        "tests/shortener/test_validation.py"
+      ]
+    },
+    "created_at": 1792161314.548992,
+    "name": "impact-analysis",
+    "produced_by": "impact",
+    "version": 1
+  },
+  {
+    "content": {
+      "ordering": [
+        "T1",
+        "T2",
+        "T3",
+        "T4",
+        "T5",
+        "T6",
+        "T7",
+        "T8",
+        "T9",
+        "T10",
+        "T11",
+        "T12"
+      ],
+      "tasks": [
+        {
+          "acceptance": "POST /api/v1/links with alias \"promo2026\" returns 201 and the alias as the code; resolving it redirects to the destination.",
+          "depends_on": [],
+          "id": "T1",
+          "requirement": "RQ-001",
+          "title": "Write a failing test for AC1"
+        },
+        {
+          "acceptance": "POST /api/v1/links with alias \"promo2026\" returns 201 and the alias as the code; resolving it redirects to the destination.",
+          "depends_on": [
+            "T1"
+          ],
+          "id": "T2",
+          "requirement": "RQ-001",
+          "title": "Implement AC1"
+        },
+        {
+          "acceptance": "An alias shorter than 4 or longer than 10 characters, or with characters other than letters and digits, returns 422 alias_invalid.",
+          "depends_on": [],
+          "id": "T3",
+          "requirement": "RQ-002",
+          "title": "Write a failing test for AC2"
+        },
+        {
+          "acceptance": "An alias shorter than 4 or longer than 10 characters, or with characters other than letters and digits, returns 422 alias_invalid.",
+          "depends_on": [
+            "T3"
+          ],
+          "id": "T4",
+          "requirement": "RQ-002",
+          "title": "Implement AC2"
+        },
+        {
+          "acceptance": "A reserved alias (api, health, docs, openapi, redoc, static, admin; case-insensitive) returns 422 alias_reserved.",
+          "depends_on": [],
+          "id": "T5",
+          "requirement": "RQ-003",
+          "title": "Write a failing test for AC3"
+        },
+        {
+          "acceptance": "A reserved alias (api, health, docs, openapi, redoc, static, admin; case-insensitive) returns 422 alias_reserved.",
+          "depends_on": [
+            "T5"
+          ],
+          "id": "T6",
+          "requirement": "RQ-003",
+          "title": "Implement AC3"
+        },
+        {
+          "acceptance": "An alias already in use returns 409 alias_conflict and the existing mapping is unchanged.",
+          "depends_on": [],
+          "id": "T7",
+          "requirement": "RQ-004",
+          "title": "Write a failing test for AC4"
+        },
+        {
+          "acceptance": "An alias already in use returns 409 alias_conflict and the existing mapping is unchanged.",
+          "depends_on": [
+            "T7"
+          ],
+          "id": "T8",
+          "requirement": "RQ-004",
+          "title": "Implement AC4"
+        },
+        {
+          "acceptance": "A request without an alias is unchanged: it returns 201 with a random 7-character code.",
+          "depends_on": [],
+          "id": "T9",
+          "requirement": "RQ-005",
+          "title": "Write a failing test for AC5"
+        },
+        {
+          "acceptance": "A request without an alias is unchanged: it returns 201 with a random 7-character code.",
+          "depends_on": [
+            "T9"
+          ],
+          "id": "T10",
+          "requirement": "RQ-005",
+          "title": "Implement AC5"
+        },
+        {
+          "depends_on": [
+            "T2",
+            "T4",
+            "T6",
+            "T8",
+            "T10"
+          ],
+          "id": "T11",
+          "title": "Regenerate the OpenAPI contract"
+        },
+        {
+          "depends_on": [
+            "T11"
+          ],
+          "id": "T12",
+          "title": "Update documentation"
+        }
+      ]
+    },
+    "created_at": 1792161314.6560202,
+    "name": "task-plan",
+    "produced_by": "decompose",
+    "version": 1
+  },
+  {
+    "content": {
+      "acceptance_criteria": [
+        {
+          "id": "AC1",
+          "rq_id": "RQ-001",
+          "text": "POST /api/v1/links with alias \"promo2026\" returns 201 and the alias as the code; resolving it redirects to the destination."
+        },
+        {
+          "id": "AC2",
+          "rq_id": "RQ-002",
+          "text": "An alias shorter than 4 or longer than 10 characters, or with characters other than letters and digits, returns 422 alias_invalid."
+        },
+        {
+          "id": "AC3",
+          "rq_id": "RQ-003",
+          "text": "A reserved alias (api, health, docs, openapi, redoc, static, admin; case-insensitive) returns 422 alias_reserved."
+        },
+        {
+          "id": "AC4",
+          "rq_id": "RQ-004",
+          "text": "An alias already in use returns 409 alias_conflict and the existing mapping is unchanged."
+        },
+        {
+          "id": "AC5",
+          "rq_id": "RQ-005",
+          "text": "A request without an alias is unchanged: it returns 201 with a random 7-character code."
+        }
+      ],
+      "approach": "Add an optional custom alias to POST /api/v1/links (4-10 letters/digits, reserved words blocked, conflicts return 409 and never overwrite).",
+      "change_set": "scenarios/scn-b/changeset",
+      "components": [
+        "src/shortener/app.py",
+        "src/shortener/codes.py",
+        "src/shortener/config.py",
+        "src/shortener/openapi.py",
+        "src/shortener/store.py",
+        "src/shortener/validation.py"
+      ],
+      "contract_version_after": "2.1.0",
+      "impact_analysis_used": true,
+      "provenance": "Authored with AI assistance (Claude Code) during development; reviewed and locked by the human owner (Mani Kumar Vadugu)",
+      "regression_suite": "tests/shortener",
+      "tasks": 12,
+      "test_plan": [
+        "tests/shortener/test_aliases.py"
+      ],
+      "title": "SCN-B: Custom aliases"
+    },
+    "created_at": 1792161314.7708304,
+    "name": "design",
+    "produced_by": "design",
+    "version": 1
+  },
+  {
+    "content": {
+      "change_set": "scenarios/scn-b/changeset",
+      "command": "python -m pytest tests/shortener/test_aliases.py",
+      "errors": 0,
+      "exit_code": 1,
+      "failed_tests": [
+        "tests.shortener.test_aliases::test_alias_becomes_the_short_code",
+        "tests.shortener.test_aliases::test_alias_length_and_characters[abc-422]",
+        "tests.shortener.test_aliases::test_alias_length_and_characters[abcd-201]",
+        "tests.shortener.test_aliases::test_alias_length_and_characters[abcdefg-201]",
+        "tests.shortener.test_aliases::test_alias_length_and_characters[abcdefghij-201]",
+        "tests.shortener.test_aliases::test_alias_length_and_characters[abcdefghijk-422]",
+        "tests.shortener.test_aliases::test_alias_length_and_characters[has-dash-422]",
+        "tests.shortener.test_aliases::test_alias_length_and_characters[spa ce1-422]",
+        "tests.shortener.test_aliases::test_reserved_aliases_are_rejected[admin]",
+        "tests.shortener.test_aliases::test_reserved_aliases_are_rejected[Health]",
+        "tests.shortener.test_aliases::test_reserved_aliases_are_rejected[OPENAPI]",
+        "tests.shortener.test_aliases::test_reserved_aliases_are_rejected[static]",
+        "tests.shortener.test_aliases::test_alias_conflict_is_409_and_keeps_the_existing_mapping"
+      ],
+      "failures": 13,
+      "lock": {
+        "locked_at": "2026-10-16T14:15:54.253372+00:00",
+        "locked_by": "63320c4d1c94"
+      },
+      "phase": "red",
+      "skipped": 0,
+      "tests": 14,
+      "touched_files": [
+        "tests/shortener/test_aliases.py"
+      ]
+    },
+    "created_at": 1792161367.3118532,
+    "name": "test-red",
+    "produced_by": "tdd-red",
+    "version": 1
+  },
+  {
+    "content": {
+      "change_set": "scenarios/scn-b/changeset",
+      "lock": {
+        "locked_at": "2026-10-16T14:15:54.253372+00:00",
+        "locked_by": "63320c4d1c94"
+      },
+      "patch_sha256": {
+        "impl": "e1f83ac67e85a8012c6053cc7c8f3875eb06e52a03d534dd5fcb7da53ba33787",
+        "tests": "45aefb81928ded5be008a3268feb5f9b607d27150e17415245081e8bf2401338"
+      },
+      "provenance": "Authored with AI assistance (Claude Code) during development; reviewed and locked by the human owner (Mani Kumar Vadugu)",
+      "scope_check": "all touched files are within the approved impact analysis",
+      "touched_files": [
+        "specs/001-agentic-sdlc-url-shortener/contracts/shortener-api.openapi.yaml",
+        "src/shortener/app.py"
+      ]
+    },
+    "created_at": 1792161367.515777,
+    "name": "change-application",
+    "produced_by": "implement",
+    "version": 1
+  },
+  {
+    "content": {
+      "change_set": "scenarios/scn-b/changeset",
+      "command": "python -m pytest tests/shortener",
+      "errors": 0,
+      "exit_code": 0,
+      "failed_tests": [],
+      "failures": 0,
+      "new_tests": [
+        "tests/shortener/test_aliases.py"
+      ],
+      "phase": "green",
+      "skipped": 0,
+      "tests": 74
+    },
+    "created_at": 1792161388.242826,
+    "name": "test-results",
+    "produced_by": "test",
+    "version": 1
+  },
+  {
+    "content": {
+      "contract_version": "2.1.0",
+      "path": "docs/changes/run_03a5a6d9a2154bea.md"
+    },
+    "created_at": 1792161388.4491723,
+    "name": "docs",
+    "produced_by": "docs",
+    "version": 1
+  },
+  {
+    "content": {
+      "new_operations": [],
+      "open_high_threats": 0,
+      "threats": [
+        {
+          "category": "Denial of service",
+          "detail": "abuse volume on new operations: creation is rate limited; reads are an accepted risk",
+          "id": "TH-0",
+          "severity": "low",
+          "status": "accepted"
+        },
+        {
+          "category": "Spoofing",
+          "detail": "creator-chosen aliases could imitate service routes or other links; reserved words are blocked and conflicts never overwrite",
+          "id": "TH-2",
+          "interface": "POST /api/v1/links",
+          "severity": "medium",
+          "status": "mitigated"
+        }
+      ]
+    },
+    "created_at": 1792161388.4932394,
+    "name": "threat-review",
+    "produced_by": "threat-review",
+    "version": 1
+  },
+  {
+    "content": {
+      "previous_release": "baseline",
+      "promoted_at": "2026-10-16T14:36:54.841665Z",
+      "release_id": "rel_03a5a6d9a2154bea",
+      "staging": "C:\\Users\\manik\\Documents\\agentic-engineering-url-shortener\\var\\staging"
+    },
+    "created_at": 1792161414.8557715,
+    "name": "release",
+    "produced_by": "promote",
+    "version": 1
+  },
+  {
+    "content": {
+      "failed_release": "rel_03a5a6d9a2154bea",
+      "non_rollbackable_effects": [
+        {
+          "code": "smk4155950",
+          "created_at": "2026-10-16T14:36:55.601616Z"
+        },
+        {
+          "code": "smk4156211",
+          "created_at": "2026-10-16T14:36:55.627072Z"
+        }
+      ],
+      "phase": "post-promotion",
+      "previous_release_verified": {
+        "ready": true
+      },
+      "promoted_at": "2026-10-16T14:36:54.841665Z",
+      "proposed_corrective_action": "disable the listed links (moved to links_quarantine, reversible)",
+      "restored_release": "baseline"
+    },
+    "created_at": 1792161416.5958948,
+    "name": "compensation-record",
+    "produced_by": "promote:compensation",
+    "version": 1
+  },
+  {
+    "content": {
+      "audit_records_altered": false,
+      "disabled": [
+        "smk4155950",
+        "smk4156211"
+      ],
+      "reversible": true,
+      "table": "links_quarantine"
+    },
+    "created_at": 1792161433.2477696,
+    "name": "corrective-action",
+    "produced_by": "corrective",
+    "version": 1
+  },
+  {
+    "content": {
+      "artifacts": {
+        "change-application": 1,
+        "compensation-record": 1,
+        "corrective-action": 1,
+        "design": 1,
+        "docs": 1,
+        "impact-analysis": 1,
+        "normalized-requirement": 1,
+        "quality-report": 1,
+        "release": 1,
+        "requirement": 1,
+        "task-plan": 1,
+        "test-red": 1,
+        "test-results": 1,
+        "threat-review": 1
+      },
+      "assumptions": [
+        "change sets apply to the baseline they were authored against (docs/scope/lean-slice.md)"
+      ],
+      "decisions": [
+        {
+          "choice": "approve",
+          "key_id": "63320c4d1c94",
+          "node_id": "approve-design",
+          "reason": "Design and impact analysis reviewed; approved to apply in isolated workspace (post-promotion fault demonstration).",
+          "role": "approver"
+        },
+        {
+          "choice": "approve",
+          "key_id": "2788b911e283",
+          "node_id": "approve-release",
+          "reason": "Tests passed with 0 failures and no open high threats; release approved.",
+          "role": "release-owner"
+        },
+        {
+          "choice": "approve",
+          "key_id": "63320c4d1c94",
+          "node_id": "approve-corrective",
+          "reason": "Post-promotion smoke check failed; staging was restored to the previous version. Corrective action approved.",
+          "role": "approver"
+        }
+      ],
+      "labels": [
+        "demonstration",
+        "fault-injection"
+      ],
+      "limitations": [
+        "metrics are demonstration data from a single workstation",
+        "planned-but-not-implemented scope: docs/scope/lean-slice.md section 2"
+      ],
+      "outcome": "FAILED",
+      "plan_and_rationale": {
+        "approach": "Add an optional custom alias to POST /api/v1/links (4-10 letters/digits, reserved words blocked, conflicts return 409 and never overwrite).",
+        "impact_analysis": true,
+        "requirement": "SCN-B: Custom aliases",
+        "tasks": 12
+      },
+      "reason": "compensated:smoke_failed",
+      "recovery": {
+        "compensations": 1,
+        "mechanisms": [
+          "compensation"
+        ],
+        "rollbacks": 0
+      },
+      "risks": [
+        "TH-0 Denial of service (low, accepted)",
+        "TH-2 Spoofing (medium, mitigated)"
+      ],
+      "run_id": "run_03a5a6d9a2154bea",
+      "trade_offs": [
+        "deterministic rule-based agents apply human-locked change sets instead of generating code at run time",
+        "scenario runs evaluate SEC-003 against a pinned pip-audit snapshot (no network); the live audit runs in `orch release check`",
+        "releases are local (snapshot or local staging); merging into the repository stays a manual human action"
+      ],
+      "validation_results": {
+        "green": {
+          "errors": 0,
+          "failures": 0,
+          "tests": 74
+        },
+        "policy": {
+          "PRIV-001": "PASS",
+          "REL-001": "PASS",
+          "SEC-002": "PASS",
+          "SEC-003": "PASS",
+          "SEC-004": "PASS"
+        },
+        "red": {
+          "errors": 0,
+          "failures": 13,
+          "tests": 14
+        }
+      },
+      "why": "smoke failed (smoke_failed); COMPENSATION after promotion: the previous release was restored and verified; corrective action approved by approver key 63320c4d1c94",
+      "workflow": "scn-b-compensate"
+    },
+    "created_at": 1792161433.2520757,
+    "name": "engineering-summary",
+    "produced_by": "system",
+    "version": 1
+  }
+]

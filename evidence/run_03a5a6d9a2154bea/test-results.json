@@ -1,0 +1,76 @@
+[
+  {
+    "content": {
+      "change_set": "scenarios/scn-b/changeset",
+      "command": "python -m pytest tests/shortener/test_aliases.py",
+      "errors": 0,
+      "exit_code": 1,
+      "failed_tests": [
+        "tests.shortener.test_aliases::test_alias_becomes_the_short_code",
+        "tests.shortener.test_aliases::test_alias_length_and_characters[abc-422]",
+        "tests.shortener.test_aliases::test_alias_length_and_characters[abcd-201]",
+        "tests.shortener.test_aliases::test_alias_length_and_characters[abcdefg-201]",
+        "tests.shortener.test_aliases::test_alias_length_and_characters[abcdefghij-201]",
+        "tests.shortener.test_aliases::test_alias_length_and_characters[abcdefghijk-422]",
+        "tests.shortener.test_aliases::test_alias_length_and_characters[has-dash-422]",
+        "tests.shortener.test_aliases::test_alias_length_and_characters[spa ce1-422]",
+        "tests.shortener.test_aliases::test_reserved_aliases_are_rejected[admin]",
+        "tests.shortener.test_aliases::test_reserved_aliases_are_rejected[Health]",
+        "tests.shortener.test_aliases::test_reserved_aliases_are_rejected[OPENAPI]",
+        "tests.shortener.test_aliases::test_reserved_aliases_are_rejected[static]",
+        "tests.shortener.test_aliases::test_alias_conflict_is_409_and_keeps_the_existing_mapping"
+      ],
+      "failures": 13,
+      "lock": {
+        "locked_at": "2026-10-16T14:15:54.253372+00:00",
+        "locked_by": "63320c4d1c94"
+      },
+      "phase": "red",
+      "skipped": 0,
+      "tests": 14,
+      "touched_files": [
+        "tests/shortener/test_aliases.py"
+      ]
+    },
+    "created_at": 1792161367.3118532,
+    "name": "test-red",
+    "produced_by": "tdd-red",
+    "version": 1
+  },
+  {
+    "content": {
+      "change_set": "scenarios/scn-b/changeset",
+      "command": "python -m pytest tests/shortener",
+      "errors": 0,
+      "exit_code": 0,
+      "failed_tests": [],
+      "failures": 0,
+      "new_tests": [
+        "tests/shortener/test_aliases.py"
+      ],
+      "phase": "green",
+      "skipped": 0,
+      "tests": 74
+    },
+    "created_at": 1792161388.242826,
+    "name": "test-results",
+    "produced_by": "test",
+    "version": 1
+  },
+  {
+    "attempt": 1,
+    "checks": {
+      "alias_create_0": true,
+      "alias_create_1": true,
+      "alias_redirect_0": true,
+      "alias_redirect_1": true,
+      "injected_post_promotion_check": false,
+      "ready": true
+    },
+    "classification": "permanent",
+    "message": "post-promotion smoke check failed",
+    "name": "failed-attempt",
+    "node": "smoke",
+    "phase": "post-promotion"
+  }
+]

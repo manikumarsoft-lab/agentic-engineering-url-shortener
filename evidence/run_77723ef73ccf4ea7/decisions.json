@@ -1,0 +1,18 @@
+{
+  "decisions": [
+    {
+      "bound": "{\"design\": 1, \"impact-analysis\": 1, \"task-plan\": 1}",
+      "choice": "approve",
+      "created_at": 1792161198.3601794,
+      "decision_id": "dec_5cd9a1d7f8d647fb",
+      "key_id": "63320c4d1c94",
+      "node_id": "approve-design",
+      "reason": "Design and impact analysis identical to SCN-B; approved to apply in isolated workspace (fault-injection run).",
+      "role": "approver",
+      "run_id": "run_77723ef73ccf4ea7",
+      "status": "ACTIVE"
+    }
+  ],
+  "exceptions": [],
+  "policy_evaluations": []
+}

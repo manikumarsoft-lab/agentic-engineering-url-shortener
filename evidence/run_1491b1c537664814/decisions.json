@@ -1,0 +1,86 @@
+{
+  "decisions": [
+    {
+      "bound": "{\"design\": 1, \"task-plan\": 1}",
+      "choice": "approve",
+      "created_at": 1792160575.0915582,
+      "decision_id": "dec_f6f1237d27c6446d",
+      "key_id": "63320c4d1c94",
+      "node_id": "approve-design",
+      "reason": "Design reviewed: 4 testable acceptance criteria incl. negative auth cases, test-first task plan, additive endpoint with no change to existing behavior. Approved to apply in isolated workspace.",
+      "role": "approver",
+      "run_id": "run_1491b1c537664814",
+      "status": "ACTIVE"
+    },
+    {
+      "bound": "{\"test-results\": 1, \"threat-review\": 1, \"docs\": 1}",
+      "choice": "approve",
+      "created_at": 1792160670.715795,
+      "decision_id": "dec_dda2b06118c243af",
+      "key_id": "2788b911e283",
+      "node_id": "approve-release",
+      "reason": "Tests red then green (64 passed, 0 failed), threat review has no open high threats, all policy checks passed, docs updated. Release approved.",
+      "role": "release-owner",
+      "run_id": "run_1491b1c537664814",
+      "status": "ACTIVE"
+    }
+  ],
+  "exceptions": [],
+  "policy_evaluations": [
+    {
+      "check_id": "PRIV-001",
+      "created_at": 1792160598.1755776,
+      "exception_id": null,
+      "mandatory": 1,
+      "node_id": "validate",
+      "outcome": "PASS",
+      "policy_version": "1.2.0",
+      "reason": "captures_personal_data == False; no personal-data markers in added code",
+      "run_id": "run_1491b1c537664814"
+    },
+    {
+      "check_id": "SEC-002",
+      "created_at": 1792160598.1755776,
+      "exception_id": null,
+      "mandatory": 1,
+      "node_id": "validate",
+      "outcome": "PASS",
+      "policy_version": "1.2.0",
+      "reason": "open_high_threats == 0; 2 threats reviewed",
+      "run_id": "run_1491b1c537664814"
+    },
+    {
+      "check_id": "SEC-003",
+      "created_at": 1792160598.1755776,
+      "exception_id": null,
+      "mandatory": 1,
+      "node_id": "validate",
+      "outcome": "PASS",
+      "policy_version": "1.2.0",
+      "reason": "dependency_scan_ok == True; pip-audit 2.10.1 snapshot of 2026-10-15T22:41:35.058490+00:00: 49 pinned dependencies, 0 known vulnerabilities",
+      "run_id": "run_1491b1c537664814"
+    },
+    {
+      "check_id": "SEC-004",
+      "created_at": 1792160598.1755776,
+      "exception_id": null,
+      "mandatory": 1,
+      "node_id": "validate",
+      "outcome": "PASS",
+      "policy_version": "1.2.0",
+      "reason": "secret_scan_clean == True; 42 files scanned, no findings",
+      "run_id": "run_1491b1c537664814"
+    },
+    {
+      "check_id": "REL-001",
+      "created_at": 1792160598.1755776,
+      "exception_id": null,
+      "mandatory": 1,
+      "node_id": "validate",
+      "outcome": "PASS",
+      "policy_version": "1.2.0",
+      "reason": "tests_passed == True; 64 tests, 0 failures, 0 errors",
+      "run_id": "run_1491b1c537664814"
+    }
+  ]
+}

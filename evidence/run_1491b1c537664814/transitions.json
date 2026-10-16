@@ -1,0 +1,1049 @@
+[
+  {
+    "action": "RUN_CREATED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "labels": [
+        "demonstration"
+      ],
+      "policy_version": "1.2.0",
+      "workflow": "scn-a",
+      "workflow_version": "1.0.0"
+    },
+    "hash": "2e4d9d81b44a7b7cab0458fa5eb6b49807d810536d82e04e0e86ca2a214b868f",
+    "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 1,
+    "target": null,
+    "ts": 1792160281.2683945
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "987bd467aa9587c217068b004656f7976c849149c5659a3b16ea82751f2fab7f",
+    "prev_hash": "3136fc3d1c978c5c7b704357f7685112adc3e48fbad27fd765d11a53abed2cb5",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 3,
+    "target": "intake",
+    "ts": 1792160281.3071918
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "intake"
+      ]
+    },
+    "hash": "c627593084200cf812c1bd532bab56f81552efaf6e91381deae611bea68e0bf8",
+    "prev_hash": "987bd467aa9587c217068b004656f7976c849149c5659a3b16ea82751f2fab7f",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 4,
+    "target": null,
+    "ts": 1792160281.309298
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "f0d12ced9f3f5b7d8b7b78c0c8fe56933d90cbb276a9cf78ed9308f6490904fa",
+    "prev_hash": "c627593084200cf812c1bd532bab56f81552efaf6e91381deae611bea68e0bf8",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 5,
+    "target": "intake",
+    "ts": 1792160281.309298
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "ae84b73c065d94cbc7dc61e3174f7af43526472d4d934714036b12eb04ec62ca",
+    "prev_hash": "103f9278086f1bc3da82a7b34858b955baa1409cab1ab5bacf4a2f70c154bf5f",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 7,
+    "target": "intake",
+    "ts": 1792160281.4131403
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "ac6786ac9daad6bc734d455d8842370ec7c7325e8feea9c5ff421b1774469969",
+    "prev_hash": "ae84b73c065d94cbc7dc61e3174f7af43526472d4d934714036b12eb04ec62ca",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 8,
+    "target": "normalize",
+    "ts": 1792160281.4153779
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "normalize"
+      ]
+    },
+    "hash": "0d056984fd6fc6304b71be56b13173656ac5f588c5f59be4e98264036203f802",
+    "prev_hash": "ac6786ac9daad6bc734d455d8842370ec7c7325e8feea9c5ff421b1774469969",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 9,
+    "target": null,
+    "ts": 1792160281.4168844
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "eb6430a3c8221152d1037733b3928d1fda8efe3da5cdd6177cc6d67daf11ea00",
+    "prev_hash": "0d056984fd6fc6304b71be56b13173656ac5f588c5f59be4e98264036203f802",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 10,
+    "target": "normalize",
+    "ts": 1792160281.4168844
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "5f98622bc84ce4b052b08a6eaeba0c14310e49c7e3ee9ce3d23fb77f41578a85",
+    "prev_hash": "4ddbf2026ff0c22fe69e26f6f57108e2b5415bf3ab5e3b664fecc16d328cee03",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 12,
+    "target": "normalize",
+    "ts": 1792160281.5223467
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "99ef99250b57fddd86f4e753c53b5a325929bace1012b759f2ad055c2b97aa31",
+    "prev_hash": "5f98622bc84ce4b052b08a6eaeba0c14310e49c7e3ee9ce3d23fb77f41578a85",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 13,
+    "target": "quality",
+    "ts": 1792160281.5243979
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "quality"
+      ]
+    },
+    "hash": "a9815000109404d514b1ad01c4905e2a8a8aee4d9bf50933fda8d97fd50482b0",
+    "prev_hash": "99ef99250b57fddd86f4e753c53b5a325929bace1012b759f2ad055c2b97aa31",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 14,
+    "target": null,
+    "ts": 1792160281.5259678
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "6158a4aec3d7405e767cbae6aff1c58f78a88f69743a5b3bffab21f32a1f8361",
+    "prev_hash": "a9815000109404d514b1ad01c4905e2a8a8aee4d9bf50933fda8d97fd50482b0",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 15,
+    "target": "quality",
+    "ts": 1792160281.5259678
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "437bafe2d5c00df88d2c5efba9c49b65a1643a9fca20e551f37cf4298a75b113",
+    "prev_hash": "a5cc83c08fdcef2aeec032993436ea82f7d0b1be7c6e51429e43dc0c6ce75a50",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 17,
+    "target": "quality",
+    "ts": 1792160281.6320782
+  },
+  {
+    "action": "NODE_SKIPPED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "condition": {
+        "equals": true,
+        "fact": "clarification_needed"
+      }
+    },
+    "hash": "c4e21622e866e13b672b6954b0a5489ee8e75ae6314bbf930097f0205e25f117",
+    "prev_hash": "437bafe2d5c00df88d2c5efba9c49b65a1643a9fca20e551f37cf4298a75b113",
+    "reason": "all five requirement-quality checks passed; no clarification required",
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 18,
+    "target": "clarify",
+    "ts": 1792160281.634272
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "d125e8d1f0bc1342b3f12ae43903c1de523c35f4850540b4b1ae2b3936676f24",
+    "prev_hash": "c4e21622e866e13b672b6954b0a5489ee8e75ae6314bbf930097f0205e25f117",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 19,
+    "target": "decompose",
+    "ts": 1792160281.63585
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "decompose"
+      ]
+    },
+    "hash": "00702d5fc2c45a9548e0682b5d857dc4df3d50b9c550ce5f605fd418f1e81b64",
+    "prev_hash": "d125e8d1f0bc1342b3f12ae43903c1de523c35f4850540b4b1ae2b3936676f24",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 20,
+    "target": null,
+    "ts": 1792160281.6372683
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "b9c46cb8119e9f4d69f8b17b2e4e778c0a61194666a3fbab938e9efd8087f694",
+    "prev_hash": "00702d5fc2c45a9548e0682b5d857dc4df3d50b9c550ce5f605fd418f1e81b64",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 21,
+    "target": "decompose",
+    "ts": 1792160281.6372683
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "817079e303159a32ea997556ee1caf9f999722c7750bf8ff93906d377f87d1f3",
+    "prev_hash": "8b2b31bee0fd1bc6d9836a68cf7f2b800aab264317d9419df2c890bc29b6a31e",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 23,
+    "target": "decompose",
+    "ts": 1792160281.7437098
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "4cdd73b90941ae025f9a777b091a1d958c8d52e1d5592c32372da17e13679965",
+    "prev_hash": "817079e303159a32ea997556ee1caf9f999722c7750bf8ff93906d377f87d1f3",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 24,
+    "target": "design",
+    "ts": 1792160281.744999
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "design"
+      ]
+    },
+    "hash": "1eea41cbfd72c996ce99a2f6b929d2e308f6f81b96af8415b7b0d3754987131f",
+    "prev_hash": "4cdd73b90941ae025f9a777b091a1d958c8d52e1d5592c32372da17e13679965",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 25,
+    "target": null,
+    "ts": 1792160281.7461019
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "7a2226a56e8cca908ea55e8d5fb6a8c339f191e42aeb3e4d7b63da7edf17b07f",
+    "prev_hash": "1eea41cbfd72c996ce99a2f6b929d2e308f6f81b96af8415b7b0d3754987131f",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 26,
+    "target": "design",
+    "ts": 1792160281.7461019
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "fd0b560f08ff6e024b074dfa826ff2db7385b905fbe9106e2b6f175ffd1fa015",
+    "prev_hash": "decda0353d312eb9256f6b63b8ab0fdca9a56234aa202e7fb2b1310d12e1fe59",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 28,
+    "target": "design",
+    "ts": 1792160281.8548605
+  },
+  {
+    "action": "GATE_OPENED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "bound": {
+        "design": 1,
+        "task-plan": 1
+      },
+      "deadline": 1792246681.8558495,
+      "kind": "approval",
+      "options": {},
+      "roles": [
+        "approver"
+      ]
+    },
+    "hash": "76eb2ba1495db6a4e2c8af59816d0c0ce4100a9c6bd18b376a000231b978239c",
+    "prev_hash": "fd0b560f08ff6e024b074dfa826ff2db7385b905fbe9106e2b6f175ffd1fa015",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 29,
+    "target": "approve-design",
+    "ts": 1792160281.8558495
+  },
+  {
+    "action": "RUN_AWAITING_APPROVAL",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "fcbf0fc59da61bd9f69cba3c3c9e8b6c195c0753511dd247ed5e37e0920cb82a",
+    "prev_hash": "76eb2ba1495db6a4e2c8af59816d0c0ce4100a9c6bd18b376a000231b978239c",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 30,
+    "target": null,
+    "ts": 1792160281.8576193
+  },
+  {
+    "action": "GATE_APPROVED",
+    "actor_id": "63320c4d1c94",
+    "actor_type": "human",
+    "data": {
+      "bound": {
+        "design": 1,
+        "task-plan": 1
+      },
+      "choice": "approve",
+      "decision_id": "dec_f6f1237d27c6446d",
+      "role": "approver"
+    },
+    "hash": "addada1efc47e979202fafe5cdedfd56b231c67ceea7d1baab52a3847ea2cefa",
+    "prev_hash": "fcbf0fc59da61bd9f69cba3c3c9e8b6c195c0753511dd247ed5e37e0920cb82a",
+    "reason": "Design reviewed: 4 testable acceptance criteria incl. negative auth cases, test-first task plan, additive endpoint with no change to existing behavior. Approved to apply in isolated workspace.",
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 31,
+    "target": "approve-design",
+    "ts": 1792160575.0915582
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "71cad0abbf006251e404f07fd77e228aa251dca5b446efcdc6e0834e588251af",
+    "prev_hash": "addada1efc47e979202fafe5cdedfd56b231c67ceea7d1baab52a3847ea2cefa",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 32,
+    "target": "tdd-red",
+    "ts": 1792160575.0961604
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "tdd-red"
+      ]
+    },
+    "hash": "bf66375639b5dfcf2d5211ea24ef344075c9cd64f9fecabc0337e3e259fb44f2",
+    "prev_hash": "71cad0abbf006251e404f07fd77e228aa251dca5b446efcdc6e0834e588251af",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 33,
+    "target": null,
+    "ts": 1792160575.0974803
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "134acbb9c25770904bbeffaca23e90a71625f3efec5c4c35dc35fc1641083429",
+    "prev_hash": "bf66375639b5dfcf2d5211ea24ef344075c9cd64f9fecabc0337e3e259fb44f2",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 34,
+    "target": "tdd-red",
+    "ts": 1792160575.0974803
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "72b52b828d010d6bbfdc18d44af3419dd50badeb5a1495cf1c289c8f3589fc06",
+    "prev_hash": "d5d8e2e5b10c51f635a6c3a39573b2ba956493254ba308bdfe5eed311ceab61e",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 36,
+    "target": "tdd-red",
+    "ts": 1792160576.8910732
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "ffcac75506dfa8c3e169c08250e676ae18c443633b2c34fdcd40b2d7f587f4d5",
+    "prev_hash": "72b52b828d010d6bbfdc18d44af3419dd50badeb5a1495cf1c289c8f3589fc06",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 37,
+    "target": "implement",
+    "ts": 1792160576.8921
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "implement"
+      ]
+    },
+    "hash": "b9cdde5c5a52229e4e4f5b53aeba05724851fd6d4a373cce2d103caecc21c4cc",
+    "prev_hash": "ffcac75506dfa8c3e169c08250e676ae18c443633b2c34fdcd40b2d7f587f4d5",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 38,
+    "target": null,
+    "ts": 1792160576.8941033
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "6f613f36b4f2cc888e0a27ab5c1a813c8b8c68d300abdec349537d3ed99d269e",
+    "prev_hash": "b9cdde5c5a52229e4e4f5b53aeba05724851fd6d4a373cce2d103caecc21c4cc",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 39,
+    "target": "implement",
+    "ts": 1792160576.8941033
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "81ec169093f221359f110475e9818efa7ca2fe87a59805ee26cc696297bd656f",
+    "prev_hash": "011e3043ff5cbc855860585fcf44b60f6ea194b4b1537840f13381786a0ded03",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 41,
+    "target": "implement",
+    "ts": 1792160577.087957
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "561f897c597577c594fd9e9428d1198a7c9ec2486cf5e7ed7896490982ea9750",
+    "prev_hash": "81ec169093f221359f110475e9818efa7ca2fe87a59805ee26cc696297bd656f",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 42,
+    "target": "test",
+    "ts": 1792160577.0903246
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "test"
+      ]
+    },
+    "hash": "49ecce8bc697f914b3a817f1700a7f2d29b5b7c1af58778f883ce289d0b809cc",
+    "prev_hash": "561f897c597577c594fd9e9428d1198a7c9ec2486cf5e7ed7896490982ea9750",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 43,
+    "target": null,
+    "ts": 1792160577.0911853
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "5706e9e315a5a3febee094e7c525c7b2a0596f641a0f6621fff52001c774c0f7",
+    "prev_hash": "49ecce8bc697f914b3a817f1700a7f2d29b5b7c1af58778f883ce289d0b809cc",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 44,
+    "target": "test",
+    "ts": 1792160577.0911853
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "e50d6b8eb6f646b7a49b796a038a5ba701d33d0a27f87bb751cc1b99de1f859d",
+    "prev_hash": "7a6ce8b6c974f65bc78e219e6fe5f046ca2ab2b64906c4fd6732118e146e5208",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 46,
+    "target": "test",
+    "ts": 1792160597.8643847
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "4888d9262deeda81c8b6af0142c3cd65122ad77b11d0b5410bb7d32e762664c9",
+    "prev_hash": "e50d6b8eb6f646b7a49b796a038a5ba701d33d0a27f87bb751cc1b99de1f859d",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 47,
+    "target": "docs",
+    "ts": 1792160597.8670547
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "68583202e181cf69ff96f20fc13b96ae98d3c515d2544556a60c85b499a2f833",
+    "prev_hash": "4888d9262deeda81c8b6af0142c3cd65122ad77b11d0b5410bb7d32e762664c9",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 48,
+    "target": "threat-review",
+    "ts": 1792160597.868167
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "docs",
+        "threat-review"
+      ]
+    },
+    "hash": "a5a5bed7c1ae4f5c2905577d7b5dd7ad84fb04656186a6ce1df78819dab487d9",
+    "prev_hash": "68583202e181cf69ff96f20fc13b96ae98d3c515d2544556a60c85b499a2f833",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 49,
+    "target": null,
+    "ts": 1792160597.8695962
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "13a8fe52c0bd7f4c0aa727ff295b22bcab2ff6523681e2d02462e10ad1b5ec69",
+    "prev_hash": "a5a5bed7c1ae4f5c2905577d7b5dd7ad84fb04656186a6ce1df78819dab487d9",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 50,
+    "target": "docs",
+    "ts": 1792160597.8695962
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "27c47bc13cb2f95e424fc45b2161e74dabac550d495a71a52371ecadbf533ff7",
+    "prev_hash": "13a8fe52c0bd7f4c0aa727ff295b22bcab2ff6523681e2d02462e10ad1b5ec69",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 51,
+    "target": "threat-review",
+    "ts": 1792160597.8695962
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "b3675602faf662b7e71d18ad4553658b9695b00ea67acefb64332e445508ecd7",
+    "prev_hash": "534d2412a911e668d03341433bef678d34b02e45fe9516d234d0a40611976e09",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 53,
+    "target": "docs",
+    "ts": 1792160598.042245
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "c6cdc720c53c2b8f648bd6c51472793e2519faa3e1184347a06f0710b3342a9b",
+    "prev_hash": "ac739a761bd5efd0de188c85aa62cb131c00c365dfa2c0c8ca3305c9babcec1a",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 55,
+    "target": "threat-review",
+    "ts": 1792160598.0438883
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "81d2385acef95521ad258d77175dda0fdb3461573e4ce3a8183d3a9d84146a61",
+    "prev_hash": "c6cdc720c53c2b8f648bd6c51472793e2519faa3e1184347a06f0710b3342a9b",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 56,
+    "target": "validate",
+    "ts": 1792160598.0458999
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "validate"
+      ]
+    },
+    "hash": "77ad6d7f9e06dea8eaa094a0a49a825cea1ebd7f7aab0dc426c5215fddb7d668",
+    "prev_hash": "81d2385acef95521ad258d77175dda0fdb3461573e4ce3a8183d3a9d84146a61",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 57,
+    "target": null,
+    "ts": 1792160598.0474002
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "ad1d87703215082eafa88062397e56d92b54909993cd76167edb91144d9bf4eb",
+    "prev_hash": "77ad6d7f9e06dea8eaa094a0a49a825cea1ebd7f7aab0dc426c5215fddb7d668",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 58,
+    "target": "validate",
+    "ts": 1792160598.0474002
+  },
+  {
+    "action": "POLICY_EVALUATED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "mandatory": true,
+      "node": "validate",
+      "policy_version": "1.2.0"
+    },
+    "hash": "93b18ae7218e6d63e8e6fe45c4bf92998efa598dfb9acf052ec2c78e2b607284",
+    "prev_hash": "ad1d87703215082eafa88062397e56d92b54909993cd76167edb91144d9bf4eb",
+    "reason": "captures_personal_data == False; no personal-data markers in added code",
+    "result": "PASS",
+    "run_id": "run_1491b1c537664814",
+    "seq": 59,
+    "target": "PRIV-001",
+    "ts": 1792160598.1755776
+  },
+  {
+    "action": "POLICY_EVALUATED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "mandatory": true,
+      "node": "validate",
+      "policy_version": "1.2.0"
+    },
+    "hash": "d64fdc06199ac6f26c7034dce196dc5b43f1b673be2da5064c14d0172513edc8",
+    "prev_hash": "93b18ae7218e6d63e8e6fe45c4bf92998efa598dfb9acf052ec2c78e2b607284",
+    "reason": "open_high_threats == 0; 2 threats reviewed",
+    "result": "PASS",
+    "run_id": "run_1491b1c537664814",
+    "seq": 60,
+    "target": "SEC-002",
+    "ts": 1792160598.1755776
+  },
+  {
+    "action": "POLICY_EVALUATED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "mandatory": true,
+      "node": "validate",
+      "policy_version": "1.2.0"
+    },
+    "hash": "3f0f766b9cb45545d66fcea3cfdaf7ffd80de52f34ab34d1039a3889fc16163a",
+    "prev_hash": "d64fdc06199ac6f26c7034dce196dc5b43f1b673be2da5064c14d0172513edc8",
+    "reason": "dependency_scan_ok == True; pip-audit 2.10.1 snapshot of 2026-10-15T22:41:35.058490+00:00: 49 pinned dependencies, 0 known vulnerabilities",
+    "result": "PASS",
+    "run_id": "run_1491b1c537664814",
+    "seq": 61,
+    "target": "SEC-003",
+    "ts": 1792160598.1755776
+  },
+  {
+    "action": "POLICY_EVALUATED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "mandatory": true,
+      "node": "validate",
+      "policy_version": "1.2.0"
+    },
+    "hash": "5cf3f0004a976d93fdbd050d5cbaadc116cdda02308487b0d8d696b6daf6670d",
+    "prev_hash": "3f0f766b9cb45545d66fcea3cfdaf7ffd80de52f34ab34d1039a3889fc16163a",
+    "reason": "secret_scan_clean == True; 42 files scanned, no findings",
+    "result": "PASS",
+    "run_id": "run_1491b1c537664814",
+    "seq": 62,
+    "target": "SEC-004",
+    "ts": 1792160598.1755776
+  },
+  {
+    "action": "POLICY_EVALUATED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "mandatory": true,
+      "node": "validate",
+      "policy_version": "1.2.0"
+    },
+    "hash": "e5cf450d7eef432ca7c663453ca1191811754ba0ef9d3d9261e53134fb202e7b",
+    "prev_hash": "5cf3f0004a976d93fdbd050d5cbaadc116cdda02308487b0d8d696b6daf6670d",
+    "reason": "tests_passed == True; 64 tests, 0 failures, 0 errors",
+    "result": "PASS",
+    "run_id": "run_1491b1c537664814",
+    "seq": 63,
+    "target": "REL-001",
+    "ts": 1792160598.1755776
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "6c8949c3a6a6757717bfcc84be2c4a37ab8d807c06564e21534c5dfad88ce7ac",
+    "prev_hash": "e5cf450d7eef432ca7c663453ca1191811754ba0ef9d3d9261e53134fb202e7b",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 64,
+    "target": "validate",
+    "ts": 1792160598.1755776
+  },
+  {
+    "action": "GATE_OPENED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "bound": {
+        "docs": 1,
+        "test-results": 1,
+        "threat-review": 1
+      },
+      "deadline": 1792246998.1775792,
+      "kind": "approval",
+      "options": {},
+      "roles": [
+        "release-owner"
+      ]
+    },
+    "hash": "a9afc382a0e9c17161d262747f5766300fc4d55092ba93da0613a5ad390b3c24",
+    "prev_hash": "6c8949c3a6a6757717bfcc84be2c4a37ab8d807c06564e21534c5dfad88ce7ac",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 65,
+    "target": "approve-release",
+    "ts": 1792160598.1775792
+  },
+  {
+    "action": "RUN_AWAITING_APPROVAL",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "45363c64bcf8c16d0dbe537f94891e61cb9c3fdb708ff07d4c74a6477ec468fa",
+    "prev_hash": "a9afc382a0e9c17161d262747f5766300fc4d55092ba93da0613a5ad390b3c24",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 66,
+    "target": null,
+    "ts": 1792160598.1797206
+  },
+  {
+    "action": "GATE_APPROVED",
+    "actor_id": "2788b911e283",
+    "actor_type": "human",
+    "data": {
+      "bound": {
+        "docs": 1,
+        "test-results": 1,
+        "threat-review": 1
+      },
+      "choice": "approve",
+      "decision_id": "dec_dda2b06118c243af",
+      "role": "release-owner"
+    },
+    "hash": "ce75c4d254f8ede8f7c48d76606529fecedf96feb80826068448c86c3f05eda6",
+    "prev_hash": "45363c64bcf8c16d0dbe537f94891e61cb9c3fdb708ff07d4c74a6477ec468fa",
+    "reason": "Tests red then green (64 passed, 0 failed), threat review has no open high threats, all policy checks passed, docs updated. Release approved.",
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 67,
+    "target": "approve-release",
+    "ts": 1792160670.715795
+  },
+  {
+    "action": "NODE_READY",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "edb7ba1dd837250f439499a72ce21560ee3139e5ebae9ae1ce9e81f6c0b879b7",
+    "prev_hash": "ce75c4d254f8ede8f7c48d76606529fecedf96feb80826068448c86c3f05eda6",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 68,
+    "target": "release",
+    "ts": 1792160670.7205858
+  },
+  {
+    "action": "STEP_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "nodes": [
+        "release"
+      ]
+    },
+    "hash": "f454c87e9084d7b23465bfc0e2aeb6b1575bbac81d62c471e108214ff1091b81",
+    "prev_hash": "edb7ba1dd837250f439499a72ce21560ee3139e5ebae9ae1ce9e81f6c0b879b7",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 69,
+    "target": null,
+    "ts": 1792160670.721943
+  },
+  {
+    "action": "NODE_STARTED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1
+    },
+    "hash": "0ddccc34cf398cb34614aaf3fde7589a61569e274b6abc37b20c6f23acb78fe4",
+    "prev_hash": "f454c87e9084d7b23465bfc0e2aeb6b1575bbac81d62c471e108214ff1091b81",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 70,
+    "target": "release",
+    "ts": 1792160670.721943
+  },
+  {
+    "action": "NODE_SUCCEEDED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "attempt": 1,
+      "degraded": false
+    },
+    "hash": "64b141c16e9d217dd9599a7d98a1b0dd77174805dc8bf0862a963665153d85d1",
+    "prev_hash": "0b362a99482186526b4cb2d0df454aa0870005a549976dce7d5e1a68e38344b5",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 72,
+    "target": "release",
+    "ts": 1792160670.8559046
+  },
+  {
+    "action": "RUN_COMPLETED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {},
+    "hash": "6c71feec5c0a864bf71bd27f229440098167f524e9e37b7a6936c404e761fde8",
+    "prev_hash": "64b141c16e9d217dd9599a7d98a1b0dd77174805dc8bf0862a963665153d85d1",
+    "reason": null,
+    "result": "ok",
+    "run_id": "run_1491b1c537664814",
+    "seq": 73,
+    "target": null,
+    "ts": 1792160670.8582592
+  },
+  {
+    "action": "SUMMARY_PRODUCED",
+    "actor_id": null,
+    "actor_type": "system",
+    "data": {
+      "version": 1
+    },
+    "hash": "8a9aecd26646e9ef90c4356145437e2d4a271b020ba21e874b4ab980354cbc3e",
+    "prev_hash": "6c71feec5c0a864bf71bd27f229440098167f524e9e37b7a6936c404e761fde8",
+    "reason": "all stages succeeded and every gate was decided by a human (approve-design by approver key 63320c4d1c94; approve-release by release-owner key 2788b911e283)",
+    "result": "COMPLETED",
+    "run_id": "run_1491b1c537664814",
+    "seq": 74,
+    "target": "engineering-summary",
+    "ts": 1792160670.8592682
+  }
+]

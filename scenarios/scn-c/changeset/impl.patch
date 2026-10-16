@@ -1,0 +1,177 @@
+diff --git a/specs/001-agentic-sdlc-url-shortener/contracts/shortener-api.openapi.yaml b/specs/001-agentic-sdlc-url-shortener/contracts/shortener-api.openapi.yaml
+--- a/specs/001-agentic-sdlc-url-shortener/contracts/shortener-api.openapi.yaml
++++ b/specs/001-agentic-sdlc-url-shortener/contracts/shortener-api.openapi.yaml
+@@ -17,6 +17,21 @@
+       required:
+       - url
+       title: CreateLink
++      type: object
++    DailyStatsOut:
++      properties:
++        code:
++          title: Code
++          type: string
++        days:
++          additionalProperties:
++            type: integer
++          title: Days
++          type: object
++      required:
++      - code
++      - days
++      title: DailyStatsOut
+       type: object
+     HTTPValidationError:
+       properties:
+@@ -153,7 +168,7 @@
+       type: object
+ info:
+   title: URL Shortener
+-  version: 2.0.0
++  version: 2.1.0
+ openapi: 3.1.0
+ paths:
+   /api/v1/links:
+@@ -299,6 +314,66 @@
+             application/problem+json: {}
+           description: Service Unavailable
+       summary: Link Stats
++  /api/v1/links/{code}/stats/daily:
++    get:
++      operationId: link_daily_stats_api_v1_links__code__stats_daily_get
++      parameters:
++      - in: path
++        name: code
++        required: true
++        schema:
++          title: Code
++          type: string
++      - in: header
++        name: x-api-key
++        required: false
++        schema:
++          anyOf:
++          - type: string
++          - type: 'null'
++          title: X-Api-Key
++      responses:
++        '200':
++          content:
++            application/json:
++              schema:
++                $ref: '#/components/schemas/DailyStatsOut'
++          description: Successful Response
++        '401':
++          content:
++            application/json:
++              schema:
++                $ref: '#/components/schemas/Problem'
++            application/problem+json: {}
++          description: Unauthorized
++        '403':
++          content:
++            application/json:
++              schema:
++                $ref: '#/components/schemas/Problem'
++            application/problem+json: {}
++          description: Forbidden
++        '404':
++          content:
++            application/json:
++              schema:
++                $ref: '#/components/schemas/Problem'
++            application/problem+json: {}
++          description: Not Found
++        '422':
++          content:
++            application/json:
++              schema:
++                $ref: '#/components/schemas/HTTPValidationError'
++          description: Validation Error
++        '503':
++          content:
++            application/json:
++              schema:
++                $ref: '#/components/schemas/Problem'
++            application/problem+json: {}
++          description: Service Unavailable
++      summary: Link Daily Stats
+   /health/live:
+     get:
+       operationId: live_health_live_get
+diff --git a/src/shortener/app.py b/src/shortener/app.py
+--- a/src/shortener/app.py
++++ b/src/shortener/app.py
+@@ -36,7 +36,7 @@
+ Clock = Callable[[], datetime]
+ PROBLEM = "application/problem+json"
+ REQUEST_ID = re.compile(r"^[A-Za-z0-9._-]{1,64}$")
+-API_VERSION = "2.0.0"
++API_VERSION = "2.1.0"
+ 
+ 
+ class JsonFormatter(logging.Formatter):
+@@ -78,6 +78,11 @@
+     code: str
+     clicks: int
+     last_click_at: str | None
++
++
++class DailyStatsOut(BaseModel):
++    code: str
++    days: dict[str, int]
+ 
+ 
+ class Problem(BaseModel):
+@@ -268,6 +273,18 @@
+         return StatsOut(code=code, clicks=row["clicks"] if row else 0,
+                         last_click_at=row["last_click_at"] if row else None)
+ 
++    @app.get("/api/v1/links/{code}/stats/daily", response_model=DailyStatsOut,
++             responses=_responses(401, 403, 404, 503))
++    def link_daily_stats(code: str, _: Annotated[str, Depends(require_key)]) -> DailyStatsOut:
++        try:
++            link = store.get(code) if codes.CODE_PATTERN.match(code) else None
++            rows = store.daily(code) if link else []
++        except sqlite3.Error:
++            raise unavailable() from None
++        if link is None:
++            raise ProblemError(404, "not_found", "Not found")
++        return DailyStatsOut(code=code, days={row["day"]: row["clicks"] for row in rows})
++
+     @app.get("/health/live", response_model=LiveOut)
+     def live() -> LiveOut:
+         return LiveOut(status="ok")
+diff --git a/src/shortener/store.py b/src/shortener/store.py
+--- a/src/shortener/store.py
++++ b/src/shortener/store.py
+@@ -21,6 +21,8 @@
+ CREATE TABLE IF NOT EXISTS idempotency (
+     key_id TEXT, idem_key TEXT, fingerprint TEXT, response TEXT, created_at TEXT,
+     PRIMARY KEY (key_id, idem_key));
++CREATE TABLE IF NOT EXISTS link_daily_stats (
++    code TEXT, day TEXT, clicks INTEGER NOT NULL, PRIMARY KEY (code, day));
+ """
+ 
+ 
+@@ -85,12 +87,20 @@
+             conn.execute(
+                 "INSERT INTO link_stats VALUES (?, 1, ?) ON CONFLICT(code) DO UPDATE SET "
+                 "clicks = clicks + 1, last_click_at = excluded.last_click_at", (code, at))
++            conn.execute(
++                "INSERT INTO link_daily_stats VALUES (?, ?, 1) ON CONFLICT(code, day) DO UPDATE SET "
++                "clicks = clicks + 1", (code, at[:10]))
+ 
+     def stats(self, code: str) -> sqlite3.Row | None:
+         with closing(self._connect()) as conn:
+             return conn.execute("SELECT clicks, last_click_at FROM link_stats WHERE code = ?",
+                                 (code,)).fetchone()
+ 
++    def daily(self, code: str) -> list[sqlite3.Row]:
++        with closing(self._connect()) as conn:
++            return conn.execute("SELECT day, clicks FROM link_daily_stats WHERE code = ? ORDER BY day",
++                                (code,)).fetchall()
++
+     def ping(self) -> None:
+         with closing(self._connect()) as conn:
+             conn.execute("SELECT 1 FROM links LIMIT 1").fetchall()

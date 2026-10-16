@@ -1,3 +1,7 @@
+"""Retry, timeout, fallback, rollback, compensation, safe-stop and resume.
+
+Verifies: FR-ORC-014..019, PVT-004 (at most 3 attempts with backoff).
+"""
 import time
 
 import pytest

@@ -1,4 +1,7 @@
-"""Typed settings with secure defaults; environment overrides for `orch serve`."""
+"""Typed settings with secure defaults; environment overrides for `orch serve`.
+
+Satisfies: FR-SHR-004 (self-referential host), FR-SHR-017 (rate limit), PVT-010, PVT-011.
+"""
 from __future__ import annotations
 
 import os

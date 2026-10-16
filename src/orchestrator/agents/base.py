@@ -1,4 +1,7 @@
-"""Agent contract: `agent(ctx: dict) -> dict` returning {"artifacts": {...}, "facts": {...}}."""
+"""Agent contract: `agent(ctx: dict) -> dict` returning {"artifacts": {...}, "facts": {...}}.
+
+Satisfies: FR-ORC-027 (one agent interface; deterministic mode only).
+"""
 from __future__ import annotations
 
 

@@ -1,0 +1,43 @@
+diff --git a/tests/shortener/test_link_details.py b/tests/shortener/test_link_details.py
+new file mode 100644
+--- /dev/null
++++ b/tests/shortener/test_link_details.py
+@@ -0,0 +1,38 @@
++"""SCN-A (HD-SCN-001): link details endpoint GET /api/v1/links/{code}."""
++DEST = "https://example.com/details"
++
++
++def _details(svc, c, code, key="consumer"):
++    return c.get(f"/api/v1/links/{code}", headers={"X-API-Key": svc.keys[key]} if key else {})
++
++
++def test_details_of_an_active_link(svc):
++    c = svc.client()
++    created = svc.create(c, DEST, expires_at="2026-10-17T12:00:00Z").json()
++    r = _details(svc, c, created["code"])
++    assert r.status_code == 200
++    assert r.json() == {"code": created["code"], "destination": DEST, "created_at": created["created_at"],
++                        "expires_at": "2026-10-17T12:00:00Z", "active": True}
++
++
++def test_expired_link_details_stay_readable_and_inactive(svc):
++    c = svc.client()
++    code = svc.create(c, DEST, expires_at="2026-10-16T13:00:00Z").json()["code"]
++    svc.clock.advance(hours=2)
++    r = _details(svc, c, code)
++    assert r.status_code == 200 and r.json()["active"] is False
++
++
++def test_details_require_a_human_api_key(svc):
++    c = svc.client()
++    code = svc.create(c, DEST).json()["code"]
++    assert _details(svc, c, code, key=None).status_code == 401
++    assert _details(svc, c, code, key="agent").status_code == 403
++
++
++def test_other_keys_and_unknown_codes_get_404(svc):
++    c = svc.client()
++    code = svc.create(c, DEST).json()["code"]
++    other = _details(svc, c, code, key="consumer#2")
++    assert other.status_code == 404 and other.json()["code"] == "not_found"
++    assert _details(svc, c, "zzzzzzz").status_code == 404

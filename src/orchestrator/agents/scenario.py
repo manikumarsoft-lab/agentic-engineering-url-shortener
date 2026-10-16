@@ -4,6 +4,9 @@ Each agent reads only its declared inputs, the run's isolated workspace and the 
 scenario files. Change sets are applied, never generated: the agents verify the human lock,
 apply the test patch, record the failing (red) result, apply the implementation patch and run
 the new tests plus the full shortener regression suite (green).
+
+Satisfies: FR-ORC-002, FR-ORC-003, FR-ORC-004, FR-ORC-009, FR-ORC-010, FR-ORC-012, FR-ORC-032..036,
+FR-ORC-040..042, FR-GOV-010, FR-GOV-012, SCN-A-AC1, SCN-B-AC1, SCN-C-AC1 (lean slice, HD-SCN-001).
 """
 from __future__ import annotations
 
@@ -13,14 +16,19 @@ import json
 import os
 import re
 import shutil
+import sqlite3
 import subprocess
 import sys
+import tomllib
 import xml.etree.ElementTree as ET
+from contextlib import closing
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 import yaml
 
+from orchestrator import security_scan
 from orchestrator.agents.base import AgentError
 
 Ctx = dict[str, Any]
@@ -217,7 +225,8 @@ def quality_check(ctx: Ctx) -> dict:
     report = {"checks": checks, "items": items, "material_failures": material,
               "clarification_required": bool(material), "reason": reason}
     return {"artifacts": {"quality-report": report},
-            "facts": {"clarification_needed": bool(material), "quality_reason": reason}}
+            "facts": {"clarification_needed": bool(material), "quality_reason": reason,
+                      "captures_personal_data": bool(personal)}}
 
 
 def select_change_set(ctx: Ctx) -> dict:
@@ -388,6 +397,19 @@ def _response_fields(spec: dict[str, Any], op: dict[str, Any]) -> set[str]:
     return set(spec.get("components", {}).get("schemas", {}).get(ref.split("/")[-1], {}).get("properties", {}))
 
 
+def _handler_source(app_src: str, op_id: str) -> str:
+    """Source of the route handler registered for `op_id` (e.g. 'GET /api/v1/links/{code}')."""
+    method, path = op_id.split(" ", 1)
+    for node in ast.walk(ast.parse(app_src)):
+        if isinstance(node, ast.FunctionDef):
+            for dec in node.decorator_list:
+                if isinstance(dec, ast.Call) and isinstance(dec.func, ast.Attribute) \
+                        and dec.func.attr == method.lower() and dec.args \
+                        and isinstance(dec.args[0], ast.Constant) and dec.args[0].value == path:
+                    return ast.get_source_segment(app_src, node) or ""
+    return ""
+
+
 def threat_review(ctx: Ctx) -> dict:
     """STRIDE-lite review of the new interfaces against the baseline contract."""
     ws = Path(ctx["workspace"])
@@ -400,7 +422,7 @@ def threat_review(ctx: Ctx) -> dict:
     for op_id in new_ops:
         fields = _response_fields(after, _operations(after)[op_id])
         if "destination" in fields:
-            owner_check = "creator_key_id" in app_src
+            owner_check = "creator_key_id" in _handler_source(app_src, op_id)
             threats.append({"id": "TH-1", "category": "Information disclosure", "interface": op_id,
                             "severity": "high", "status": "mitigated" if owner_check else "open",
                             "detail": "any valid API key can read the destination and timestamps of any link"
@@ -423,15 +445,34 @@ def threat_review(ctx: Ctx) -> dict:
 
 
 def validate_release(ctx: Ctx) -> dict:
-    """Collect the facts the release policy checks evaluate (PRIV-001, SEC-002, REL-001)."""
+    """Facts for the release policy checks: PRIV-001, SEC-002, SEC-003 (pip-audit snapshot),
+    SEC-004 (secret scan) and REL-001. Every fact carries its evidence in `<fact>_detail`."""
     path, _, manifest = _changeset(ctx)
+    ws = Path(ctx["workspace"])
     added = [line for line in _lf(path / manifest["impl_patch"]).splitlines()
              if line.startswith("+") and not line.startswith("+++")]
     pii = sorted({m.group(0).lower() for line in added for m in PII_CODE.finditer(line)})
     results, threats = ctx["inputs"]["test-results"], ctx["inputs"]["threat-review"]
-    return {"facts": {"captures_personal_data": bool(pii), "personal_data_markers": pii,
-                      "open_high_threats": threats["open_high_threats"],
-                      "tests_passed": results["failures"] == 0 and results["errors"] == 0}}
+    if ctx["facts"].get("fault_injection") == "scanner_unavailable":
+        scan_ok, scan = False, "dependency scanner unavailable (injected fault): no evidence, never PASS"
+    else:
+        deps = lambda p: tomllib.loads(_lf(p))["project"]["dependencies"]  # noqa: E731
+        audit = security_scan.check_snapshot(_root(ctx))
+        unchanged = deps(ws / "pyproject.toml") == deps(_root(ctx) / "pyproject.toml")
+        scan_ok = audit["ok"] and unchanged
+        scan = audit["reason"] + ("" if unchanged else "; the change set alters dependencies")
+    secrets = security_scan.secret_scan(ws, security_scan.tree_files(ws, ["src", "tests"]))
+    secret_detail = (f"{secrets['files_scanned']} files scanned, no findings" if secrets["clean"] else
+                     "findings: " + ", ".join(f"{f['file']}:{f['line']} ({f['rule']})" for f in secrets["findings"]))
+    return {"facts": {
+        "captures_personal_data": bool(pii),
+        "captures_personal_data_detail": f"markers in added code: {pii}" if pii else "no personal-data markers in added code",
+        "open_high_threats": threats["open_high_threats"],
+        "open_high_threats_detail": f"{len(threats['threats'])} threats reviewed",
+        "dependency_scan_ok": scan_ok, "dependency_scan_ok_detail": scan,
+        "secret_scan_clean": secrets["clean"], "secret_scan_clean_detail": secret_detail,
+        "tests_passed": results["failures"] == 0 and results["errors"] == 0,
+        "tests_passed_detail": f"{results['tests']} tests, {results['failures']} failures, {results['errors']} errors"}}
 
 
 def release(ctx: Ctx) -> dict:
@@ -449,30 +490,136 @@ def release(ctx: Ctx) -> dict:
                                       "note": "local release snapshot; merging into the repository is a human action"}}}
 
 
-def summarize(ctx: Ctx) -> dict:
-    """Final engineering summary (FR-ORC-026) built from the run's own artifacts."""
-    i, f = ctx["inputs"], ctx["facts"]
-    red, green = i.get("test-red") or {}, i.get("test-results") or {}
-    threats = (i.get("threat-review") or {}).get("threats", [])
-    design_ = i.get("design") or {}
-    return {"artifacts": {"engineering-summary": {
-        "scenario": ctx["params"].get("scenario"),
-        "plan_and_rationale": {"requirement": (i.get("normalized-requirement") or {}).get("title"),
-                               "approach": design_.get("approach"),
-                               "tasks": len((i.get("task-plan") or {}).get("tasks", [])),
-                               "impact_analysis": bool(i.get("impact-analysis"))},
-        "artifacts": sorted(k for k, v in i.items() if v),
-        "risks": [f"{t['id']} {t['category']} ({t['severity']}, {t['status']})" for t in threats],
-        "trade_offs": ["deterministic rule-based agents apply human-locked change sets instead of generating code",
-                       "release is a local snapshot; merging into the repository stays a manual human action"],
-        "validation_results": {"red": {k: red.get(k) for k in ("tests", "failures", "errors")},
-                               "green": {k: green.get(k) for k in ("tests", "failures", "errors")},
-                               "policy_facts": {k: f.get(k) for k in ("captures_personal_data",
-                                                                      "open_high_threats", "tests_passed")}},
-        "assumptions": ["change set applies to the current working-tree baseline"],
-        "limitations": ["metrics are demonstration data", "see docs/scope/lean-slice.md section 2"]}}}
+# ---- local staging: promotion, smoke check, compensation, corrective action ---------------------
+SMOKE = r'''
+import json, sqlite3, sys, time
+from pathlib import Path
+from fastapi.testclient import TestClient
+from common import apikeys
+from shortener.app import create_app
+from shortener.config import Settings
+db, keys_db, mode = sys.argv[1], sys.argv[2], sys.argv[3]
+conn = sqlite3.connect(keys_db, isolation_level=None)
+conn.execute(apikeys.SCHEMA)
+key = apikeys.insert(conn, "consumer", "staging smoke", time.time())[1]
+conn.close()
+c = TestClient(create_app(Settings(db_path=Path(db), keys_db_path=Path(keys_db))), follow_redirects=False)
+checks = {"ready": c.get("/health/ready").status_code == 200}
+if mode == "traffic":
+    for i in range(2):
+        alias = f"smk{int(time.time() * 1000) % 10**6:06d}{i}"
+        r = c.post("/api/v1/links", json={"url": f"https://example.com/smoke/{i}", "alias": alias},
+                   headers={"X-API-Key": key})
+        checks[f"alias_create_{i}"] = r.status_code == 201
+        checks[f"alias_redirect_{i}"] = r.status_code == 201 and c.get("/" + alias).status_code == 302
+print(json.dumps(checks))
+'''
+
+
+def _staging(ctx: Ctx) -> Path:
+    return Path(ctx["var_dir"]) / "staging"
+
+
+def _state(staging: Path) -> dict[str, Any]:
+    path = staging / "state.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"active": None, "history": []}
+
+
+def _save_state(staging: Path, state: dict[str, Any]) -> None:
+    staging.mkdir(parents=True, exist_ok=True)
+    (staging / "state.json").write_text(json.dumps(state, indent=2), encoding="utf-8")
+
+
+def _install_release(src_root: Path, dest: Path) -> None:
+    for pkg in ("shortener", "common"):
+        target = dest / "src" / pkg
+        if target.exists():
+            shutil.rmtree(target)
+        shutil.copytree(src_root / "src" / pkg, target, ignore=shutil.ignore_patterns("__pycache__"))
+
+
+def _smoke(staging: Path, release_id: str, mode: str) -> dict[str, bool]:
+    env = {k: v for k, v in os.environ.items() if not k.startswith("ORCH_")}
+    env["PYTHONPATH"] = str(staging / "releases" / release_id / "src")
+    proc = subprocess.run([sys.executable, "-c", SMOKE, str(staging / "shortener.db"), str(staging / "keys.db"), mode],
+                          env=env, capture_output=True, text=True, timeout=120)
+    if proc.returncode != 0:
+        return {"smoke_process": False}
+    return json.loads(proc.stdout.strip().splitlines()[-1])
+
+
+def promote(ctx: Ctx) -> dict:
+    """Promote the tested workspace to the local staging release (after the human release decision)."""
+    staging = _staging(ctx)
+    state = _state(staging)
+    if state["active"] is None:  # first use: the baseline is the release in service
+        _install_release(_root(ctx), staging / "releases" / "baseline")
+        state = {"active": "baseline", "history": [{"release": "baseline", "event": "bootstrap"}]}
+    release_id = f"rel_{ctx['run_id'][4:]}"
+    _install_release(Path(ctx["workspace"]), staging / "releases" / release_id)
+    promoted_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    previous = state["active"]
+    state["active"] = release_id
+    state["history"].append({"release": release_id, "event": "promoted", "previous": previous,
+                             "at": promoted_at, "run_id": ctx["run_id"]})
+    _save_state(staging, state)
+    return {"artifacts": {"release": {"release_id": release_id, "previous_release": previous,
+                                      "promoted_at": promoted_at, "staging": str(staging)}},
+            "facts": {"promoted_release": release_id, "previous_release": previous, "promoted_at": promoted_at}}
+
+
+def smoke_check(ctx: Ctx) -> dict:
+    """Post-promotion smoke check against staging; it also serves real traffic (alias creation)."""
+    staging = _staging(ctx)
+    checks = _smoke(staging, _state(staging)["active"], "traffic")
+    if ctx["facts"].get("fault_injection") == "smoke_fail":
+        checks["injected_post_promotion_check"] = False  # labelled fault-injection run only
+    if not all(checks.values()):
+        raise AgentError("smoke_failed", "post-promotion smoke check failed",
+                         {"phase": "post-promotion", "checks": checks})
+    return {"artifacts": {"smoke-result": {"passed": True, "checks": checks}}, "facts": {"smoke_passed": True}}
+
+
+def restore_previous_release(ctx: Ctx) -> dict:
+    """Compensation (post-promotion): re-activate the previous release, verify it, and list the
+    effects that cannot be rolled back (links created while the failed release was live)."""
+    staging = _staging(ctx)
+    state = _state(staging)
+    failed, previous, promoted_at = state["active"], ctx["facts"]["previous_release"], ctx["facts"]["promoted_at"]
+    state["active"] = previous
+    state["history"].append({"release": previous, "event": "re-promoted (compensation)", "replaced": failed,
+                             "at": datetime.now(timezone.utc).isoformat()})
+    _save_state(staging, state)
+    verify = _smoke(staging, previous, "verify")
+    if not all(verify.values()):
+        raise AgentError("previous_release_smoke_failed", "the previous release failed verification",
+                         {"checks": verify})
+    with closing(sqlite3.connect(staging / "shortener.db")) as conn:
+        rows = conn.execute("SELECT code, created_at FROM links WHERE created_at >= ? ORDER BY code",
+                            (promoted_at,)).fetchall()
+    return {"artifacts": {"compensation-record": {
+        "phase": "post-promotion", "failed_release": failed, "restored_release": previous,
+        "promoted_at": promoted_at, "previous_release_verified": verify,
+        "non_rollbackable_effects": [{"code": c, "created_at": t} for c, t in rows],
+        "proposed_corrective_action": "disable the listed links (moved to links_quarantine, reversible)"}}}
+
+
+def disable_effects(ctx: Ctx) -> dict:
+    """Human-approved corrective action: quarantine links created while the failed release was live."""
+    record = ctx["inputs"]["compensation-record"]
+    codes_ = [e["code"] for e in record["non_rollbackable_effects"]]
+    with closing(sqlite3.connect(_staging(ctx) / "shortener.db", isolation_level=None)) as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        conn.execute("CREATE TABLE IF NOT EXISTS links_quarantine AS SELECT * FROM links WHERE 0")
+        for code in codes_:
+            conn.execute("INSERT INTO links_quarantine SELECT * FROM links WHERE code = ?", (code,))
+            conn.execute("DELETE FROM links WHERE code = ?", (code,))
+        conn.execute("COMMIT")
+    return {"artifacts": {"corrective-action": {"disabled": codes_, "table": "links_quarantine",
+                                                "reversible": True, "audit_records_altered": False}}}
 
 
 AGENTS = {fn.__name__: fn for fn in (ingest, normalize, quality_check, select_change_set, decompose,
                                        impact_analysis, design, apply_tests, apply_impl, run_tests,
-                                       write_docs, threat_review, validate_release, release, summarize)}
+                                       write_docs, threat_review, validate_release, release, promote,
+                                       smoke_check, restore_previous_release, disable_effects)}

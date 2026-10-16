@@ -1,0 +1,88 @@
+diff --git a/specs/001-agentic-sdlc-url-shortener/contracts/shortener-api.openapi.yaml b/specs/001-agentic-sdlc-url-shortener/contracts/shortener-api.openapi.yaml
+--- a/specs/001-agentic-sdlc-url-shortener/contracts/shortener-api.openapi.yaml
++++ b/specs/001-agentic-sdlc-url-shortener/contracts/shortener-api.openapi.yaml
+@@ -5,6 +5,11 @@
+     CreateLink:
+       additionalProperties: false
+       properties:
++        alias:
++          anyOf:
++          - type: string
++          - type: 'null'
++          title: Alias
+         expires_at:
+           anyOf:
+           - format: date-time
+@@ -153,7 +158,7 @@
+       type: object
+ info:
+   title: URL Shortener
+-  version: 2.0.0
++  version: 2.1.0
+ openapi: 3.1.0
+ paths:
+   /api/v1/links:
+diff --git a/src/shortener/app.py b/src/shortener/app.py
+--- a/src/shortener/app.py
++++ b/src/shortener/app.py
+@@ -36,7 +36,8 @@
+ Clock = Callable[[], datetime]
+ PROBLEM = "application/problem+json"
+ REQUEST_ID = re.compile(r"^[A-Za-z0-9._-]{1,64}$")
+-API_VERSION = "2.0.0"
++API_VERSION = "2.1.0"
++RESERVED_ALIASES = frozenset({"api", "health", "docs", "openapi", "redoc", "static", "admin"})
+ 
+ 
+ class JsonFormatter(logging.Formatter):
+@@ -64,6 +65,7 @@
+     model_config = ConfigDict(extra="forbid")
+     url: str
+     expires_at: datetime | None = None
++    alias: str | None = None
+ 
+ 
+ class LinkOut(BaseModel):
+@@ -223,6 +225,12 @@
+                                        max_length=settings.max_url_length)
+         except InvalidURL as err:
+             raise ProblemError(422, err.code, "Invalid URL", err.detail) from None
++        if body.alias is not None:
++            if not codes.CODE_PATTERN.match(body.alias):
++                raise ProblemError(422, "alias_invalid", "Invalid alias",
++                                   "an alias is 4 to 10 letters or digits")
++            if body.alias.lower() in RESERVED_ALIASES:
++                raise ProblemError(422, "alias_reserved", "Reserved alias", "this alias is reserved")
+         now = clock()
+         expires_at = None
+         if body.expires_at is not None:
+@@ -233,7 +241,8 @@
+                 raise ProblemError(422, "invalid_expiration", "Invalid expiration",
+                                    "expires_at must be in the future")
+             expires_at = _iso(body.expires_at)
+-        fingerprint = hashlib.sha256(json.dumps([body.url, expires_at]).encode()).hexdigest()
++        request_parts = [body.url, expires_at] + ([body.alias] if body.alias else [])
++        fingerprint = hashlib.sha256(json.dumps(request_parts).encode()).hexdigest()
+         created_at = _iso(now)
+         render = lambda code: LinkOut(  # noqa: E731
+             code=code, short_url=f"{settings.public_base_url}/{code}", destination=destination,
+@@ -241,13 +250,17 @@
+         try:
+             status, out = store.create(
+                 key_id=key_id, destination=destination, created_at=created_at, expires_at=expires_at,
+-                idem_key=idempotency_key, fingerprint=fingerprint, new_code=make_code,
+-                attempts=settings.max_code_attempts, render=render)
++                idem_key=idempotency_key, fingerprint=fingerprint,
++                new_code=(lambda: body.alias) if body.alias else make_code,
++                attempts=1, render=render)
+         except sqlite3.Error:
+             raise unavailable() from None
+         if status == "conflict":
+             raise ProblemError(409, "idempotency_conflict", "Idempotency conflict",
+                                "this Idempotency-Key was used with a different request")
++        if status == "exhausted" and body.alias:
++            raise ProblemError(409, "alias_conflict", "Alias already in use",
++                               "the alias is taken; the existing link is unchanged")
+         if status == "exhausted":
+             raise ProblemError(503, "code_generation_exhausted", "Service unavailable",
+                                "could not allocate a unique code; retry later")

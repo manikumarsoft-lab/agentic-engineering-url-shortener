@@ -1,0 +1,42 @@
+diff --git a/tests/shortener/test_daily_stats.py b/tests/shortener/test_daily_stats.py
+new file mode 100644
+--- /dev/null
++++ b/tests/shortener/test_daily_stats.py
+@@ -0,0 +1,37 @@
++"""SCN-C option A: daily aggregate click counts per link (UTC), no personal data."""
++import sqlite3
++
++DEST = "https://example.com/daily"
++
++
++def _daily(svc, c, code, key="consumer"):
++    return c.get(f"/api/v1/links/{code}/stats/daily", headers={"X-API-Key": svc.keys[key]} if key else {})
++
++
++def test_clicks_are_counted_per_utc_day(svc):
++    c = svc.client()
++    code = svc.create(c, DEST).json()["code"]
++    c.get(f"/{code}")
++    c.get(f"/{code}")
++    svc.clock.advance(days=1)
++    c.get(f"/{code}")
++    r = _daily(svc, c, code)
++    assert r.status_code == 200
++    assert r.json() == {"code": code, "days": {"2026-10-16": 2, "2026-10-17": 1}}
++
++
++def test_daily_counts_store_no_personal_data(svc):
++    c = svc.client()
++    code = svc.create(c, DEST).json()["code"]
++    c.get(f"/{code}", headers={"User-Agent": "ua-marker", "X-Forwarded-For": "198.51.100.7"})
++    db = sqlite3.connect(svc.settings.db_path)
++    columns = [row[1] for row in db.execute("PRAGMA table_info(link_daily_stats)")]
++    assert columns == ["code", "day", "clicks"]
++    assert "ua-marker" not in str(db.execute("SELECT * FROM link_daily_stats").fetchall())
++
++
++def test_daily_stats_need_a_key_and_a_known_code(svc):
++    c = svc.client()
++    code = svc.create(c, DEST).json()["code"]
++    assert _daily(svc, c, code, key=None).status_code == 401
++    assert _daily(svc, c, "zzzzzzz").status_code == 404

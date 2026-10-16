@@ -39,15 +39,17 @@ class PolicySet:
         results = []
         for cid in check_ids:
             check = self.checks[cid]
+            detail = facts.get(f"{check.fact}_detail")  # evidence the agent recorded for this fact
+            suffix = f"; {detail}" if detail else ""
             if check.fact not in facts:
                 results.append(Evaluation(cid, "NOT-APPLICABLE", check.mandatory,
                                           f"fact '{check.fact}' not present"))
             elif facts[check.fact] == check.expect:
                 results.append(Evaluation(cid, "PASS", check.mandatory,
-                                          f"{check.fact} == {check.expect!r}"))
+                                          f"{check.fact} == {check.expect!r}{suffix}"))
             else:
                 results.append(Evaluation(cid, "FAIL", check.mandatory,
-                                          f"{check.fact} = {facts[check.fact]!r}, expected {check.expect!r}"))
+                                          f"{check.fact} = {facts[check.fact]!r}, expected {check.expect!r}{suffix}"))
         return results
 
 

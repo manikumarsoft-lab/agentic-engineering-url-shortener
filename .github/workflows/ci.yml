@@ -1,0 +1,30 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install pinned dependencies and the project
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.lock
+          python -m pip install --no-deps -e .
+
+      - name: Tests (full suite, including the POSIX process-kill test)
+        run: python -m pytest -ra
+
+      - name: Traceability check
+        run: python tools/trace_check.py
+
+      - name: Dependency audit (live pip-audit)
+        run: python -m pip_audit -r requirements.lock --no-deps --disable-pip --progress-spinner off

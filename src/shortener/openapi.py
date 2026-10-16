@@ -1,6 +1,8 @@
 """Generate the shortener OpenAPI contract from the app: `python -m shortener.openapi [path]`.
 
 The generated file is the single source of the contract (CR-007). Never edit it by hand.
+
+Satisfies: CST-003 (API contract deliverable), CR-007.
 """
 from __future__ import annotations
 

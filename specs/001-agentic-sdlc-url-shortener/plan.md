@@ -200,19 +200,19 @@ analytics; SCN-B adds custom aliases; SCN-C (conforming option) adds daily aggre
 
 ### 2.2 Contract deliverables (see [contracts/README.md](./contracts/README.md))
 
-| Contract | File | Version | Owner |
-|----------|------|---------|-------|
-| Shortener HTTP API | `contracts/shortener-api.openapi.yaml` | 1.0.0 (baseline) | Human owner (API owner role) |
-| Orchestrator HTTP API | `contracts/orchestrator-api.openapi.yaml` | 2.1.0 (CR-003) | Human owner |
-| Workflow graph definition | `contracts/workflow-graph.v2.yaml` | 2.1.0 (CR-003) | Human owner (workflow owner) |
-| Policy set | `contracts/policy-set.v1.yaml` | 1.0.0 | Human owner (policy owner) |
-| Problem (error) schema | `contracts/schemas/problem.schema.json` | 1.0.0 | Shared |
-| Workflow-state schema | `contracts/schemas/workflow-state.schema.json` | 1.0.0 | Orchestrator |
-| Approval/decision schema | `contracts/schemas/gate-decision.schema.json` | 2.0.0 (CR-002) | Orchestrator |
-| Audit-event schema | `contracts/schemas/audit-event.schema.json` | 1.0.0 | Orchestrator |
-| Policy-evaluation schema | `contracts/schemas/policy-evaluation.schema.json` | 1.0.0 | Orchestrator |
-| Exception schema | `contracts/schemas/policy-exception.schema.json` | 1.0.0 | Orchestrator |
-| Persistence schemas | [data-model.md](./data-model.md) §3, realized as Alembic revisions | 1.0.0 | Each service owns its own |
+| Contract | File | Version | Owner | Implementation status (CR-008) |
+|----------|------|---------|-------|--------------------------------|
+| Shortener HTTP API | `contracts/shortener-api.openapi.yaml` | **2.0.0, generated from the app** (CR-007) | Human owner (API owner role) | **Implemented**; single source, drift test; scenario change sets bump it to 2.1.0 |
+| Orchestrator HTTP API | `contracts/orchestrator-api.openapi.yaml` | 2.1.0 (CR-003) | Human owner | **Not implemented** (design reference); the `orch` CLI is the interface |
+| Workflow graph definition | `contracts/workflow-graph.v2.yaml` | 2.1.0 (CR-003) | Human owner (workflow owner) | **Design reference, not executed as-is**; executed workflows are `scenarios/<name>/workflow.yaml` (node mapping in the file header) |
+| Policy set | `policy/policy-set.yaml` (executed); `contracts/policy-set.v1.yaml` (design) | **1.2.0** executed (PRIV-001, SEC-002..004, REL-001; pinned advisory snapshot) | Human owner (policy owner) | **Partially implemented**: other domains planned, not implemented |
+| Problem (error) schema | `contracts/schemas/problem.schema.json` | 1.0.0 | Shared | Shortener problem body is defined by the generated contract (`Problem`) |
+| Workflow-state schema | `contracts/schemas/workflow-state.schema.json` | 1.0.0 | Orchestrator | Not enforced (no HTTP API) |
+| Approval/decision schema | `contracts/schemas/gate-decision.schema.json` | 2.0.0 (CR-002) | Orchestrator | Not enforced; decisions go through `Engine.decide` (adds `answer`, `escalate`) |
+| Audit-event schema | `contracts/schemas/audit-event.schema.json` | 1.0.0 | Orchestrator | Not enforced; executed fields are in `src/orchestrator/audit.py` |
+| Policy-evaluation schema | `contracts/schemas/policy-evaluation.schema.json` | 1.0.0 | Orchestrator | Not enforced; table `policy_evaluations` |
+| Exception schema | `contracts/schemas/policy-exception.schema.json` | 1.0.0 | Orchestrator | Not enforced; table `exceptions` (no expiry) |
+| Persistence schemas | [data-model.md](./data-model.md) §3 | 1.0.0 | Each service owns its own | Implemented as plain SQL `CREATE TABLE IF NOT EXISTS` (no Alembic revisions) |
 
 Representative examples live in `contracts/examples/`. **Executable validation**:
 
@@ -241,11 +241,15 @@ Representative examples live in `contracts/examples/`. **Executable validation**
 
 Planned scenario contract increments (delivered only through runs):
 
+*Updated by CR-008 to what was built (HD-SCN-001). Each change set applies to the 2.0.0 baseline
+independently, so each bumps the contract to 2.1.0; there is no 1.1.0 → 1.2.0 → 1.3.0 chain.*
+
 | Scenario | Shortener API | Schema | Compat |
 |----------|---------------|--------|--------|
-| SCN-A | 1.1.0: optional `expires_at` on create; `410 link_expired`; `GET /api/v1/links/{code}/analytics` | add `expires_at` column (nullable); add `link_stats` table | additive |
-| SCN-B | 1.2.0: optional `alias` on create; `409 alias_conflict`; `422 alias_invalid`/`alias_reserved` | add `code_origin` column (default `generated`) | additive |
-| SCN-C (option A) | 1.3.0: `daily` buckets (UTC date → count) in the analytics response | add `link_daily_stats` table | additive |
+| SCN-A | 2.1.0: `GET /api/v1/links/{code}` link details (owner-scoped) | none | additive |
+| SCN-B | 2.1.0: optional `alias` on create; `409 alias_conflict`; `422 alias_invalid`/`alias_reserved` | none (aliases use the existing `links.code`) | additive |
+| SCN-C (option A) | 2.1.0: `GET /api/v1/links/{code}/stats/daily` (UTC day → count) | add `link_daily_stats` table | additive |
+| Baseline (2.0.0) | Expiry (`410 link_expired`) and stats (`/stats`) are baseline features (HD-CUT-002) | `expires_at`, `link_stats` in the baseline schema | — |
 
 ---
 
@@ -1199,12 +1203,15 @@ consistency.
 | CR-003 follow-up | 2026-10-15 | Mani Kumar Vadugu | plan aligned with CR-003; glossary defined by human owner | Contracts: workflow graph 2.0.0 → 2.1.0 and orchestrator API 2.0.0 → 2.1.0 (MINOR; Change Record in contracts/README.md) |
 | CR-004 | 2026-10-15 | Mani Kumar Vadugu | Provenance label replaced with the fixed AI-assistance text (§Summary, §4) | Spec FR-ORC-034, research R-06, data model, ADR-006 and tasks aligned; no contract version change |
 | CR-005 | 2026-10-15 | Mani Kumar Vadugu | Spec interruption edge case aligned with §6.3 / PD-011 | No plan change needed |
+| Analysis remediation | 2026-10-15 | Mani Kumar Vadugu | §3.1 modules added (criteria, fallback, faults; tools/perf); §10.3 `raise_ambiguity` → `finding-injection`; CEX-001 recorded under Complexity Tracking | Tasks regenerated with stable IDs (see tasks.md) |
 | CR-006 step 2 | 2026-10-15 | Mani Kumar Vadugu | Pre-implementation review rulings C1, C2, C3, C5; join/skip table; runtime and governance specifications; three disclosed limitations (§16) | plan.md only. Pending alignment: workflow graph (ST-05 inputs, REL-01/REL-02 edge, clarify rounds), gate-decision schema (`decision_source`), ADRs, quickstart, tasks |
 | CR-006 step 3 | 2026-10-15 | Mani Kumar Vadugu | HD-CUT-001 scope cut recorded (§16.5); cut items added to backlog BL-14..BL-21 as planned, not implemented | plan.md only. Pending alignment: §14.1 must-have list (G-SECURITY), PD-005, PD-007, policy SEC-004, workflow graph (G-SECURITY node), tasks |
 | CR-006 | 2026-10-15 | Mani Kumar Vadugu | Pre-implementation review dispositioned: §16 rulings (steps 2–3); tasks.md regenerated to 54 tasks with false dependencies removed, change sets authored in parallel with the engine and traceability check in CI from Phase 1 (step 4); change-log rows in spec.md and plan.md (steps 5–6) | Contracts, ADRs and quickstart alignment is task T201 (human approval required before T003) |
 | HD-CUT-001 | 2026-10-15 | Mani Kumar Vadugu | Human scope-cut decision (§16.5): 8 review cut-list items deferred | Backlog BL-14..BL-21 marked planned, not implemented; disclosed in docs/limitations.md (T248) |
 | HD-CUT-002 | 2026-10-15 15:55 | Mani Kumar Vadugu | The re-cut schedule cannot meet the 2026-10-16 15:30 deadline. Deliver a lean implementation that demonstrates every assessed capability, without per-task ceremony. tasks.md is retained as the planning record; implementation follows the lean slice in [docs/scope/lean-slice.md](../../docs/scope/lean-slice.md) | Built scope and items "planned, not implemented" listed in docs/scope/lean-slice.md; T201 relabelled "CR-006 step 7"; open questions for the human owner listed there |
-| Analysis remediation | 2026-10-15 | Mani Kumar Vadugu | §3.1 modules added (criteria, fallback, faults; tools/perf); §10.3 `raise_ambiguity` → `finding-injection`; CEX-001 recorded under Complexity Tracking | Tasks regenerated with stable IDs (see tasks.md) |
+| HD-SCN-001 | 2026-10-15 | Mani Kumar Vadugu | Scenario capabilities: SCN-A greenfield = link details endpoint `GET /api/v1/links/{code}` (destination, created_at, expires_at, active; API key required; owner-scoped by later human decision: other keys get 404); SCN-B brownfield = custom aliases (4–10 chars, reserved words blocked, conflict → 409, no behavior change without alias); SCN-C ambiguous = "track who clicks links" (options A daily aggregates / C abort; change set selected from a catalog keyed by option_id). Policy FAIL + exception demonstrated by the labelled fault-injection variant `scn-c-scanner-down` (SEC-003) | Supersedes the §11 scenario capabilities (expiry/analytics now in the baseline per HD-CUT-002). Scenario files in `scenarios/`; change sets authored by `tools/author_changesets.py`, applied only after the human locks them (`orch changeset lock`) |
+| CR-007 | 2026-10-15 | Mani Kumar Vadugu | The shortener OpenAPI contract is generated from the running app and is the single source: `specs/001-agentic-sdlc-url-shortener/contracts/shortener-api.openapi.yaml` regenerated by `python -m shortener.openapi`, version 1.0.0 (hand-written) → 2.0.0 (MAJOR: operations and schemas differ from the hand-written draft); the separate `contracts/` JSON copy is removed | Contract test fails on drift; scenario change sets bump it to 2.1.0 (additive). Hand-written §2.2/§2.3 contract tables describe the earlier draft |
+| CR-008 | 2026-10-15 | Mani Kumar Vadugu | Close remaining gaps and reconcile planning artifacts with what was built: SEC-003 evaluates a real pip-audit snapshot of requirements.lock (hash-pinned in policy 1.2.0) and live pip-audit runs in `orch release check` and CI; SEC-004 regex secret scan; scenario `scn-b-compensate` (post-promotion compensation + G-CORRECTIVE) distinct from `scn-b-defective` (pre-promotion rollback); engineering summary for every outcome; change-set baseline limitation documented; tasks.md status table; workflow-graph.v2.yaml status header; §2.2/§2.3 tables updated; CI workflow; change logs in date order | Executed policy set 1.2.0; change sets regenerated (manifests record baseline hashes; human must lock them); docs/scope/lean-slice.md §1-§2 updated |
 
 ### CR-002 impact analysis
 

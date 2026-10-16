@@ -1,3 +1,8 @@
+"""Fork/join and human gates.
+
+Verifies: FR-ORC-006, FR-ORC-037..039 (parallel fork, join waits), FR-GOV-001..003, FR-GOV-014..016,
+NFR-AUT-001 and SC-011 (agent keys refused and audited).
+"""
 import pytest
 
 from orchestrator import audit

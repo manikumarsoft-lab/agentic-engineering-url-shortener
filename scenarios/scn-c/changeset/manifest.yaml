@@ -1,0 +1,28 @@
+scenario: scn-c
+variant: option-A
+summary: Add daily aggregate click counts per link (UTC day) at GET /api/v1/links/{code}/stats/daily;
+  no visitor personal data.
+provenance: Authored with AI assistance (Claude Code) during development; reviewed and locked by the human
+  owner (Mani Kumar Vadugu)
+base:
+  description: the baseline commit's src, tests/shortener, contract and pyproject; each change set applies
+    to that baseline independently (no release chain)
+  files_sha256:
+    specs/001-agentic-sdlc-url-shortener/contracts/shortener-api.openapi.yaml: 4cf40a3cbb54ed567dfbca8a549ff29b6bc6371bf87c4dc081729495db919f57
+    src/shortener/app.py: 13daa69cb09adde17e731c19ce6e9319a6e65a97650e0e1ff4b21ffecd404d30
+    src/shortener/store.py: 1d6bd685ed18a93406101f72004d21465de83684d510187d4a757be9597f90df
+tests_patch: tests.patch
+impl_patch: impl.patch
+new_tests:
+- tests/shortener/test_daily_stats.py
+touched_files:
+- specs/001-agentic-sdlc-url-shortener/contracts/shortener-api.openapi.yaml
+- src/shortener/app.py
+- src/shortener/store.py
+- tests/shortener/test_daily_stats.py
+contract_version_after: 2.1.0
+sha256:
+  tests_patch: 84a8e0ffdfe96cedb85c088c6d1f0d66bbda9efb525311d5ae8ab2936c5ff00f
+  impl_patch: 63e89245f4629b8db2bba93e9a0366470adf277aac17eda19dba29496dc28d00
+review: 'Not applied by any run until the human owner locks it: orch changeset lock scenarios/scn-c/changeset
+  --key <approver key>'

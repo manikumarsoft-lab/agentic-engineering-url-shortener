@@ -1,0 +1,7 @@
+# Approved change-set catalog for SCN-C, keyed by the clarification option_id (plan §16.1 C1).
+# An answer whose option has no entry here ends the run FAILED (no_approved_change_set).
+# Option C (withdraw) aborts at the clarification gate and never reaches this catalog.
+options:
+  A:
+    change_set: scenarios/scn-c/changeset
+    refined_requirement: scenarios/scn-c/requirement-option-a.md

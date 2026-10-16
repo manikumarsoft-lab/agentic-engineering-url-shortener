@@ -1,6 +1,7 @@
 """Shortener HTTP API (FastAPI).
 
-Satisfies: FR-SHR-001..019 (baseline incl. expiry and stats per HD-CUT-002), NFR-SEC-001, NFR-SEC-004.
+Satisfies: FR-SHR-001..019 (baseline incl. expiry and stats per HD-CUT-002), FR-OBS-009, NFR-SEC-001,
+NFR-SEC-004.
 No `from __future__ import annotations`: FastAPI must resolve the local dependency annotations.
 """
 import hashlib

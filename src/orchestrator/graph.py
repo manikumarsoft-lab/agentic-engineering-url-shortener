@@ -13,7 +13,8 @@ import yaml
 DEFAULT_TRANSIENT = frozenset({"timeout", "io_error", "db_locked"})
 DEFAULT_PERMANENT = frozenset({"invalid_input", "tests_failed", "policy_fail", "permission_refused",
                                "integrity_mismatch", "undeclared_scope", "tests_not_red",
-                               "patch_does_not_apply", "no_approved_change_set"})
+                               "patch_does_not_apply", "no_approved_change_set", "smoke_failed",
+                               "previous_release_smoke_failed"})
 GATE_KINDS = frozenset({"approval", "clarify"})
 ON_FAILURE = frozenset({"safe_stop", "fail_run", "rollback", "compensate"})
 
@@ -55,6 +56,7 @@ class Node:
     on_failure: str = "safe_stop"
     fallback: AgentCall | None = None
     compensate: AgentCall | None = None
+    failure_edge: str | None = None  # after successful compensation, only this node may proceed
     condition: dict[str, Any] | None = None
     skip_reason: str | None = None
     consumes: tuple[str, ...] = ()
@@ -125,6 +127,7 @@ def _node(raw: dict[str, Any], defaults: dict[str, Any]) -> Node:
         on_failure=raw.get("on_failure", "safe_stop"),
         fallback=_call(raw.get("fallback")),
         compensate=_call(raw.get("compensate")),
+        failure_edge=raw.get("failure_edge"),
         condition=raw.get("conditional"),
         skip_reason=raw.get("skip_reason"),
         consumes=tuple(raw.get("consumes", ())),
@@ -146,6 +149,12 @@ def _validate(wf: Workflow) -> None:
                 raise GraphError(f"{node.id}: unknown dependency '{dep}'")
         if node.gate and node.gate.rework_target and node.gate.rework_target not in wf.nodes:
             raise GraphError(f"{node.id}: unknown rework_target '{node.gate.rework_target}'")
+        if node.failure_edge:
+            target = wf.nodes.get(node.failure_edge)
+            if target is None or node.id not in target.depends_on:
+                raise GraphError(f"{node.id}: failure_edge must name a node that depends on it")
+            if node.on_failure != "compensate":
+                raise GraphError(f"{node.id}: failure_edge requires on_failure: compensate")
         if node.gate and node.gate.kind not in GATE_KINDS:
             raise GraphError(f"{node.id}: unknown gate kind '{node.gate.kind}'")
         if node.gate and node.gate.kind == "clarify" and not node.gate.options:

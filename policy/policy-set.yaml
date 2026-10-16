@@ -1,10 +1,30 @@
 # Versioned policy set (lean slice). The version is recorded on every run and evaluation.
-version: 1.0.0
+version: 1.2.0
+# SEC-003 in scenario runs evaluates this advisory snapshot (a real pip-audit run over
+# requirements.lock). Refresh with `orch advisory snapshot`, then update the pinned hash here.
+advisory_snapshot:
+  path: policy/advisory-snapshot.json
+  sha256: 0162c7e58e69f180b970d2596d2b28e543799b3be061f85073247acd8285e43b
 checks:
   - id: PRIV-001
     description: No visitor personal data is captured (FR-SHR-012, A-005)
     fact: captures_personal_data
     expect: false
+    mandatory: true
+  - id: SEC-002
+    description: The threat review has no open high-severity threat
+    fact: open_high_threats
+    expect: 0
+    mandatory: true
+  - id: SEC-003
+    description: Dependency audit (pip-audit) executed with zero known vulnerabilities; never PASS without evidence
+    fact: dependency_scan_ok
+    expect: true
+    mandatory: true
+  - id: SEC-004
+    description: Secret scan of the released code found no keys, tokens or private keys
+    fact: secret_scan_clean
+    expect: true
     mandatory: true
   - id: REL-001
     description: Required tests executed and passing

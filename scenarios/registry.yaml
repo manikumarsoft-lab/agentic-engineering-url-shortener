@@ -1,0 +1,20 @@
+# `orch run submit <name>`: scenario name -> workflow, initial facts and run labels.
+scn-a:
+  workflow: scn-a
+scn-b:
+  workflow: scn-b
+  facts: {variant: normal}
+scn-b-defective:
+  workflow: scn-b
+  facts: {variant: defective}
+  labels: [demonstration, fault-injection]
+scn-b-compensate:
+  workflow: scn-b-compensate
+  facts: {fault_injection: smoke_fail}
+  labels: [demonstration, fault-injection]
+scn-c:
+  workflow: scn-c
+scn-c-scanner-down:
+  workflow: scn-c
+  facts: {fault_injection: scanner_unavailable}
+  labels: [demonstration, fault-injection]

@@ -2,6 +2,8 @@
 
 A classified failure is written as {"ok": false, "code": ...}. Any other exception exits non-zero
 without a result file, which the engine treats as an unclassified failure (safe-stop).
+
+Satisfies: FR-ORC-014, FR-ORC-015, FR-ORC-018 (subprocess isolation, classification, timeouts).
 """
 from __future__ import annotations
 

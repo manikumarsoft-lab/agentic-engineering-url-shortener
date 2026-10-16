@@ -4,8 +4,9 @@ Each step runs every READY node at once in isolated subprocesses (fork), then co
 results in node-ID order. A node becomes READY only when all its predecessors are SUCCEEDED or
 SKIPPED (join). Every state change is committed together with its audit event.
 
-Satisfies: FR-ORC-005..008, FR-ORC-011, FR-ORC-014..025, FR-ORC-028, FR-GOV-001..004,
-FR-GOV-007, FR-GOV-014..016 (lean slice, HD-CUT-002).
+Satisfies: FR-ORC-005..008, FR-ORC-011, FR-ORC-014..026, FR-ORC-028, FR-ORC-037..039,
+FR-GOV-001..004, FR-GOV-007, FR-GOV-008, FR-GOV-011, FR-GOV-014..016, NFR-AUT-001, PVT-004
+(lean slice, HD-CUT-002).
 """
 from __future__ import annotations
 
@@ -21,7 +22,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from orchestrator import audit, keys, workspace
+from orchestrator import audit, keys, summary, workspace
 from orchestrator.graph import DEFAULT_PERMANENT, DEFAULT_TRANSIENT, AgentCall, Node, Workflow
 from orchestrator.keys import Principal
 from orchestrator.policy import PolicySet
@@ -163,8 +164,12 @@ class Engine:
             self.clock.sleep(max(0.0, min(waiting) - now))
             return True
         with self.store.tx() as c:
-            if all(r["state"] in DONE for r in rows.values()):
-                self._finish(c, run_id, "COMPLETED", None)
+            compensated = [n for n, r in sorted(rows.items()) if r["state"] == "COMPENSATED"]
+            if all(r["state"] in DONE or r["state"] == "COMPENSATED" for r in rows.values()):
+                if compensated:  # the compensation path finished; the change itself failed
+                    self._finish(c, run_id, "FAILED", f"compensated:{rows[compensated[0]]['last_error']}")
+                else:
+                    self._finish(c, run_id, "COMPLETED", None)
             elif any(r["state"] == "AWAITING_APPROVAL" for r in rows.values()):
                 if run["state"] != "AWAITING_APPROVAL":
                     self.store.set_run(c, run_id, state="AWAITING_APPROVAL")
@@ -400,7 +405,19 @@ class Engine:
             node, row = self.wf.nodes[nid], rows[nid]
             if row["state"] not in ("PENDING", "STALE"):
                 continue
-            if not all(rows[d]["state"] in DONE for d in node.depends_on):
+            guarded = [d for d in node.depends_on if self.wf.nodes[d].failure_edge == nid]
+            if guarded and all(rows[d]["state"] == "SUCCEEDED" for d in guarded):
+                # The compensation path is only for failure: skip the edge and everything after it.
+                with self.store.tx() as c:
+                    for other in sorted({nid} | self.wf.downstream({nid})):
+                        if rows[other]["state"] in ("PENDING", "STALE"):
+                            self.store.set_node(c, run_id, other, state="SKIPPED")
+                            self._audit(c, run_id, "NODE_SKIPPED", target=other,
+                                        reason=f"compensation path not needed: {', '.join(guarded)} succeeded")
+                return True
+            if not all(rows[d]["state"] in DONE or (rows[d]["state"] == "COMPENSATED"
+                                                   and self.wf.nodes[d].failure_edge == nid)
+                       for d in node.depends_on):
                 continue
             with self.store.tx() as c:
                 if node.condition and not _condition_holds(node.condition, facts):
@@ -605,13 +622,34 @@ class Engine:
             with self.store.tx() as c:
                 if not out.ok:
                     self._audit(c, run_id, "COMPENSATION_FAILED", target=cid, result="failed",
-                                reason=out.code)
+                                reason=out.code, data=out.details)
                     self._safe_stop(c, run_id, "compensation_failed", cid)
                     return
-                self._audit(c, run_id, "COMPENSATION_COMPLETED", target=cid)
+                for name, content in out.outputs.get("artifacts", {}).items():
+                    if name in self.wf.nodes[cid].produces:
+                        version = self.store.add_artifact(c, run_id, name, content, f"{cid}:compensation",
+                                                          out.ended)
+                        self._audit(c, run_id, "ARTIFACT_VERSION_CREATED", target=name,
+                                    data={"version": version, "produced_by": f"{cid}:compensation"})
+                self._audit(c, run_id, "COMPENSATION_COMPLETED", target=cid,
+                            data={"phase": "post-promotion", "agent": call.agent})
+        edge = self.wf.nodes[nid].failure_edge
         with self.store.tx() as c:
             self._recovered(c, run_id, nid, self.store.nodes(run_id)[nid], mechanism="compensation")
-            self._finish(c, run_id, "FAILED", f"compensated:{code}")
+            if edge is None:
+                self._finish(c, run_id, "FAILED", f"compensated:{code}")
+                return
+            # Continue only along the declared failure edge (e.g. human-approved corrective action);
+            # the normal successors of the failed node are never reached.
+            self.store.set_node(c, run_id, nid, state="COMPENSATED")
+            path = {edge} | self.wf.downstream({edge})
+            current = self.store.nodes(run_id)
+            for other in sorted(self.wf.downstream({nid}) - path):
+                if current[other]["state"] == "PENDING":
+                    self.store.set_node(c, run_id, other, state="SKIPPED")
+                    self._audit(c, run_id, "NODE_SKIPPED", target=other,
+                                reason=f"not reached: {nid} was compensated")
+            self._audit(c, run_id, "COMPENSATION_PATH", target=nid, data={"next": edge})
 
     def _evaluate_policy(self, c: sqlite3.Connection, run_id: str, node: Node,
                          facts: dict[str, Any]) -> str | None:
@@ -697,7 +735,16 @@ class Engine:
     def _safe_stop(self, c: sqlite3.Connection, run_id: str, reason: str, nid: str | None = None) -> None:
         self.store.set_run(c, run_id, state="SAFE_STOPPED", reason=reason)
         self._audit(c, run_id, "RUN_SAFE_STOPPED", target=nid, reason=reason)
+        self._summarize(c, run_id, "SAFE_STOPPED", reason)
 
     def _finish(self, c: sqlite3.Connection, run_id: str, state: str, reason: str | None) -> None:
         self.store.set_run(c, run_id, state=state, reason=reason, ended_at=self.clock.now())
         self._audit(c, run_id, f"RUN_{state}", reason=reason)
+        self._summarize(c, run_id, state, reason)
+
+    def _summarize(self, c: sqlite3.Connection, run_id: str, outcome: str, reason: str | None) -> None:
+        """Final engineering summary for every terminal outcome and safe-stop (FR-ORC-026)."""
+        content = summary.build(self.store, run_id, outcome, reason)
+        version = self.store.add_artifact(c, run_id, "engineering-summary", content, "system", self.clock.now())
+        self._audit(c, run_id, "SUMMARY_PRODUCED", target="engineering-summary", result=outcome,
+                    reason=content["why"], data={"version": version})

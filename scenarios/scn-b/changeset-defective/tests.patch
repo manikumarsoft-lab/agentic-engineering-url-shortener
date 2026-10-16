@@ -1,0 +1,47 @@
+diff --git a/tests/shortener/test_aliases.py b/tests/shortener/test_aliases.py
+new file mode 100644
+--- /dev/null
++++ b/tests/shortener/test_aliases.py
+@@ -0,0 +1,42 @@
++"""SCN-B (HD-SCN-001): custom aliases in the existing creation flow."""
++import pytest
++
++DEST = "https://example.com/alias"
++
++
++def test_alias_becomes_the_short_code(svc):
++    c = svc.client()
++    r = svc.create(c, DEST, alias="promo2026")
++    assert r.status_code == 201 and r.json()["code"] == "promo2026"
++    assert r.json()["short_url"].endswith("/promo2026")
++    assert c.get("/promo2026").headers["location"] == DEST
++
++
++@pytest.mark.parametrize("alias, status", [
++    ("abc", 422), ("abcd", 201), ("abcdefg", 201), ("abcdefghij", 201), ("abcdefghijk", 422),
++    ("has-dash", 422), ("spa ce1", 422)])
++def test_alias_length_and_characters(svc, alias, status):
++    r = svc.create(svc.client(), DEST, alias=alias)
++    assert r.status_code == status
++    if status == 422:
++        assert r.json()["code"] == "alias_invalid"
++
++
++@pytest.mark.parametrize("alias", ["admin", "Health", "OPENAPI", "static"])
++def test_reserved_aliases_are_rejected(svc, alias):
++    r = svc.create(svc.client(), DEST, alias=alias)
++    assert r.status_code == 422 and r.json()["code"] == "alias_reserved"
++
++
++def test_alias_conflict_is_409_and_keeps_the_existing_mapping(svc):
++    c = svc.client()
++    assert svc.create(c, DEST, alias="taken01").status_code == 201
++    r = svc.create(c, "https://example.org/other", alias="taken01", key="consumer#2")
++    assert r.status_code == 409 and r.json()["code"] == "alias_conflict"
++    assert c.get("/taken01").headers["location"] == DEST
++
++
++def test_requests_without_alias_are_unchanged(svc):
++    body = svc.create(svc.client(), DEST).json()
++    assert len(body["code"]) == 7 and set(body) == {"code", "short_url", "destination", "created_at",
++                                                    "expires_at"}

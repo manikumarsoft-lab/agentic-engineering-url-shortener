@@ -1,0 +1,10 @@
+{
+  "generated_at": "2026-10-15T22:41:35.058490+00:00",
+  "lock": "requirements.lock",
+  "lock_sha256": "e4a8e998e360225faa6ef14fae17a0177e83e2dec333364dedd2e3b3a057208e",
+  "result": {
+    "dependencies": 49,
+    "tool": "pip-audit 2.10.1",
+    "vulnerabilities": []
+  }
+}

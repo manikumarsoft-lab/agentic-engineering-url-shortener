@@ -1,0 +1,35 @@
+# SCN-A greenfield: link details endpoint (HD-SCN-001). Change set: scenarios/scn-a/changeset.
+name: scn-a
+version: 1.0.0
+workspace:
+  include: [src, tests/shortener, specs/001-agentic-sdlc-url-shortener/contracts/shortener-api.openapi.yaml, pyproject.toml]
+defaults: {timeout_s: 120, max_attempts: 3, backoff_s: 1, gate_timeout_s: 86400}
+nodes:
+  - {id: intake, agent: ingest, params: {requirement: scenarios/scn-a/requirement.md}, produces: [requirement]}
+  - {id: normalize, agent: normalize, consumes: [requirement], produces: [normalized-requirement], depends_on: [intake]}
+  - {id: quality, agent: quality_check, consumes: [normalized-requirement], produces: [quality-report], depends_on: [normalize]}
+  - id: clarify
+    gate:
+      kind: clarify
+      roles: [engineer, approver]
+      binds: [quality-report]
+      options: {W: {label: Withdraw the request, action: abort}}
+    conditional: {fact: clarification_needed, equals: true}
+    skip_reason: all five requirement-quality checks passed; no clarification required
+    depends_on: [quality]
+  - {id: decompose, agent: decompose, consumes: [normalized-requirement], produces: [task-plan], depends_on: [clarify]}
+  - {id: design, agent: design, params: {change_set: scenarios/scn-a/changeset}, consumes: [normalized-requirement, task-plan], produces: [design], depends_on: [decompose]}
+  - id: approve-design
+    gate: {roles: [approver], binds: [design, task-plan], rework_target: design}
+    depends_on: [design]
+  - {id: tdd-red, agent: apply_tests, params: {change_set: scenarios/scn-a/changeset}, produces: [test-red], depends_on: [approve-design], timeout_s: 300}
+  - {id: implement, agent: apply_impl, params: {change_set: scenarios/scn-a/changeset}, produces: [change-application], depends_on: [tdd-red]}
+  - {id: test, agent: run_tests, params: {change_set: scenarios/scn-a/changeset}, produces: [test-results], depends_on: [implement], on_failure: rollback, timeout_s: 300}
+  - {id: docs, agent: write_docs, consumes: [design, test-results], produces: [docs], depends_on: [test]}
+  - {id: threat-review, agent: threat_review, consumes: [design], produces: [threat-review], depends_on: [test]}
+  - {id: validate, agent: validate_release, params: {change_set: scenarios/scn-a/changeset}, consumes: [test-results, threat-review], depends_on: [docs, threat-review], policy_checks: [PRIV-001, SEC-002, SEC-003, SEC-004, REL-001]}
+  - id: approve-release
+    gate: {roles: [release-owner], binds: [test-results, threat-review, docs]}
+    depends_on: [validate]
+  - {id: release, agent: release, produces: [release], depends_on: [approve-release]}
+# The engine writes the final engineering summary for every outcome (FR-ORC-026).

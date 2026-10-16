@@ -1,3 +1,7 @@
+"""Replanning, policy blocking with exceptions, and metrics.
+
+Verifies: FR-ORC-020, FR-ORC-021, SC-006 (only stale nodes re-run), FR-GOV-005..008, FR-OBS-006, FR-OBS-007.
+"""
 import pytest
 
 from orchestrator import audit

@@ -1,6 +1,8 @@
 """Deterministic, rule-based agents (the only agent mode; HD-001, FR-ORC-029).
 
 Generic building blocks used by workflows and tests. Scenario agents are added on top of these.
+
+Satisfies: FR-ORC-027, FR-ORC-029.
 """
 from __future__ import annotations
 

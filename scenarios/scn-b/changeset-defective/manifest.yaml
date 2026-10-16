@@ -1,0 +1,26 @@
+scenario: scn-b
+variant: defective
+summary: 'FAULT-INJECTION DEMONSTRATION (FR-ORC-036): aliases as in the normal change set, plus a defect
+  that removes collision retry for generated codes.'
+provenance: Authored with AI assistance (Claude Code) during development; reviewed and locked by the human
+  owner (Mani Kumar Vadugu)
+base:
+  description: the baseline commit's src, tests/shortener, contract and pyproject; each change set applies
+    to that baseline independently (no release chain)
+  files_sha256:
+    specs/001-agentic-sdlc-url-shortener/contracts/shortener-api.openapi.yaml: 4cf40a3cbb54ed567dfbca8a549ff29b6bc6371bf87c4dc081729495db919f57
+    src/shortener/app.py: 13daa69cb09adde17e731c19ce6e9319a6e65a97650e0e1ff4b21ffecd404d30
+tests_patch: tests.patch
+impl_patch: impl.patch
+new_tests:
+- tests/shortener/test_aliases.py
+touched_files:
+- specs/001-agentic-sdlc-url-shortener/contracts/shortener-api.openapi.yaml
+- src/shortener/app.py
+- tests/shortener/test_aliases.py
+contract_version_after: 2.1.0
+sha256:
+  tests_patch: 45aefb81928ded5be008a3268feb5f9b607d27150e17415245081e8bf2401338
+  impl_patch: 786a322eedc417df5b77f317dca715c6fb302905480d0b1df3f6abcb4e251d78
+review: 'Not applied by any run until the human owner locks it: orch changeset lock scenarios/scn-b/changeset-defective
+  --key <approver key>'

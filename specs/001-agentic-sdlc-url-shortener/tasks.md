@@ -22,6 +22,70 @@ description: "Task list for feature 001: Agentic Software Engineering System: UR
 - **Task-plan approval**: pending (T003).
 - **CR-006 step 4 regeneration** (2026-10-15): tasks regenerated per plan §16 and HD-CUT-001. `/speckit-analyze` must be re-run on this version before T003.
 
+## Implementation Status (CR-008, 2026-10-15)
+
+Implementation followed the lean slice (HD-CUT-002, `docs/scope/lean-slice.md`), not this task list
+task by task. Status per task: **Done** (built and tested as described), **Partial** (built in lean
+form; the gap is named), **Planned, not implemented** (per HD-CUT-001/002), **Human** (waiting for the
+human owner), **Not recorded**. Checkboxes below are left unticked: only the human owner marks tasks.
+
+| Task | Status | Lean-slice reality / gap |
+|------|--------|--------------------------|
+| T001 | Done | Decision recorded (below) |
+| T002 | Done | `analysis.md` |
+| T201 | Partial | Shortener contract regenerated (CR-007); graph, gate-decision schema, orchestrator API and ADRs not aligned (graph carries a status header) |
+| T003 | Not recorded | Task-plan approval never recorded; superseded by HD-CUT-002 |
+| T202 | Partial | `pyproject.toml`, `.gitignore`, `requirements.lock`; no ruff/mypy, `tools/check.py`, `req` marker plugin or import-boundary test |
+| T203 | Partial | Lean `tools/trace_check.py` + CI (`.github/workflows/ci.yml`); README is a stub |
+| T204 | Partial | Shared API keys (`src/common/apikeys.py`), injectable clock; no ULID IdGenerator or shared logging module |
+| T205 | Partial | Shortener persistence without Alembic (plain SQL schema) |
+| T206 | Partial | Orchestrator persistence without Alembic; append-only triggers and hash chain done |
+| T207 | Done | `validation.py`, `codes.py` |
+| T208 | Done | Create/resolve/idempotency in `app.py` + `store.py` |
+| T209 | Done | API + generated contract and drift test |
+| T210 | Done | Auth, rate limit, JSON request logs, security tests |
+| T211 | Partial | Persistence-failure and 200-parallel-create tests; PVT-003 (1,000) not run |
+| T212 | Human | Baseline tag not yet created |
+| T213 | Partial | Change-set store, manifest, lock file (`orch changeset lock`); lock not anchored to an annotated tag |
+| T214 | Done | SCN-A content changed by HD-SCN-001 (link details) |
+| T215 | Done | SCN-B normal + defective; undeclared-scope variant not built |
+| T216 | Done | SCN-C catalog + aggregate-daily change set |
+| T217 | Human | Change sets not yet locked |
+| T218 | Done | Node/run states and atomic transitions inside `engine.py` + `store.py` |
+| T219 | Done | Graph loading/validation in code (no meta-schema files); join/skip incl. failure edge |
+| T220 | Done | Artifacts, provenance, decision lineage |
+| T221 | Partial | Agent contract; undeclared artifact outputs refused (`PERMISSION_REFUSED`); no capability-based permission guard, no AI-backed stub |
+| T222 | Partial | Subprocess runner with timeout and process-tree kill; no attempt fencing |
+| T223 | Done | Superstep scheduler, node-ID commit order, stall detection |
+| T224 | Partial | CLI only; no orchestrator HTTP API |
+| T225 | Done | Approve, rework ≤ 2, terminate, escalate, timeout, clarification answers |
+| T226 | Partial | Policy loader/evaluator, PRIV-001; CHG checks implemented in agents |
+| T227 | Partial | SEC-002, SEC-003 (pip-audit snapshot), SEC-004 (secret scan), REL-001; no AUD/DEP/LIC |
+| T228 | Partial | Exception request/approval; no separation of duties, no expiry |
+| T229 | Done | Retry, fallback, safe-stop, fault injection |
+| T230 | Partial | Startup recovery + approver resume; budget reset instead of per-node grants |
+| T231 | Partial | Workspace, patch applier, test runner; workspace from the working tree, not `git archive` |
+| T232 | Partial | Staging promote/restore/smoke in `scn-b-compensate`; no `staging bootstrap|status`, no `demo reset` |
+| T233 | Partial | Replanning and approval revocation; late-ambiguity routing not built |
+| T234 | Done | ST-01..03 agents, catalog selection after clarification |
+| T235 | Partial | Impact, decompose, design; no ST-05a |
+| T236 | Done | Test-first apply + rollback |
+| T237 | Done | Docs, threat review, validation facts |
+| T238 | Done | Promote, smoke, compensation, G-CORRECTIVE; summary written by the engine for every outcome |
+| T239 | Partial | Audit show/verify, per-run metrics incl. MTTR and latency; no query filters or percentiles |
+| T240 | Partial | Evidence export + index of every run; no `orch trace` |
+| T241 | Partial | Covered by engine and e2e tests; no separate path suite |
+| T242 | Partial | Rollback, compensation, one real interruption test; not every boundary (PVT-006) |
+| T243 | Done | Scripted e2e SCN-A, SCN-B, defective, compensate |
+| T244 | Partial | Scripted e2e SCN-C variants; no determinism test |
+| T245 | Human | Recorded SCN-A run |
+| T246 | Human | Recorded SCN-B runs (normal, defective, compensate) |
+| T247 | Human | Recorded SCN-C runs |
+| T248 | Planned, not implemented | Docs other than `docs/scope/lean-slice.md` |
+| T249 | Partial | `orch release check` (live pip-audit, secret scan, traceability); no quickstart test or perf measurement |
+| T250 | Partial | Evidence index per export, per-run summaries; no aggregate engineering-summary document |
+| T251 | Human | Fresh-setup timing, sign-off, submission tag |
+
 ## Format and Field Legend
 
 Each task line is `- [ ] T### [P?] [Story?] Description`, followed by its fields:

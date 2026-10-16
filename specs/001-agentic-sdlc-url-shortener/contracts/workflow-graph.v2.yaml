@@ -1,3 +1,21 @@
+# ==================================================================================================
+# IMPLEMENTATION STATUS (CR-008, 2026-10-15): DESIGN REFERENCE, NOT EXECUTED AS-IS.
+# The lean slice (HD-CUT-002) executes scenarios/<name>/workflow.yaml with the same engine semantics.
+# Mapping from this contract's nodes to the executed node ids:
+#   ST-01 -> intake        ST-02 -> normalize       ST-03 -> quality       G-CLARIFY -> clarify (conditional)
+#   ST-05 -> impact (scn-b, scn-b-compensate; requirement + baseline import graph only, plan §16.1 C2)
+#   ST-06 -> decompose     ST-07 -> design          G-DESIGN -> approve-design
+#   ST-08 -> tdd-red + implement (test-first change set)   ST-09 -> test (on failure: rollback)
+#   ST-10a/b -> docs       ST-11a/b -> threat-review + validate (policy checks)
+#   SP-1 / SP-2 -> joins expressed as depends_on of validate (no separate sync nodes)
+#   ST-12 -> validate (PRIV-001, SEC-002, SEC-003, SEC-004, REL-001)   G-RELEASE -> approve-release
+#   REL-01 -> release (snapshot) or promote + smoke (scn-b-compensate)
+#   REL-02 -> compensation hook restore_previous_release   G-CORRECTIVE -> approve-corrective + corrective
+#   ST-13 -> written by the engine for every outcome (no graph node)
+# Not implemented: ST-05a, G-SECURITY (HD-CUT-001 #7), dynamic G-CLARIFY-n (late ambiguity),
+# G-EXCEPTION as a node (exceptions are `orch exception` actions), per-node failure maps exactly as
+# listed below (the executed defaults are in src/orchestrator/graph.py), meta-schema validation.
+# ==================================================================================================
 # Workflow graph template: authoritative node definitions for the orchestration engine.
 # Validated at engine start against a meta-schema; runs pin this version (graph_template_version).
 # Generic state machines (allowed/prohibited transitions) are in data-model.md §2; node-level

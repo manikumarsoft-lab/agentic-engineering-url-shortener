@@ -1,4 +1,7 @@
-"""Structured JSON request logs with a per-request correlation ID and no secrets or personal data."""
+"""Structured JSON request logs with a per-request correlation ID and no secrets or personal data.
+
+Verifies: FR-OBS-009, NFR-SEC-002.
+"""
 import json
 import logging
 

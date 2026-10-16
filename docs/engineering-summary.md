@@ -17,8 +17,8 @@ human owner: Mani Kumar Vadugu
 
 | Decision | ADR |
 |----------|-----|
-| Python 3.12, FastAPI, Pydantic v2 | ADR-001 |
-| SQLite (WAL), one database per service | ADR-002 (implemented with stdlib `sqlite3`, not SQLAlchemy/Alembic) |
+| Python 3.12, FastAPI, Pydantic v2; pip + `requirements.lock` as built | ADR-001, ADR-020 |
+| SQLite (WAL), one database per service, via stdlib `sqlite3` as built | ADR-002, ADR-021 |
 | In-repository engine with a deterministic superstep scheduler (parallel fork, ordered commit, join) | ADR-003 |
 | Versioned YAML workflow graph with conditional nodes | ADR-005 |
 | Pre-authored change sets (manifest + `tests.patch` + `impl.patch`), human-locked, applied in an isolated workspace | ADR-006 |
@@ -73,5 +73,5 @@ path).
    (ARCH, AUD, DEP, LIC).
 4. Add a test for the undeclared-scope check (CHG-002) and bidirectional requirement ↔ test traceability.
 5. Build the orchestrator HTTP API and an AI-backed agent behind the existing gates and locks.
-6. Bring ADR-001/ADR-002 in line with the implementation (pip + `requirements.lock`, stdlib
-   `sqlite3`), or migrate the implementation to match them.
+6. Close the accepted deviations: align the release gate with Human Gate 4 ruling 4 (G4, CR-009),
+   restore the full FR-ORC-034 label (T258, CR-010) and owner-scope the stats endpoint (T290, G10).

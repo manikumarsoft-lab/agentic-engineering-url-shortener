@@ -94,7 +94,7 @@ sets. The runs do not verify the lock against this tag (§2.2).
 **Provenance label (shortened)**: the change-set manifests and `PROVENANCE` in
 `src/orchestrator/agents/scenario.py` carry "Authored with AI assistance (Claude Code) during
 development; reviewed and locked by the human owner (Mani Kumar Vadugu)" without the spec's
-closing clause. See §2.2 and CR-010.
+closing clause. See §2.2 and CR-010 (approved 2026-10-16 as an accepted deviation).
 
 ---
 
@@ -122,8 +122,9 @@ closing clause. See §2.2 and CR-010.
   (documentation finalization ∥ security validation) and SP-2. Built instead: one fork after
   `test` (§1.2). FR-ORC-039 holds for that single fork only. Task T259.
 - Full FR-ORC-034 provenance label: the closing clause "; applied by the deterministic agent, not
-  generated at run time." is missing from the label (§1.5). CR-010 proposes keeping the recorded
-  label for this submission (accepted deviation); task T258.
+  generated at run time." is missing from the label (§1.5). CR-010 (approved by the human owner
+  2026-10-16) keeps the recorded label for this submission as an accepted deviation; FR-ORC-034
+  stays PARTIAL; task T258.
 
 ### 2.3 Observability, traceability and evidence
 

@@ -187,7 +187,7 @@ runs will not match §4 exactly unless the code and change sets are unchanged.
 - **Persistence and tooling differ from the ADR text.** The implementation uses stdlib `sqlite3`
   (WAL, `CREATE TABLE IF NOT EXISTS`, append-only triggers) rather than SQLAlchemy Core + Alembic
   (ADR-002), and pip with `requirements.lock` rather than `uv` (ADR-001). ADR-020 and ADR-021
-  record this as built; both are **proposed** (CR-009) and await the human owner's approval.
+  record this as built; the human owner accepted both on 2026-10-16 (CR-009).
 - **TDD record for the baseline.** Scenario change sets record red then green. The baseline
   shortener code was not developed red-first per task (lean-slice §3, open question 3).
 - **Horizontal scaling (NFR-SCL-002): documented, not demonstrated.** The shortener runs as one
@@ -222,7 +222,7 @@ runs will not match §4 exactly unless the code and change sets are unchanged.
 ## 9. Known gaps (final assessment)
 
 The independent final assessment ([docs/reviews/final-assessment.md](docs/reviews/final-assessment.md),
-2026-10-16; review by the human owner pending) checked 206 spec criteria: **136 MET, 50 PARTIAL,
+2026-10-16; reviewed by the human owner Mani Kumar Vadugu) checked 206 spec criteria: **136 MET, 50 PARTIAL,
 20 MISSING** before the documentation changes of 2026-10-16. Every remaining PARTIAL or MISSING
 item is listed below with the task (in `specs/001-agentic-sdlc-url-shortener/tasks.md`, Phase 13)
 or gap ID (G-, in the assessment) that addresses it. "No task yet" means nothing is planned for it.
@@ -263,14 +263,14 @@ Principle V (T255); baseline not developed red-first and no recorded exception, 
 | FR-ORC-025 | No declared per-agent permissions or permission guard | T275 |
 | FR-ORC-029 | Runs don't record the agent mode | T266 |
 | FR-ORC-033, edge case: integrity mismatch | Integrity mismatch safe-stops but isn't a recorded policy FAIL; lock not tied to the git tag | T253, T279 |
-| FR-ORC-034 | Provenance label lacks "; applied by the deterministic agent, not generated at run time." (CR-010 proposes keeping it for this submission) | T258 |
+| FR-ORC-034 | Provenance label lacks "; applied by the deterministic agent, not generated at run time." (accepted deviation for this submission, CR-010, approved 2026-10-16) | T258 |
 | FR-ORC-036 | `orch run submit … --fact` can inject a fault without the `fault-injection` label; no `undeclared-scope` variant | G2, T276 |
 | FR-ORC-037, FR-ORC-039 | One fork after `test` instead of three branches after design approval | T259 |
 | FR-ORC-040, FR-ORC-041 | SCN-A, SCN-B and SCN-C complete without staging promotion or smoke check | T260 |
-| Release gate (Human Gate 4 ruling 4) | `approve-release` offers approve/reject/escalate, not ready/not_ready/escalate (CR-009 proposes an accepted deviation) | G4 (future work) |
+| Release gate (Human Gate 4 ruling 4) | `approve-release` offers approve/reject/escalate, not ready/not_ready/escalate (accepted deviation for this submission, CR-009, approved 2026-10-16) | G4 (future work) |
 | FR-GOV-005 | Policy set covers PRIV, SEC and REL only | T253 |
 | FR-GOV-008 | Exceptions lack scope, expiry or review condition; no rejection | T254 |
-| FR-GOV-009, NFR-MNT-001 | ADRs disagree with the code; CR-009 (ADR-020/021/022) awaits approval | CR-009 (human) |
+| FR-GOV-009, NFR-MNT-001 | CR-009 approved 2026-10-16 (ADR-020/021/022 Accepted); the items ADR-022 marks "Not amended" still disagree with the code | Tasks listed in ADR-022 |
 | FR-GOV-010, US4/AC1, US4/AC2, SC-008 | No release-readiness assessment with blocking reasons; no expired-exception case | T261, T254 |
 | FR-OBS-004 | Refused audit modifications are not themselves audited | T277 |
 | FR-OBS-005 | Audit can be listed by run only | T267 |
@@ -279,7 +279,8 @@ Principle V (T255); baseline not developed red-first and no recorded exception, 
 | SCN-A-AC2 | No data/schema impact recorded | No task yet |
 | SCN-B-AC5 | Undeclared-scope check exists but is untested | T276 |
 | SC-002 | Not every scenario acceptance criterion is met (SCN-A-AC4, AC6) | T263, T264 |
-| NFR-SEC-003 | Threat model drafted 2026-10-16, review pending; stats readable by any key holder (TB-5) needs a decision | T255, G10 (human) |
+| NFR-SEC-003 | Threat model drafted 2026-10-16, review pending | T255 |
+| Threat model TB-5 (G10) | Stats readable by any key holder: accepted risk for this submission (human owner, 2026-10-16), because stats contain only aggregate counts and no personal data and owner-scoping would change the baseline of the locked change sets | T290 |
 | NFR-SCL-001, PVT-003 | Concurrency tested with 200 creations, not 1,000 | T273 |
 | NFR-RCV-001, PVT-006 | One real interruption test, not every stage boundary | T272 |
 | NFR-TST-001, PVT-007 | No coverage measurement or gate | T281 |

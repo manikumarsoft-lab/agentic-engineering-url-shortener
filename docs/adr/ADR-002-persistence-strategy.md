@@ -5,9 +5,9 @@
 **Accepted (Mani Kumar Vadugu, human owner, 2026-10-15)**
 
 Superseded in part by [ADR-021](ADR-021-sqlite-stdlib-persistence.md) (stdlib `sqlite3`, no
-SQLAlchemy, Alembic or repositories; file layout) — **proposed, CR-009, awaiting human owner
-approval**. Until approved, this ADR's text stands and the differences are listed in
-[docs/reviews/final-assessment.md](../reviews/final-assessment.md) §3.
+SQLAlchemy, Alembic or repositories; file layout) — **approved, CR-009 (Mani Kumar Vadugu, human owner,
+2026-10-16)**. Where the two differ, ADR-021 describes the implementation; the differences are
+listed in [docs/reviews/final-assessment.md](../reviews/final-assessment.md) §4.
 
 History: Proposed 2026-10-15. Underlying selection made by the human owner (Mani Kumar Vadugu)
 during `/speckit-plan` (research R-02, DQ-008).

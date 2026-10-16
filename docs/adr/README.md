@@ -1,7 +1,8 @@
 # Architecture Decision Records: Feature 001
 
-ADR gate for `specs/001-agentic-sdlc-url-shortener` (2026-10-15). **All 19 ADRs are Accepted**
-(Mani Kumar Vadugu, human owner, Human Gate 4, 2026-10-15).
+ADR gate for `specs/001-agentic-sdlc-url-shortener` (2026-10-15). **All 22 ADRs are Accepted**
+(Mani Kumar Vadugu, human owner): ADR-001 to ADR-019 at Human Gate 4 (2026-10-15), ADR-020 to
+ADR-022 with CR-009 (2026-10-16).
 
 Format: Status · Context · Decision Drivers · Options Considered (approach, advantages,
 disadvantages, risks, implementation impact, assessment implications) · Decision · Rationale ·
@@ -11,8 +12,8 @@ Consequences · Risks and Mitigations · Reversibility · Traceability · Valida
 
 | ADR | Decision | ADR-gate topics | Basis | Status |
 |-----|----------|-----------------|-------|--------|
-| [001](ADR-001-language-and-framework.md) | Python 3.12 + FastAPI + Pydantic v2 (uv) | 2 Language/framework | DQ-008 (human selection) | Accepted; superseded in part by ADR-020 (proposed) |
-| [002](ADR-002-persistence-strategy.md) | SQLite (WAL) + SQLAlchemy Core + Alembic; DB per instance; additive migrations | 3 Persistence | DQ-008 (human selection) | Accepted; superseded in part by ADR-021 (proposed) |
+| [001](ADR-001-language-and-framework.md) | Python 3.12 + FastAPI + Pydantic v2 (uv) | 2 Language/framework | DQ-008 (human selection) | Accepted; superseded in part by ADR-020 (CR-009) |
+| [002](ADR-002-persistence-strategy.md) | SQLite (WAL) + SQLAlchemy Core + Alembic; DB per instance; additive migrations | 3 Persistence | DQ-008 (human selection) | Accepted; superseded in part by ADR-021 (CR-009) |
 | [003](ADR-003-orchestration-model.md) | In-repository engine built from scratch, with the deterministic superstep scheduler | 5 Orchestration model | DQ-008, PD-004 | Accepted |
 | [004](ADR-004-application-architecture-and-local-execution.md) | Two services + CLI; layered packages; ports and `var/` layout | 1 Application architecture; 14 Deployment/local execution | DQ-008 (human selection) | Accepted |
 | [005](ADR-005-dependency-graph-representation.md) | Versioned YAML graph template plus per-run graph instances | 7 Dependency graph | New | Accepted |
@@ -30,9 +31,9 @@ Consequences · Risks and Mitigations · Reversibility · Traceability · Valida
 | [017](ADR-017-dynamic-replanning.md) | Stale closure, input-hash memoization, approval revocation | 11 Dynamic replanning | New | Accepted |
 | [018](ADR-018-testing-strategy.md) | Test-first pyramid, virtual clock, fault injection, requirement-marked tests | 13 Testing strategy | PD-006 | Accepted |
 | [019](ADR-019-analytics-consistency.md) | Atomic increment after redirect; exact while storage is healthy; failures counted | 16 Analytics consistency | Ruling 2 | Accepted |
-| [020](ADR-020-python-toolchain-as-built.md) | As built: pip + `requirements.lock`; pytest only; no uv, ruff, mypy, Hypothesis, schemathesis | 2 Language/framework | CR-009, final assessment | Proposed (awaiting human owner approval, CR-009) |
-| [021](ADR-021-sqlite-stdlib-persistence.md) | As built: SQLite (WAL) via stdlib `sqlite3`; no SQLAlchemy, Alembic, repositories or migrations | 3 Persistence | CR-009, final assessment | Proposed (awaiting human owner approval, CR-009) |
-| [022](ADR-022-as-built-amendments-003-019.md) | As-built amendments to ADR-003..ADR-019; spec-mandated items left as code gaps; G4 release-gate deviation | (several) | CR-009, final assessment | Proposed (awaiting human owner approval, CR-009) |
+| [020](ADR-020-python-toolchain-as-built.md) | As built: pip + `requirements.lock`; pytest only; no uv, ruff, mypy, Hypothesis, schemathesis | 2 Language/framework | CR-009, final assessment | Accepted (Mani Kumar Vadugu, human owner, 2026-10-16, CR-009) |
+| [021](ADR-021-sqlite-stdlib-persistence.md) | As built: SQLite (WAL) via stdlib `sqlite3`; no SQLAlchemy, Alembic, repositories or migrations | 3 Persistence | CR-009, final assessment | Accepted (Mani Kumar Vadugu, human owner, 2026-10-16, CR-009) |
+| [022](ADR-022-as-built-amendments-003-019.md) | As-built amendments to ADR-003..ADR-019; spec-mandated items left as code gaps; G4 release-gate deviation | (several) | CR-009, final assessment | Accepted (Mani Kumar Vadugu, human owner, 2026-10-16, CR-009) |
 
 All 16 ADR-gate topics are covered. These minor choices have no standalone ADR: logging (in ADR-011),
 security scanners (ADR-009), CLI framework (ADR-001), IDs and time (ADR-015).
@@ -74,3 +75,7 @@ ADR-001 to ADR-019 were reviewed and accepted by Mani Kumar Vadugu (human owner)
 (Human Gate 4). Also confirmed at that gate: the FR-GOV-003/FR-GOV-015 interpretation (a release
 decision of "not ready" ends the run `FAILED`; `ABORTED` is reserved for a human "reject and
 terminate" at an approval gate) and the three MAJOR contract bumps of CR-002.
+
+ADR-020 to ADR-022 were accepted by Mani Kumar Vadugu (human owner) on 2026-10-16 with CR-009,
+together with the G4 release-gate deviation: `approve-release` keeps its as-built options for this
+submission, and aligning it with ruling 4 is future work.

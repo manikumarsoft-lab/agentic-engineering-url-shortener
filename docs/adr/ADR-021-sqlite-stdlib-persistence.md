@@ -2,15 +2,15 @@
 
 ## Status
 
-**Proposed (awaiting human owner approval, CR-009)**
+**Accepted (Mani Kumar Vadugu, human owner, 2026-10-16, CR-009)**
 
 Supersedes in part: [ADR-002](ADR-002-persistence-strategy.md) §Decision, §Rationale,
 §Consequences (Operational, Testing), §Reversibility, §Validation. ADR-002's choice of SQLite
 (WAL, one file per role, append-only triggers) stands.
 
 History: drafted 2026-10-16 with AI assistance (Claude Code) from the final assessment
-([docs/reviews/final-assessment.md](../reviews/final-assessment.md) §3). It has no effect until
-the human owner approves CR-009.
+([docs/reviews/final-assessment.md](../reviews/final-assessment.md) §3). Accepted by the human owner
+with CR-009 on 2026-10-16.
 
 ## Context
 

@@ -58,7 +58,7 @@ pattern `^[A-Za-z0-9]{4,10}$`, and `409 alias_conflict` that never overwrites
 | TB-2 | Malicious or self-referential targets (redirect loops, internal hosts) | mitigated | Self domain, `localhost`, private, loopback, link-local, multicast, reserved and unspecified IP literals rejected (`validation.py` `_blocked_ip`, `self_referential_url`). The shortener never fetches destinations (no SSRF path). Host names that *resolve* to private addresses are not checked (DNS is not resolved). |
 | TB-3 | Enumeration of short codes | mitigated in part | CSPRNG base62 codes of length 7 (~3.5 × 10¹² values, `src/shortener/codes.py`); unknown and malformed codes return the same 404. Redirects are not rate limited (AR-1), so enumeration volume is bounded only by that accepted risk. |
 | TB-4 | Enumeration through the API | mitigated | Missing/invalid keys get 401 before any lookup, so existence is never revealed to unauthenticated callers (FR-SHR-019). |
-| TB-5 | Stats read by a different key holder (`GET /api/v1/links/{code}/stats`) | **open** (human decision) | Any valid human key can read the click count and last-click time of any link; no destination is returned. Not owner-scoped in the baseline (unlike TH-1). Low severity; needs to be accepted or fixed by the human owner. |
+| TB-5 | Stats read by a different key holder (`GET /api/v1/links/{code}/stats`) | **accepted risk (human owner, 2026-10-16)** | Any valid human key can read the click count and last-click time of any link; no destination is returned. Not owner-scoped in the baseline (unlike TH-1). Low severity. Accepted for this submission (G10): stats contain only aggregate counts and no personal data, and restricting reads to the creating key would change the baseline the locked change sets apply to. Owner-scoping is future work (T290). |
 | TB-6 | Injection (SQL, header, log) | mitigated | Parameterized SQL only (`src/shortener/store.py`, `src/orchestrator/store.py`); request body `extra="forbid"`; `X-Request-ID` accepted only if it matches `^[A-Za-z0-9._-]{1,64}$`; JSON log formatter emits explicit fields only (`src/shortener/app.py`). |
 | TB-7 | Abuse volume on creation | mitigated | 60 creations per minute per key, sliding window, 429 with `Retry-After` (`app.py` `RateLimiter`, PVT-011). In-memory and per process (see README "Horizontal scaling"). |
 | TB-8 | Approval spoofing (an agent or wrong role records a decision) | mitigated | Every gate decision, resume, exception and replan request is checked for a human key with the required role; refusals are audited as `AUTH_REFUSED` (`engine.py` `_principal`; `tests/orchestrator/test_flow_and_gates.py`). Decisions record key ID and role (FR-GOV-013). |
@@ -76,12 +76,14 @@ pattern `^[A-Za-z0-9]{4,10}$`, and `409 alias_conflict` that never overwrites
 - No DNS resolution during URL validation: avoids network calls and SSRF, but a public host name
   pointing to a private address is accepted.
 - Single-person separation of duties (plan §16.4).
+- Stats readable by any key holder (TB-5): accepted risk for this submission (human owner,
+  2026-10-16); owner-scoping is T290.
 
 ## 6. Open items
 
 | Item | Owner | Task |
 |------|-------|------|
-| TB-5 stats visible to any key holder: accept or owner-scope | Human owner | — (decision needed) |
+| TB-5 stats visible to any key holder: accepted risk (human owner, 2026-10-16); owner-scope the stats endpoint | Engineering | T290 |
 | Separation of duties between key identities | Engineering | T262 |
 | Audit of refused tamper attempts | Engineering | T277 |
 | Agent capability guard | Engineering | T275 |

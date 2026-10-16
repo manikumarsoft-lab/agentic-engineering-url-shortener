@@ -4,8 +4,8 @@
 Convergence tasks appended to `tasks.md`) · **Scope**: every criterion in
 `specs/001-agentic-sdlc-url-shortener/spec.md` and the assignment criteria it cites.
 
-> Independent assessment produced with AI assistance (Claude Code); review by the human owner
-> Mani Kumar Vadugu: **pending**. Change "pending" to "reviewed" only after reading it.
+> Independent assessment produced with AI assistance (Claude Code); reviewed by the human owner
+> Mani Kumar Vadugu, 2026-10-16.
 
 ## 0. Method
 
@@ -204,24 +204,24 @@ G1–G8 and G10–G11 were found in this assessment; G9 groups the converge task
 
 | # | Gap | Exact fix |
 |---|-----|-----------|
-| G1 | FR-ORC-034 label shortened | `src/orchestrator/agents/scenario.py:35`: append `"; applied by the deterministic agent, not generated at run time."` to `PROVENANCE`; re-run `tools/author_changesets.py`; the human owner re-locks each change set (`orch changeset lock <path> --key <approver>`). **CR-010 (proposed)**: keep the recorded label for this submission; future work T258. |
+| G1 | FR-ORC-034 label shortened | `src/orchestrator/agents/scenario.py:35`: append `"; applied by the deterministic agent, not generated at run time."` to `PROVENANCE`; re-run `tools/author_changesets.py`; the human owner re-locks each change set (`orch changeset lock <path> --key <approver>`). **CR-010 (approved 2026-10-16, accepted deviation)**: the recorded label is kept for this submission; FR-ORC-034 stays PARTIAL; future work T258. |
 | G2 | `--fact` injects faults without the label | `src/cli/main.py` `run_submit`: refuse `--fact` keys `fault_injection` and `variant` unless the registry entry sets them; or in `Engine.submit` add `fault-injection` to `labels` when `facts` has `fault_injection` or `variant != "normal"`. Add a CLI test. |
 | G3 | Quickstart described non-existent commands | Rewrite `quickstart.md` from README §2/§5 (done 2026-10-16, §6); add `tests/e2e/test_quickstart.py` running every command against a temporary `ORCH_HOME` (T282). |
-| G4 | Release gate vocabulary differs from Human Gate 4 ruling 4 | `engine.py`: gate kind `release` with `ready`, `not_ready`, `escalate`; `not_ready` → FAILED with reasons; `kind: release` on `approve-release` in all four workflows. **CR-009 (proposed)**: accepted deviation for this submission, because changing it now would make the recorded evidence inconsistent with the code; future work. |
+| G4 | Release gate vocabulary differs from Human Gate 4 ruling 4 | `engine.py`: gate kind `release` with `ready`, `not_ready`, `escalate`; `not_ready` → FAILED with reasons; `kind: release` on `approve-release` in all four workflows. **CR-009 (approved 2026-10-16)**: accepted deviation for this submission, because changing it now would make the recorded evidence inconsistent with the code; future work. |
 | G5 | Submission tag missing (CST-009) | Human owner: `git tag -a assessment-submission-v1.0 -m "…"` and `git push origin assessment-submission-v1.0` after CI is green (T251). |
 | G6 | Exact counts under concurrent redirects untested (A-013) | Add a test to `tests/shortener/test_concurrency_serve.py`: 200 parallel GETs to one code, assert `clicks == 200`. |
 | G7 | Idempotency records never expire | `store.create`: ignore and replace rows with `created_at` older than 24 h; test with a fake clock. |
 | G8 | Horizontal scaling undocumented (NFR-SCL-002) | README §7 "Horizontal scaling" paragraph (done 2026-10-16, §6). |
 | G9 | Constitution, readiness, topology, separation of duties, traceability, metrics, AI mode, PVT and documentation gaps | Phase 13 tasks T252–T289 in `tasks.md`. |
-| G10 | Stats readable by any key holder (threat-model TB-5) | Human decision: accept as a documented low risk, or owner-scope `GET /api/v1/links/{code}/stats` like SCN-A's TH-1 control. |
+| G10 | Stats readable by any key holder (threat-model TB-5) | **Accepted risk (human owner, 2026-10-16)**: stats contain only aggregate counts and no personal data, and restricting reads to the creating key would change the baseline the locked change sets apply to. Future work T290: owner-scope `GET /api/v1/links/{code}/stats` like SCN-A's TH-1 control. |
 | G11 | Creation during a persistence outage untested (FR-SHR-015, EC-03) | Add a test that patches `store.create` to raise `sqlite3.OperationalError` and asserts 503 `persistence_unavailable` and no stored link. |
 
 ## 4. ADR disagreements with the implementation
 
 **(amend)**: the code is a legitimate lean-slice choice; the ADR should follow it.
 **(fix code)**: the ADR restates a spec requirement or a Human Gate 4 ruling; rewording it would
-move the conflict into `spec.md`, so the code should change. Proposed amendments are in ADR-020,
-ADR-021 and ADR-022 (all Proposed, CR-009).
+move the conflict into `spec.md`, so the code should change. The amendments are in ADR-020,
+ADR-021 and ADR-022 (all Accepted 2026-10-16, CR-009).
 
 ### ADR-001 (amend → ADR-020)
 
@@ -250,7 +250,7 @@ ADR-021 and ADR-022 (all Proposed, CR-009).
 | 003 | Agents are `fn(ctx) -> dict` run by `agents/runner.py`; IDs from `uuid4().hex`; `Clock`/`FakeClock` in `engine.py`; no AI stub; no determinism test | (amend) agent shape, IDs, clock. (fix code) AI stub (T266), determinism test (T271) |
 | 004 | Flat modules plus `src/cli/`; no orchestrator server on 8200; staging is a subprocess smoke check, not a server on 8100 | (amend) layout, processes, paths. (fix code) `orch demo reset` (T287); HTTP API (T284) or a CR removing it |
 | 005 | No `sync`/`system` nodes, `optional_inputs` or dynamic gate patterns; conditions `{fact, equals \| not_equals}`; adds `failure_edge`, `compensate` | (amend). (fix code) entry/exit criteria and owner (T252) |
-| 006 | Manifest fields differ; lock in `scenarios/changesets.lock.yaml` by approver key, not a tag; R0 from the working tree; one workspace per run; dependency change fails SEC-003 not `manifest_invalid`; label shortened; no `undeclared-scope` variant | (amend) manifest, lock mechanism, R0 source, workspace granularity. (fix code) label (T258; CR-010 proposes keeping it), variant (T276), tag anchoring (T279), `git archive` (T288) |
+| 006 | Manifest fields differ; lock in `scenarios/changesets.lock.yaml` by approver key, not a tag; R0 from the working tree; one workspace per run; dependency change fails SEC-003 not `manifest_invalid`; label shortened; no `undeclared-scope` variant | (amend) manifest, lock mechanism, R0 source, workspace granularity. (fix code) label (T258; kept by CR-010, accepted deviation), variant (T276), tag anchoring (T279), `git archive` (T288) |
 | 007 | Contract generated from the app (CR-007); no Alembic | (amend) code-first contract with drift test. (fix code) CHG-003 as a policy check (T253) |
 | 008 | No schema validation of events, no 405 / `AUDIT_TAMPER_REFUSED`, no `orch audit export`; evidence export writes `chain.json` with `head_hash` | (amend) export mechanism. (fix code) audit refused tamper attempts (T277) |
 | 009 | Regex secret scan (SEC-004), not detect-secrets as "SEC-002"; SEC-002 is "no open high threat"; no pip-licenses, expiry, non-waivable list or G-EXCEPTION gate | (amend) scanners, check IDs, CLI exception flow. (fix code) expiry and non-waivable checks (T254), licensing (T253), separation of duties (T262) |
@@ -260,19 +260,19 @@ ADR-021 and ADR-022 (all Proposed, CR-009).
 | 013 | Resume resets the retry budget; no REL-005 | (amend) remove REL-005. (fix code) approver-granted extension (T274) |
 | 014 | Matches the code | none (1,000-creation test: T273) |
 | 015 | IDs not ULIDs (`run_`, `dec_`, `exc_`, `ep_`); artifact content inline in DB; no rebuild-from-audit test | (amend) ID format and storage. (fix code) consistency test (T241 scope) |
-| 016 | Release gate offers approve / reject_rework / reject_terminate / escalate (reject_terminate → ABORTED) instead of ruling 4's ready / not_ready / escalate (not_ready → FAILED); no `decision_source` | (amend) drop `decision_source`. Ruling 4 not amended: G4 proposed as an accepted deviation in CR-009, future work |
+| 016 | Release gate offers approve / reject_rework / reject_terminate / escalate (reject_terminate → ABORTED) instead of ruling 4's ready / not_ready / escalate (not_ready → FAILED); no `decision_source` | (amend) drop `decision_source`. Ruling 4 not amended: G4 accepted as a deviation in CR-009 (2026-10-16), future work |
 | 017 | `NODE_STALE` not `ARTIFACT_STALE`; no `GRAPH_VERSION_CREATED` or memoization; no late ambiguity | (amend) event names. (fix code) late ambiguity (T264) |
 | 018 | No `tools/check.py`, coverage, `req` markers, TDD log or `FAULT_INJECTED`; fault injection via facts plus registry labels | (amend) test-first recorded per scenario run. (fix code) G2, T281; Constitution IV decision T256 (human) |
 | 019 | Analytics and `analytics_write_failures` are baseline (HD-SCN-001), reported by `/health/ready` | (amend). (fix code) concurrency exactness test (G6) |
 
-Consequential edits once CR-009 is approved: `plan.md` (Technical Context, §2.1, §12 R-01/R-02,
-§14.2 slice 1) and `research.md` (R-01, R-02) carry "As built (CR-009, proposed)" notes as of
-2026-10-16; the approved text is replaced only after approval.
+Consequential edits of CR-009: `plan.md` (Technical Context, §2.1, §12 R-01/R-02,
+§14.2 slice 1) and `research.md` (R-01, R-02) carry "As built (CR-009, approved)" notes; CR-009
+was approved by the human owner on 2026-10-16.
 
 ## 5. Recommended order
 
 1. Fix code where the ADR is right and no deviation is proposed: G2, G6, G7, G11.
-2. Human owner decides CR-009 (ADR-020/021/022, G4 deviation) and CR-010 (G1 deviation), and G10.
+2. Human owner decides CR-009 (ADR-020/021/022, G4 deviation) and CR-010 (G1 deviation), and G10. Done 2026-10-16 (§7).
 3. Work through Phase 13 (T252–T289), constitution items first.
 4. Human owner records PVT-009 timing and creates the submission tag (G5, T251).
 
@@ -289,3 +289,15 @@ code, change sets or evidence.
 | EV-008 | `docs/traceability-matrix.md` created from existing links | PARTIAL: hand-built, not generated or checked (FR-OBS-008, T268/T269 remain) |
 | FR-GOV-009, NFR-MNT-001 | CR-009, CR-010, ADR-020/021/022 (all Proposed) | No change until the human owner approves |
 | F7, F8 | `docs/scope/lean-slice.md` corrected | Claims now match the code; FR-ORC-034/037/038 statuses unchanged |
+
+## 7. Human owner decisions (2026-10-16)
+
+Recorded for the human owner Mani Kumar Vadugu, 2026-10-16. Docs only: no code, change set,
+policy or evidence changes. The statuses in §1–§2 are not re-assessed by these decisions.
+
+| Item | Decision | Effect |
+|------|----------|--------|
+| CR-009 | Approved. ADR-020, ADR-021 and ADR-022 are Accepted. The G4 release-gate deviation is accepted for this submission; aligning `approve-release` with Human Gate 4 ruling 4 is future work | ADR-001/002 status notes, ADR index, "As built" notes in plan.md and research.md set to approved; T285 done |
+| CR-010 | Approved as an accepted deviation: the recorded provenance label is kept for this submission | FR-ORC-034 stays PARTIAL; full label is future work T258 |
+| G10 | Accepted risk for this submission: stats contain only aggregate counts and no personal data; restricting reads to the creating key would change the baseline the locked change sets apply to | Threat model TB-5 "accepted risk (human owner, 2026-10-16)"; owner-scoping is T290 |
+| Review | This assessment was reviewed by the human owner | Header updated |

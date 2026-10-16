@@ -42,7 +42,7 @@ Node 24.20.0, npm 11.19.0 present; Java, Go, .NET and Docker absent.
 - **Reversibility**: medium. The HTTP contracts are language-neutral, so a service could be
   re-implemented behind the same contract.
 - **Validation**: slice 1 toolchain green; slice 3 contract drift and schemathesis green.
-- **As built (CR-009, proposed; awaiting human owner approval)**: (a) is implemented with pip
+- **As built (CR-009, approved 2026-10-16)**: (a) is implemented with pip
   and the pinned `requirements.lock` instead of uv; FastAPI handlers are synchronous and use
   stdlib `sqlite3`, not SQLAlchemy Core; there is no mypy, ruff, Hypothesis or schemathesis.
   Contract conformance is the drift test of the app-generated OpenAPI document (CR-007). See
@@ -69,7 +69,7 @@ Node 24.20.0, npm 11.19.0 present; Java, Go, .NET and Docker absent.
 - **Reversibility**: high. Repository protocols plus SQLAlchemy Core keep SQL portable; Postgres
   adapter is backlog BL-09.
 - **Validation**: persistence suite; PVT-003 concurrency test; audit trigger tests.
-- **As built (CR-009, proposed; awaiting human owner approval)**: SQLite (WAL) through stdlib
+- **As built (CR-009, approved 2026-10-16)**: SQLite (WAL) through stdlib
   `sqlite3`, with no SQLAlchemy, Alembic or repository protocols. Schemas are created with
   `CREATE TABLE IF NOT EXISTS`; there are no migrations or migration tests. Append-only triggers
   are on `audit` and `policy_evaluations`. The concurrency test covers 200 parallel creations,

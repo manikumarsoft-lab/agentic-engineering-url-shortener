@@ -2,11 +2,11 @@
 
 ## Status
 
-**Proposed (awaiting human owner approval, CR-009)**
+**Accepted (Mani Kumar Vadugu, human owner, 2026-10-16, CR-009)**
 
 History: drafted 2026-10-16 with AI assistance (Claude Code) from the final assessment
-([docs/reviews/final-assessment.md](../reviews/final-assessment.md) §3). It has no effect until
-the human owner approves CR-009.
+([docs/reviews/final-assessment.md](../reviews/final-assessment.md) §3). Accepted by the human owner
+with CR-009 on 2026-10-16.
 
 ## Context
 
@@ -70,7 +70,7 @@ ADR-003..ADR-019 stand.
   (`var/work/<run_id>/`), not per attempt and not via `git archive`. A change set that alters
   `pyproject.toml` dependencies fails SEC-003 at `validate` instead of `manifest_invalid`.
 - **Not amended (code to change)**: provenance label text (FR-ORC-034; accepted deviation
-  proposed in CR-010; T258); `undeclared-scope` variant (SCN-B-AC5, T276); lock anchored to an
+  for this submission, CR-010; T258); `undeclared-scope` variant (SCN-B-AC5, T276); lock anchored to an
   annotated tag (plan §16.3, T279); R0 from `git archive` (T288).
 
 ### ADR-007: Contract-first API and schema versioning
@@ -137,7 +137,7 @@ ADR-003..ADR-019 stand.
 
 - **Amended**: There is no `decision_source` field. Scripted decisions appear only in tests;
   evidence export refuses runs labelled `test`.
-- **Proposed accepted deviation (CR-009, G4)**: the release gate `approve-release` offers
+- **Accepted deviation (CR-009, G4; human owner, 2026-10-16)**: the release gate `approve-release` offers
   approve / reject_rework / reject_terminate / escalate (reject_terminate → `ABORTED`) instead
   of ruling 4's ready / not_ready / escalate (not_ready → `FAILED`). The ruling is **not**
   amended; the deviation is kept for this submission because changing the code now would make
@@ -172,7 +172,7 @@ ADR-003..ADR-019 stand.
 
 ## Consequences
 
-- ADR-003..ADR-019 describe the code once CR-009 is approved, except for the "Not amended"
+- ADR-003..ADR-019 describe the code (CR-009, approved 2026-10-16), except for the "Not amended"
   items, which stay open with task IDs in `tasks.md` Phase 13 and in README "Known gaps".
 - No accepted ruling (Human Gate 4 rulings 1–4, plan §16) is changed by this ADR.
 

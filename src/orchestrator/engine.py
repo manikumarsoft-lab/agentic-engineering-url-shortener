@@ -384,10 +384,18 @@ class Engine:
                           reason: str) -> None:
         p = self._principal(run_id, presented, {"approver"}, "exception.approve")
         row = self.store.conn.execute(
-            "SELECT status, check_id FROM exceptions WHERE exception_id = ? AND run_id = ?",
+            "SELECT status, check_id, requested_by FROM exceptions WHERE exception_id = ? AND run_id = ?",
             (exception_id, run_id)).fetchone()
         if row is None or row["status"] != "REQUESTED":
             raise EngineError(f"exception {exception_id} is not awaiting a decision")
+        if row["requested_by"] == p.key_id:  # FR-GOV-017: separation of duties between key identities
+            reason = "separation of duties: the key that requested the exception may not approve it"
+            with self.store.tx() as c:
+                self._audit(c, run_id, "AUTH_REFUSED", target=row["check_id"], actor_type="human",
+                            actor_id=p.key_id, result="refused", reason=reason,
+                            data={"action": "exception.approve", "exception_id": exception_id,
+                                  "violation": "separation_of_duties_violation"})
+            raise AuthError(reason)
         with self.store.tx() as c:
             c.execute("UPDATE exceptions SET status = 'APPROVED', decided_by = ?, decided_at = ? "
                       "WHERE exception_id = ?", (p.key_id, self.clock.now(), exception_id))

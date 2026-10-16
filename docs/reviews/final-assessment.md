@@ -205,11 +205,11 @@ G1–G8 and G10–G11 were found in this assessment; G9 groups the converge task
 | # | Gap | Exact fix |
 |---|-----|-----------|
 | G1 | FR-ORC-034 label shortened | `src/orchestrator/agents/scenario.py:35`: append `"; applied by the deterministic agent, not generated at run time."` to `PROVENANCE`; re-run `tools/author_changesets.py`; the human owner re-locks each change set (`orch changeset lock <path> --key <approver>`). **CR-010 (approved 2026-10-16, accepted deviation)**: the recorded label is kept for this submission; FR-ORC-034 stays PARTIAL; future work T258. |
-| G2 | `--fact` injects faults without the label | `src/cli/main.py` `run_submit`: refuse `--fact` keys `fault_injection` and `variant` unless the registry entry sets them; or in `Engine.submit` add `fault-injection` to `labels` when `facts` has `fault_injection` or `variant != "normal"`. Add a CLI test. |
+| G2 | `--fact` injects faults without the label | `src/cli/main.py` `run_submit`: refuse `--fact` keys `fault_injection` and `variant` unless the registry entry sets them; or in `Engine.submit` add `fault-injection` to `labels` when `facts` has `fault_injection` or `variant != "normal"`. Add a CLI test. **Done 2026-10-16 (§8).** |
 | G3 | Quickstart described non-existent commands | Rewrite `quickstart.md` from README §2/§5 (done 2026-10-16, §6); add `tests/e2e/test_quickstart.py` running every command against a temporary `ORCH_HOME` (T282). |
 | G4 | Release gate vocabulary differs from Human Gate 4 ruling 4 | `engine.py`: gate kind `release` with `ready`, `not_ready`, `escalate`; `not_ready` → FAILED with reasons; `kind: release` on `approve-release` in all four workflows. **CR-009 (approved 2026-10-16)**: accepted deviation for this submission, because changing it now would make the recorded evidence inconsistent with the code; future work. |
 | G5 | Submission tag missing (CST-009) | Human owner: `git tag -a assessment-submission-v1.0 -m "…"` and `git push origin assessment-submission-v1.0` after CI is green (T251). |
-| G6 | Exact counts under concurrent redirects untested (A-013) | Add a test to `tests/shortener/test_concurrency_serve.py`: 200 parallel GETs to one code, assert `clicks == 200`. |
+| G6 | Exact counts under concurrent redirects untested (A-013) | Add a test to `tests/shortener/test_concurrency_serve.py`: 200 parallel GETs to one code, assert `clicks == 200`. **Done 2026-10-16 (§8): the test passed without a code change.** |
 | G7 | Idempotency records never expire | `store.create`: ignore and replace rows with `created_at` older than 24 h; test with a fake clock. |
 | G8 | Horizontal scaling undocumented (NFR-SCL-002) | README §7 "Horizontal scaling" paragraph (done 2026-10-16, §6). |
 | G9 | Constitution, readiness, topology, separation of duties, traceability, metrics, AI mode, PVT and documentation gaps | Phase 13 tasks T252–T289 in `tasks.md`. |
@@ -271,7 +271,7 @@ was approved by the human owner on 2026-10-16.
 
 ## 5. Recommended order
 
-1. Fix code where the ADR is right and no deviation is proposed: G2, G6, G7, G11.
+1. Fix code where the ADR is right and no deviation is proposed: G2, G6, G7, G11. G2 and G6 done 2026-10-16 (§8).
 2. Human owner decides CR-009 (ADR-020/021/022, G4 deviation) and CR-010 (G1 deviation), and G10. Done 2026-10-16 (§7).
 3. Work through Phase 13 (T252–T289), constitution items first.
 4. Human owner records PVT-009 timing and creates the submission tag (G5, T251).
@@ -301,3 +301,18 @@ policy or evidence changes. The statuses in §1–§2 are not re-assessed by the
 | CR-010 | Approved as an accepted deviation: the recorded provenance label is kept for this submission | FR-ORC-034 stays PARTIAL; full label is future work T258 |
 | G10 | Accepted risk for this submission: stats contain only aggregate counts and no personal data; restricting reads to the creating key would change the baseline the locked change sets apply to | Threat model TB-5 "accepted risk (human owner, 2026-10-16)"; owner-scoping is T290 |
 | Review | This assessment was reviewed by the human owner | Header updated |
+
+## 8. Code changes made after this assessment (2026-10-16)
+
+Each change was made test-first: the new test was run and failed before the fix, then passed after
+it. No change to `scenarios/`, `policy/`, `evidence/` or the change-set lock. Statuses in §1–§2
+describe the repository before these changes; this table gives the effect.
+
+| Item | Change | Red → green | Effect on status |
+|------|--------|-------------|------------------|
+| FR-GOV-017 (T262) | `Engine.approve_exception` refuses approval by the key that requested the exception: `AuthError` ("separation of duties: …"), audited as `AUTH_REFUSED` with `violation: separation_of_duties_violation`; the exception stays `REQUESTED` | `test_requesting_key_cannot_approve_its_own_exception`: failed with "DID NOT RAISE AuthError", then passed | MISSING → MET |
+| FR-ORC-036 (G2) | `orch run submit` refuses `--fact fault_injection=…` or `--fact variant=…` unless the value equals the one the scenario's registry entry sets; no run is created | `test_fault_facts_come_only_from_the_registry` (4 cases: scn-a, scn-c, scn-b `variant=defective`, scn-b-defective `variant=normal`): all 4 created a run before the fix, then were refused | Stays PARTIAL: the `undeclared-scope` variant is still missing (T276) |
+| FR-SHR-014, A-013 (G6) | Test only: 200 parallel redirects to one code through `orch serve`, then `clicks == 200` | `test_orch_serve_counts_200_parallel_redirects_exactly` passed on its first run; no code change | PARTIAL → MET |
+
+Checks after the changes: `python -m pytest` 134 passed, 1 skipped (the POSIX kill path, CI only);
+`python tools/trace_check.py` PASS, 0 gaps.

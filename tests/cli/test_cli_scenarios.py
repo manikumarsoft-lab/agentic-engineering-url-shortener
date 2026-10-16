@@ -11,6 +11,7 @@ from typer.testing import CliRunner
 
 from cli.main import app
 from orchestrator.agents.scenario import CONTRACT_REL
+from orchestrator.store import Store
 
 ROOT = Path(__file__).resolve().parents[2]
 COPY = ("src", "tests/shortener", CONTRACT_REL, "pyproject.toml", "requirements.lock", "scenarios", "policy")
@@ -81,6 +82,20 @@ def test_scanner_down_variant_via_cli_with_exception_and_evidence(orch):
     decisions = json.loads((evidence_dir / "decisions.json").read_text())
     assert decisions["exceptions"][0]["status"] == "APPROVED"
     assert run_id in (orch.root / "evidence" / "index.md").read_text()
+
+
+@pytest.mark.parametrize("scenario, fact", [
+    ("scn-a", "fault_injection=smoke_fail"),  # registry entry sets no fault_injection
+    ("scn-c", "fault_injection=scanner_unavailable"),
+    ("scn-b", "variant=defective"),  # registry sets variant: normal; overriding it is a fault
+    ("scn-b-defective", "variant=normal"),
+])
+def test_fault_facts_come_only_from_the_registry(orch, scenario, fact):
+    """Verifies: FR-ORC-036 (fault injection only through labelled registry entries, G2)."""
+    out = orch("run", "submit", scenario, "--fact", fact, code=2)
+    assert "refused" in out and fact.split("=")[0] in out
+    assert not re.search(r"run_[0-9a-f]{16}", out)
+    assert Store(orch.root / "var" / "orchestrator.db").conn.execute("SELECT 1 FROM runs").fetchone() is None
 
 
 def test_option_c_and_free_text_via_cli(orch):

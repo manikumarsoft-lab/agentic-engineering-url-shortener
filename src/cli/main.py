@@ -29,6 +29,7 @@ from orchestrator.policy import load_policy
 from orchestrator.store import Store
 
 ROOT = Path(__file__).resolve().parents[2]
+FAULT_FACTS = frozenset({"fault_injection", "variant"})  # set only by labelled registry entries
 
 app = typer.Typer(no_args_is_help=True, help="Agentic SDLC orchestrator (lean slice).")
 keys_app = typer.Typer(no_args_is_help=True, help="Manage API keys.")
@@ -123,9 +124,14 @@ def run_submit(scenario: str,
     for item in fact or []:
         k, _, v = item.partition("=")
         try:
-            facts[k] = json.loads(v)
+            value = json.loads(v)
         except json.JSONDecodeError:
-            facts[k] = v
+            value = v
+        # FR-ORC-036 (G2): faults come only from labelled registry entries, never from --fact
+        if k in FAULT_FACTS and entry.get("facts", {}).get(k, object()) != value:
+            raise _refused(EngineError(f"--fact {k} is set only by the scenario registry entry "
+                                       "(use a labelled scenario such as scn-b-defective or scn-c-scanner-down)"))
+        facts[k] = value
     store = _store()
     engine = _engine(store, entry["workflow"])
     run_id = engine.submit(facts, labels=tuple(entry.get("labels", ("demonstration",))))

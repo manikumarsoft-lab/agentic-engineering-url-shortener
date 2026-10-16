@@ -226,6 +226,9 @@ The independent final assessment ([docs/reviews/final-assessment.md](docs/review
 20 MISSING** before the documentation changes of 2026-10-16. Every remaining PARTIAL or MISSING
 item is listed below with the task (in `specs/001-agentic-sdlc-url-shortener/tasks.md`, Phase 13)
 or gap ID (G-, in the assessment) that addresses it. "No task yet" means nothing is planned for it.
+Closed by code changes after the assessment (assessment §8): FR-GOV-017 (T262), exact click
+counts under concurrent redirects (FR-SHR-014, A-013; G6), and fault facts passed with `--fact`
+(the G2 part of FR-ORC-036).
 
 **Constitution** (converge findings F1–F6, all CRITICAL): no entry/exit criteria or owner per
 stage, Principle II (T252); policy set lacks audit retention, dependency, licensing and
@@ -242,7 +245,6 @@ Principle V (T255); baseline not developed red-first and no recorded exception, 
 | FR-ORC-022, SCN-A-AC4 | Late ambiguity does not suspend only the dependent path | T264 |
 | FR-ORC-027, FR-ORC-030 | No AI-backed agent mode or disabled stub | T266 |
 | FR-ORC-038 | No second fork (docs finalization ∥ security validation) and no SP-2 | T259 |
-| FR-GOV-017 | The same key can request and approve an exception | T262 |
 | FR-OBS-008, US5/AC2 | No bidirectional traceability view (`docs/traceability-matrix.md` is a hand-built substitute) | T268 |
 | SCN-A-AC6 | No additive-change check for SCN-A | T263 |
 | NFR-PRF-001, NFR-PRF-002, PVT-001, PVT-002 | Redirect and creation latency not measured | T280 |
@@ -254,7 +256,6 @@ Principle V (T255); baseline not developed red-first and no recorded exception, 
 | Item | Gap | Task |
 |------|-----|------|
 | FR-SHR-013 | Idempotency records never expire | G7 |
-| FR-SHR-014, A-013 | Exact click counts under concurrent redirects untested | G6 |
 | FR-SHR-015, edge case: outage during creation | Creation during a storage outage untested | G11 |
 | FR-ORC-005 | Stages declare no entry criteria, exit criteria or owner | T252 |
 | FR-ORC-012, SCN-A-AC3 | Artifacts don't record input versions or requirement links | T265 |
@@ -264,7 +265,7 @@ Principle V (T255); baseline not developed red-first and no recorded exception, 
 | FR-ORC-029 | Runs don't record the agent mode | T266 |
 | FR-ORC-033, edge case: integrity mismatch | Integrity mismatch safe-stops but isn't a recorded policy FAIL; lock not tied to the git tag | T253, T279 |
 | FR-ORC-034 | Provenance label lacks "; applied by the deterministic agent, not generated at run time." (accepted deviation for this submission, CR-010, approved 2026-10-16) | T258 |
-| FR-ORC-036 | `orch run submit … --fact` can inject a fault without the `fault-injection` label; no `undeclared-scope` variant | G2, T276 |
+| FR-ORC-036 | No `undeclared-scope` variant | T276 |
 | FR-ORC-037, FR-ORC-039 | One fork after `test` instead of three branches after design approval | T259 |
 | FR-ORC-040, FR-ORC-041 | SCN-A, SCN-B and SCN-C complete without staging promotion or smoke check | T260 |
 | Release gate (Human Gate 4 ruling 4) | `approve-release` offers approve/reject/escalate, not ready/not_ready/escalate (accepted deviation for this submission, CR-009, approved 2026-10-16) | G4 (future work) |

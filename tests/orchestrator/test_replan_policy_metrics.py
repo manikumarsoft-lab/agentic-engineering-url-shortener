@@ -84,6 +84,23 @@ def test_policy_fail_blocks_release_until_exception_is_approved(env):
     assert outcomes == ["FAIL", "EXCEPTION-REQUESTED", "EXCEPTION-REQUESTED"]
 
 
+def test_requesting_key_cannot_approve_its_own_exception(env):
+    """Verifies: FR-GOV-017 (separation of duties between key identities)."""
+    eng = env.engine(RELEASE, policy=load_policy_text(POLICY))
+    run_id = eng.submit()
+    assert eng.run(run_id) == "SAFE_STOPPED"
+    exc = eng.request_exception(run_id, "PRIV-001", env.keys["approver"], "pilot only", "7-day purge")
+    with pytest.raises(AuthError, match="separation of duties"):
+        eng.approve_exception(run_id, exc, env.keys["approver"], "approving my own request")
+    status = env.store.conn.execute("SELECT status FROM exceptions WHERE exception_id = ?", (exc,)).fetchone()
+    assert status[0] == "REQUESTED"
+    refusals = [e for e in audit.events(env.store.conn, run_id) if e["action"] == "AUTH_REFUSED"]
+    assert refusals and refusals[-1]["data"]["action"] == "exception.approve"
+    assert refusals[-1]["data"]["violation"] == "separation_of_duties_violation"
+    assert "separation of duties" in refusals[-1]["reason"]
+    assert audit.verify_chain(env.store.conn, run_id) == (True, None)
+
+
 def test_mttr_counts_recovered_episodes_only():
     ev = lambda action, ts, ep: {"action": action, "ts": ts, "data": {"episode": ep}}  # noqa: E731
     events = [ev("FAILURE_DETECTED", 10, "e1"), ev("RECOVERY_COMPLETED", 14, "e1"),

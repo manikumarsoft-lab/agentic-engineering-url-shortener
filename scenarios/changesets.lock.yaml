@@ -1,0 +1,30 @@
+# Written by `orch changeset lock` (human approver key). Do not edit by hand.
+change_sets:
+  scenarios/scn-a/changeset:
+    locked_at: '2026-10-16T14:15:54.073357+00:00'
+    locked_by: 63320c4d1c94
+    role: approver
+    sha256:
+      impl_patch: 0c43bfe8802ff47ff12207e457a3eaa4e3c457a8a07d6c778f09c0424817cff4
+      tests_patch: 0abd7288a8edd35eab8a0fc4bc42ac95636417990e99dc68fce00cfb2d415ce9
+  scenarios/scn-b/changeset:
+    locked_at: '2026-10-16T14:15:54.253372+00:00'
+    locked_by: 63320c4d1c94
+    role: approver
+    sha256:
+      impl_patch: e1f83ac67e85a8012c6053cc7c8f3875eb06e52a03d534dd5fcb7da53ba33787
+      tests_patch: 45aefb81928ded5be008a3268feb5f9b607d27150e17415245081e8bf2401338
+  scenarios/scn-b/changeset-defective:
+    locked_at: '2026-10-16T14:15:54.436531+00:00'
+    locked_by: 63320c4d1c94
+    role: approver
+    sha256:
+      impl_patch: 786a322eedc417df5b77f317dca715c6fb302905480d0b1df3f6abcb4e251d78
+      tests_patch: 45aefb81928ded5be008a3268feb5f9b607d27150e17415245081e8bf2401338
+  scenarios/scn-c/changeset:
+    locked_at: '2026-10-16T14:15:54.624746+00:00'
+    locked_by: 63320c4d1c94
+    role: approver
+    sha256:
+      impl_patch: 63e89245f4629b8db2bba93e9a0366470adf277aac17eda19dba29496dc28d00
+      tests_patch: 84a8e0ffdfe96cedb85c088c6d1f0d66bbda9efb525311d5ae8ab2936c5ff00f
